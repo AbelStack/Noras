@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+
+#[Fillable([
+    'course_offering_id', 
+    'uploaded_by', 
+    'title', 
+    'description', 
+    'original_filename', 
+    'stored_filename', 
+    'file_path', 
+    'file_size', 
+    'mime_type', 
+    'status', 
+    'version',
+    'replaces_material_id'
+])]
+class CourseMaterial extends Model
+{
+    use HasFactory;
+
+    protected function casts(): array
+    {
+        return [
+            'file_size' => 'integer',
+            'version' => 'integer',
+        ];
+    }
+
+    public function courseOffering()
+    {
+        return $this->belongsTo(CourseOffering::class);
+    }
+
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function replaces()
+    {
+        return $this->belongsTo(CourseMaterial::class, 'replaces_material_id');
+    }
+
+    public function replacedBy()
+    {
+        return $this->hasMany(CourseMaterial::class, 'replaces_material_id');
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === 'published';
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
+    }
+}

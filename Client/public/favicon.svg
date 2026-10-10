@@ -1,0 +1,18 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="64" fill="#3B82F6"/>
+  
+  <!-- Sparkles/Star icon in white -->
+  <g transform="translate(32, 32)">
+    <!-- Main sparkle -->
+    <path d="M32 0L36 28L48 24L40 40L56 48L32 52L24 68L20 40L0 48L16 32L8 16L32 20L32 0Z" fill="white"/>
+    
+    <!-- Small sparkle top right -->
+    <circle cx="50" cy="10" r="3" fill="white"/>
+    <path d="M50 6L51 10L54 9L52 12L56 13L50 14L49 18L48 12L44 13L48 11L46 8L50 9L50 6Z" fill="white"/>
+    
+    <!-- Small sparkle bottom left -->
+    <circle cx="14" cy="50" r="2.5" fill="white"/>
+    <path d="M14 47L15 50L18 49L16 52L19 53L14 54L13 57L12 52L9 53L12 51L10 48L14 49L14 47Z" fill="white"/>
+  </g>
+</svg>
