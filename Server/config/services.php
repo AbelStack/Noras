@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'gemini'),
+        
+        'gemini' => [
+            'api_key' => env('GEMINI_API_KEY'),
+            'model' => env('GEMINI_MODEL', 'gemini-2.0-flash-exp'),
+            'max_chars' => env('GEMINI_MAX_CHARS', 800000),
+        ],
+        
+        'groq' => [
+            'api_key' => env('GROQ_API_KEY'),
+            'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+            'max_chars' => env('GROQ_MAX_CHARS', 400000),
+        ],
+    ],
+
 ];

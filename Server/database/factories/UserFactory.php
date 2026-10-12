@@ -45,4 +45,14 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user account is unapproved (pending).
+     */
+    public function unapproved(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'account_status' => 'pending',
+        ]);
+    }
 }

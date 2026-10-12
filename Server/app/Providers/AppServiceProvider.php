@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Configure rate limiter for AI note generation
+        // Limit: 10 generations per hour per user
+        RateLimiter::for('note-generation', function (Request $request) {
+            return Limit::perHour(10)->by($request->user()?->id);
+        });
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\UniversityController;
 use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\CourseMaterialController;
+use App\Http\Controllers\Api\V1\GeneratedNoteController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/health', [HealthController::class, 'index']);
@@ -40,6 +41,13 @@ Route::prefix('v1')->group(function () {
             Route::get('/materials', [CourseMaterialController::class, 'index']);
             Route::get('/materials/{id}', [CourseMaterialController::class, 'show']);
             Route::get('/materials/{id}/download', [CourseMaterialController::class, 'download']);
+
+            // AI-generated notes (with rate limiting on generation)
+            Route::post('/notes/generate/{materialId}', [GeneratedNoteController::class, 'generate'])
+                ->middleware('throttle:note-generation');
+            Route::get('/notes', [GeneratedNoteController::class, 'index']);
+            Route::get('/notes/{id}', [GeneratedNoteController::class, 'show']);
+            Route::delete('/notes/{id}', [GeneratedNoteController::class, 'destroy']);
         });
 
         Route::middleware('admin')->prefix('admin')->group(function () {
