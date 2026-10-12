@@ -36,8 +36,15 @@ class StudentMaterialAccessTest extends TestCase
 
         $response = $this->actingAs($student)->getJson('/api/v1/materials');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'materials',
+                    'pagination' => ['current_page', 'per_page', 'total', 'last_page']
+                ]
+            ]);
         $this->assertCount(2, $response->json('data.materials'));
+        $this->assertEquals(2, $response->json('data.pagination.total'));
     }
 
     public function test_approved_student_can_view_single_published_material(): void
@@ -146,6 +153,7 @@ class StudentMaterialAccessTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertCount(1, $response->json('data.materials'));
+        $this->assertEquals(1, $response->json('data.pagination.total'));
     }
 
     public function test_download_returns_404_if_file_missing(): void
@@ -178,5 +186,24 @@ class StudentMaterialAccessTest extends TestCase
         // Second request with same token should fail
         $response = $this->actingAs($student)->getJson('/api/v1/materials');
         $response->assertStatus(403);
+    }
+
+    public function test_student_materials_are_paginated(): void
+    {
+        Storage::fake('local');
+        $student = $this->createApprovedStudent();
+        CourseMaterial::factory()->published()->count(25)->create();
+
+        $response = $this->actingAs($student)->getJson('/api/v1/materials');
+
+        $response->assertStatus(200);
+        $this->assertCount(20, $response->json('data.materials'));
+        $this->assertEquals(25, $response->json('data.pagination.total'));
+        $this->assertEquals(2, $response->json('data.pagination.last_page'));
+        
+        // Test second page
+        $response2 = $this->actingAs($student)->getJson('/api/v1/materials?page=2');
+        $response2->assertStatus(200);
+        $this->assertCount(5, $response2->json('data.materials'));
     }
 }

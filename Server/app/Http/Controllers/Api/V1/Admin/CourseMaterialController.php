@@ -87,16 +87,23 @@ class CourseMaterialController extends Controller
             ], 422);
         }
 
+        // Generate unique filename before transaction
+        $storedFilename = Str::uuid() . '.pdf';
+        $filePath = 'course-materials/' . $storedFilename;
+
+        // Store file first - fail fast before database transaction
+        try {
+            Storage::disk('local')->put($filePath, file_get_contents($file->getRealPath()));
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to store file',
+            ], 500);
+        }
+
+        // Now attempt database transaction
         DB::beginTransaction();
         try {
-            // Generate unique filename
-            $storedFilename = Str::uuid() . '.pdf';
-            $filePath = 'course-materials/' . $storedFilename;
-
-            // Store file
-            Storage::disk('local')->put($filePath, file_get_contents($file->getRealPath()));
-
-            // Create material record
             $material = CourseMaterial::create([
                 'course_offering_id' => $validated['course_offering_id'],
                 'uploaded_by' => auth()->id(),
@@ -124,10 +131,8 @@ class CourseMaterialController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            // Clean up file if database operation failed
-            if (isset($filePath) && Storage::disk('local')->exists($filePath)) {
-                Storage::disk('local')->delete($filePath);
-            }
+            // Clean up file since database operation failed
+            Storage::disk('local')->delete($filePath);
 
             return response()->json([
                 'status' => 'error',
@@ -210,8 +215,6 @@ class CourseMaterialController extends Controller
 
     public function replace(Request $request, $id)
     {
-        $oldMaterial = CourseMaterial::findOrFail($id);
-
         $validated = $request->validate([
             'file' => ['required', 'file', 'mimes:pdf', 'max:' . (self::MAX_FILE_SIZE / 1024)],
             'title' => ['sometimes', 'string', 'max:255'],
@@ -229,16 +232,26 @@ class CourseMaterialController extends Controller
             ], 422);
         }
 
+        // Generate unique filename before transaction
+        $storedFilename = Str::uuid() . '.pdf';
+        $filePath = 'course-materials/' . $storedFilename;
+
+        // Store file first - fail fast before database transaction
+        try {
+            Storage::disk('local')->put($filePath, file_get_contents($file->getRealPath()));
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to store file',
+            ], 500);
+        }
+
+        // Now attempt database transaction with row locking
         DB::beginTransaction();
         try {
-            // Generate unique filename
-            $storedFilename = Str::uuid() . '.pdf';
-            $filePath = 'course-materials/' . $storedFilename;
+            // Lock the old material row to prevent concurrent replacements
+            $oldMaterial = CourseMaterial::where('id', $id)->lockForUpdate()->firstOrFail();
 
-            // Store new file
-            Storage::disk('local')->put($filePath, file_get_contents($file->getRealPath()));
-
-            // Create new material version
             $newMaterial = CourseMaterial::create([
                 'course_offering_id' => $oldMaterial->course_offering_id,
                 'uploaded_by' => auth()->id(),
@@ -267,10 +280,8 @@ class CourseMaterialController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            // Clean up new file if database operation failed
-            if (isset($filePath) && Storage::disk('local')->exists($filePath)) {
-                Storage::disk('local')->delete($filePath);
-            }
+            // Clean up file since database operation failed
+            Storage::disk('local')->delete($filePath);
 
             return response()->json([
                 'status' => 'error',
@@ -312,6 +323,25 @@ class CourseMaterialController extends Controller
         }
     }
 
+    /**
+     * Validate PDF file signature by checking magic bytes.
+     * 
+     * SECURITY NOTE: This validation only verifies that the file begins with '%PDF' header.
+     * It does NOT guarantee the file is safe, complete, or non-malicious. This check:
+     * - Prevents upload of files renamed to .pdf that are not PDFs
+     * - Does NOT detect embedded malware, exploits, or malformed PDFs
+     * - Does NOT validate PDF structure beyond the first 4 bytes
+     * 
+     * For production use, consider:
+     * - Malware scanning (ClamAV, VirusTotal API, or commercial solutions)
+     * - PDF structure validation libraries
+     * - Restricted admin review before publication
+     * - Sandboxed rendering environments
+     * - Content Security Policy for downloads
+     * 
+     * @param \Illuminate\Http\UploadedFile $file
+     * @return bool True if file begins with PDF magic bytes
+     */
     private function isValidPdf($file): bool
     {
         try {

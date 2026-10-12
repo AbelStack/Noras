@@ -5,7 +5,10 @@ RESTful API backend for the Noras academic platform built with Laravel 13.
 ## Current Status
 
 ✅ **Phase 1 Complete**: Laravel foundation, health endpoints, automated testing  
-✅ **Phase 2 Complete**: Authentication, student verification, role-based authorization
+✅ **Phase 2 Complete**: Authentication, student verification, role-based authorization  
+✅ **Phase 3 Complete**: University, department, course catalog management  
+✅ **Phase 4 Complete**: PDF course material upload, versioning, publication workflow  
+✅ **Phase 4.1 Complete**: Security verification, concurrency fixes, pagination
 
 ## Requirements
 
@@ -445,15 +448,174 @@ Import `../Noras-API.postman_collection.json` into Postman for API testing.
 - Implement rate limiting
 - Monitor for suspicious activity
 
-## Next Steps (Future Phases)
+## Development Phases
 
-- ✅ Phase 1: Laravel foundation
+- ✅ Phase 1: Laravel foundation, health endpoints
 - ✅ Phase 2: Authentication & Student Verification
-- ⏳ Phase 3: Department & Course Management
-- ⏳ Phase 4: Materials & Quiz System
-- ⏳ Phase 5: AI Integration
+- ✅ Phase 3: Department & Course Management
+- ✅ Phase 4: PDF Materials Management
+- ✅ Phase 4.1: Security & Reliability Verification
+- ⏳ Phase 5: AI Integration (Note Generation, Quiz System)
 
 ## Support
 
 For issues or questions, contact the development team.
 
+
+
+---
+
+## Phase 4 - Course Materials Management
+
+### Material Endpoints
+
+#### Admin Material Management
+
+**Upload Material**  
+**POST** `/api/v1/admin/materials` (Admin Only)
+
+Upload PDF course material (max 50MB).
+
+**Request Body** (multipart/form-data):
+```json
+{
+  "course_offering_id": 1,
+  "title": "Week 1 Lecture Notes",
+  "description": "Introduction to the course",
+  "file": "<pdf_file>"
+}
+```
+
+**Response (201 Created)**:
+```json
+{
+  "status": "success",
+  "message": "Course material uploaded successfully",
+  "data": {
+    "material": {
+      "id": 1,
+      "title": "Week 1 Lecture Notes",
+      "status": "draft",
+      "version": 1,
+      "file_size": 2048576,
+      "original_filename": "lecture.pdf"
+    }
+  }
+}
+```
+
+**List Materials**  
+**GET** `/api/v1/admin/materials` (Admin Only)
+
+List all materials with optional filters.
+
+**Query Parameters**:
+- `course_offering_id` (optional): Filter by course offering
+- `status` (optional): `draft` or `published`
+- `uploaded_by` (optional): Filter by uploader user ID
+- `search` (optional): Search in title or filename
+
+**Publish Material**  
+**POST** `/api/v1/admin/materials/{id}/publish` (Admin Only)
+
+Make a draft material visible to students.
+
+**Unpublish Material**  
+**POST** `/api/v1/admin/materials/{id}/unpublish` (Admin Only)
+
+Hide a published material from students (returns to draft).
+
+**Replace Material**  
+**POST** `/api/v1/admin/materials/{id}/replace` (Admin Only)
+
+Upload a new version of an existing material. Creates new record with incremented version number in draft status.
+
+**Request Body** (multipart/form-data):
+```json
+{
+  "file": "<new_pdf_file>",
+  "title": "Updated Title (optional)",
+  "description": "Updated description (optional)"
+}
+```
+
+**Update Metadata**  
+**PUT** `/api/v1/admin/materials/{id}` (Admin Only)
+
+Update title and description without replacing the file.
+
+**Delete Material**  
+**DELETE** `/api/v1/admin/materials/{id}` (Admin Only)
+
+Permanently delete a material and its file.
+
+---
+
+#### Student Material Access
+
+**List Published Materials**  
+**GET** `/api/v1/materials` (Approved Students)
+
+View all published course materials with pagination.
+
+**Query Parameters**:
+- `course_offering_id` (optional): Filter by course offering
+- `search` (optional): Search in title or filename
+- `page` (optional): Page number (20 items per page)
+
+**Response**:
+```json
+{
+  "status": "success",
+  "data": {
+    "materials": [...],
+    "pagination": {
+      "current_page": 1,
+      "per_page": 20,
+      "total": 45,
+      "last_page": 3
+    }
+  }
+}
+```
+
+**View Material Details**  
+**GET** `/api/v1/materials/{id}` (Approved Students)
+
+View details of a single published material.
+
+**Download Material**  
+**GET** `/api/v1/materials/{id}/download` (Approved Students)
+
+Download the PDF file. Returns file with appropriate headers.
+
+---
+
+### Material Security Features
+
+- ✅ Admin-only upload and management
+- ✅ PDF signature validation (`%PDF` magic bytes)
+- ✅ File size limit (50MB)
+- ✅ Private storage (not web-accessible)
+- ✅ UUID-based filenames (prevents path traversal)
+- ✅ Draft-by-default workflow (requires explicit publish)
+- ✅ Version tracking with replacement history
+- ✅ Published-only student access
+- ✅ File/database consistency protection
+- ✅ Row-level locking for concurrent replacements
+- ⚠️ Note: Basic validation only - production requires malware scanning
+
+### Test Coverage (Phase 4)
+
+- ✅ PDF upload with validation
+- ✅ File type and signature verification
+- ✅ Publish/unpublish workflow
+- ✅ Material replacement and versioning
+- ✅ Material deletion with file cleanup
+- ✅ Student published-only access
+- ✅ Authorization enforcement
+- ✅ Pagination on student endpoint
+- ✅ File/database consistency
+- ✅ Filter and search functionality
+
+See `PHASE_4.1_SECURITY_VERIFICATION_REPORT.md` for detailed security audit results.

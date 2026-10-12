@@ -26,11 +26,20 @@ class CourseMaterialController extends Controller
             });
         }
 
-        $materials = $query->orderBy('created_at', 'desc')->get();
+        $materials = $query->orderBy('created_at', 'desc')
+            ->paginate(20);
 
         return response()->json([
             'status' => 'success',
-            'data' => ['materials' => $materials],
+            'data' => [
+                'materials' => $materials->items(),
+                'pagination' => [
+                    'current_page' => $materials->currentPage(),
+                    'per_page' => $materials->perPage(),
+                    'total' => $materials->total(),
+                    'last_page' => $materials->lastPage(),
+                ],
+            ],
         ]);
     }
 
