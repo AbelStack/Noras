@@ -110,7 +110,7 @@ class GeneratedNoteController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'notes' => $notes->items()->map(function ($note) {
+                    'notes' => $notes->getCollection()->map(function ($note) {
                         return [
                             'id' => $note->id,
                             'content' => $note->content,

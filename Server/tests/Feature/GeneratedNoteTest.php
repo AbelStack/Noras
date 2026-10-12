@@ -38,6 +38,14 @@ class GeneratedNoteTest extends TestCase
                 ]
             ], 200),
         ]);
+        
+        // Mock PdfTextExtractor to avoid PDF parsing issues in tests
+        $this->mock(\App\Services\PdfTextExtractor::class, function ($mock) {
+            $mock->shouldReceive('extractText')
+                ->andReturn('Sample PDF text content for testing. This is the extracted text from a course material PDF document.');
+            $mock->shouldReceive('getCharacterCount')
+                ->andReturn(100);
+        });
     }
 
     #[Test]
@@ -156,11 +164,19 @@ class GeneratedNoteTest extends TestCase
             'status' => 'published',
         ]);
 
-        // Create multiple notes
-        GeneratedNote::factory()->count(3)->create([
-            'course_material_id' => $material->id,
-            'generated_by' => $user->id,
+        // Create multiple notes for different materials
+        $materials = CourseMaterial::factory()->count(3)->create([
+            'course_offering_id' => $offering->id,
+            'status' => 'published',
         ]);
+        
+        foreach ($materials as $material) {
+            GeneratedNote::factory()->create([
+                'course_material_id' => $material->id,
+                'material_version' => $material->version,
+                'generated_by' => $user->id,
+            ]);
+        }
 
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/v1/notes');

@@ -33,12 +33,12 @@ class PdfTextExtractor
         // Get the file path
         $filePath = $material->file_path;
         
-        if (!Storage::disk('private')->exists($filePath)) {
+        if (!Storage::disk('local')->exists($filePath)) {
             throw new Exception('Course material file not found');
         }
 
         // Get the full system path
-        $fullPath = Storage::disk('private')->path($filePath);
+        $fullPath = Storage::disk('local')->path($filePath);
 
         try {
             // Parse the PDF
