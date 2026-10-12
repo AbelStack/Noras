@@ -1,62 +1,65 @@
 <template>
   <div class="min-h-screen bg-white flex">
     <!-- Left Sidebar -->
-    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-600 relative overflow-hidden p-12 flex-col justify-between">
-      <div class="absolute top-0 left-0 w-full h-full opacity-10">
-        <div class="absolute top-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-        <div class="absolute bottom-20 left-20 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 relative overflow-hidden p-12 flex-col justify-between">
+      <div class="absolute top-0 left-0 w-full h-full opacity-20">
+        <div class="absolute top-20 right-20 w-96 h-96 bg-blue-200 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-20 left-20 w-96 h-96 bg-yellow-200 rounded-full blur-3xl"></div>
       </div>
 
       <div class="relative z-10">
-        <router-link to="/" class="inline-flex items-center gap-3 mb-16">
+        <router-link to="/" class="inline-flex items-center gap-2 mb-16">
           <img 
             src="/Noras Logo.jpg" 
             alt="Noras"
             class="h-12 w-auto object-contain"
             loading="eager"
           />
-          <span class="text-3xl font-bold text-white tracking-tight">Noras</span>
+          <div class="h-10 w-px bg-blue-300"></div>
+          <span class="text-3xl font-bold text-blue-700 tracking-tight">Noras</span>
         </router-link>
 
-        <h2 class="text-5xl font-bold text-white mb-6 leading-tight">
-          Start Your Academic Success Story
-        </h2>
-        <p class="text-xl text-blue-50 font-normal leading-relaxed mb-12">
-          Join hundreds of Wollo University students who are studying smarter with AI-powered tools.
-        </p>
+        <div class="text-center max-w-md mx-auto mb-12">
+          <h2 class="text-5xl font-bold text-blue-700 mb-6 leading-tight">
+            Start Your Academic Success Story
+          </h2>
+          <p class="text-xl text-blue-700 font-normal leading-relaxed">
+            Join hundreds of Wollo University students who are studying smarter with AI-powered tools.
+          </p>
+        </div>
 
         <div class="space-y-6">
           <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Zap :size="24" class="text-white" />
+            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Zap :size="24" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-white font-bold text-lg mb-1">Quick Setup</h3>
-              <p class="text-blue-100 font-normal">Get started in less than 2 minutes</p>
+              <h3 class="text-blue-700 font-bold text-lg mb-1">Quick Setup</h3>
+              <p class="text-blue-600 font-normal">Get started in less than 2 minutes</p>
             </div>
           </div>
           <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Award :size="24" class="text-white" />
+            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Award :size="24" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-white font-bold text-lg mb-1">Verified Students Only</h3>
-              <p class="text-blue-100 font-normal">Secure platform for university students</p>
+              <h3 class="text-blue-700 font-bold text-lg mb-1">Verified Students Only</h3>
+              <p class="text-blue-600 font-normal">Secure platform for university students</p>
             </div>
           </div>
           <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <BarChart3 :size="24" class="text-white" />
+            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <BarChart3 :size="24" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-white font-bold text-lg mb-1">Track Your Growth</h3>
-              <p class="text-blue-100 font-normal">See your progress in real-time</p>
+              <h3 class="text-blue-700 font-bold text-lg mb-1">Track Your Growth</h3>
+              <p class="text-blue-600 font-normal">See your progress in real-time</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="relative z-10 text-blue-100 font-normal">
+      <div class="relative z-10 text-blue-600 font-normal">
         <p>&copy; 2026 Noras. Developed by Abel T.</p>
       </div>
     </div>
@@ -73,11 +76,12 @@
               class="h-10 w-auto object-contain"
               loading="eager"
             />
+            <div class="h-8 w-px bg-gray-300"></div>
             <span class="text-2xl font-bold text-gray-900 tracking-tight">Noras</span>
           </router-link>
         </div>
 
-        <div class="mb-8">
+        <div class="mb-8 text-center">
           <h1 class="text-4xl font-bold text-gray-900 mb-3 tracking-tight">Create Your Account</h1>
           <p class="text-gray-600 text-lg font-normal">Start studying smarter today</p>
         </div>

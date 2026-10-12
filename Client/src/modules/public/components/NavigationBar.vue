@@ -3,13 +3,14 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="flex justify-between items-center h-16 sm:h-18 md:h-20">
         <!-- Logo -->
-        <router-link to="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        <router-link to="/" class="flex items-center gap-2 flex-shrink-0">
           <img 
             src="/Noras Logo.jpg" 
             alt="Noras"
             class="h-8 sm:h-9 md:h-10 w-auto object-contain"
             loading="eager"
           />
+          <div class="h-6 sm:h-7 md:h-8 w-px bg-gray-300"></div>
           <span class="text-xl sm:text-2xl md:text-2xl font-bold text-gray-900 tracking-tight">Noras</span>
         </router-link>
 
