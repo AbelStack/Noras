@@ -3,13 +3,14 @@
     <nav class="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-gray-200/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between items-center h-16 sm:h-18 md:h-20">
-          <router-link to="/" class="flex items-center flex-shrink-0">
+          <router-link to="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <img 
               src="/Noras Logo.jpg" 
-              alt="Noras - AI-Powered Academic Platform"
+              alt="Noras"
               class="h-8 sm:h-9 md:h-10 w-auto object-contain"
               loading="eager"
             />
+            <span class="text-xl sm:text-2xl md:text-2xl font-bold text-gray-900 tracking-tight">Noras</span>
           </router-link>
         </div>
       </div>

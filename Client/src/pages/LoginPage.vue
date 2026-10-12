@@ -8,13 +8,14 @@
       </div>
 
       <div class="relative z-10">
-        <router-link to="/" class="inline-block mb-16">
+        <router-link to="/" class="inline-flex items-center gap-3 mb-16">
           <img 
             src="/Noras Logo.jpg" 
-            alt="Noras - AI-Powered Academic Platform"
+            alt="Noras"
             class="h-12 w-auto object-contain"
             loading="eager"
           />
+          <span class="text-3xl font-bold text-white tracking-tight">Noras</span>
         </router-link>
 
         <h2 class="text-5xl font-bold text-white mb-6 leading-tight">
@@ -65,13 +66,14 @@
       <div class="max-w-md w-full">
         <!-- Mobile Logo -->
         <div class="lg:hidden text-center mb-10">
-          <router-link to="/" class="inline-block">
+          <router-link to="/" class="inline-flex items-center gap-2 justify-center">
             <img 
               src="/Noras Logo.jpg" 
-              alt="Noras - AI-Powered Academic Platform"
-              class="h-10 w-auto object-contain mx-auto"
+              alt="Noras"
+              class="h-10 w-auto object-contain"
               loading="eager"
             />
+            <span class="text-2xl font-bold text-gray-900 tracking-tight">Noras</span>
           </router-link>
         </div>
 
