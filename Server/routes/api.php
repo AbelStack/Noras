@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\CourseMaterialController;
 use App\Http\Controllers\Api\V1\GeneratedNoteController;
+use App\Http\Controllers\Api\V1\GeneratedQuizController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/health', [HealthController::class, 'index']);
@@ -48,6 +49,13 @@ Route::prefix('v1')->group(function () {
             Route::get('/notes', [GeneratedNoteController::class, 'index']);
             Route::get('/notes/{id}', [GeneratedNoteController::class, 'show']);
             Route::delete('/notes/{id}', [GeneratedNoteController::class, 'destroy']);
+
+            // AI-generated quizzes (with rate limiting on generation)
+            Route::post('/quizzes/generate/{materialId}', [GeneratedQuizController::class, 'generate'])
+                ->middleware('throttle:quiz-generation');
+            Route::get('/quizzes', [GeneratedQuizController::class, 'index']);
+            Route::get('/quizzes/{id}', [GeneratedQuizController::class, 'show']);
+            Route::delete('/quizzes/{id}', [GeneratedQuizController::class, 'destroy']);
         });
 
         Route::middleware('admin')->prefix('admin')->group(function () {

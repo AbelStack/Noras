@@ -27,5 +27,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('note-generation', function (Request $request) {
             return Limit::perHour(10)->by($request->user()?->id);
         });
+
+        // Configure rate limiter for AI quiz generation
+        // Limit: 10 generations per hour per user
+        RateLimiter::for('quiz-generation', function (Request $request) {
+            return Limit::perHour(10)->by($request->user()?->id);
+        });
     }
 }
