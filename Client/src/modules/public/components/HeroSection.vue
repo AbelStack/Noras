@@ -1,5 +1,5 @@
 <template>
-  <section id="home" class="pt-32 pb-20 bg-gradient-to-br from-beige-50 via-white to-blue-50 min-h-screen flex items-center relative overflow-hidden">
+  <section id="home" class="pt-24 sm:pt-28 md:pt-32 pb-20 bg-gradient-to-br from-beige-50 via-white to-blue-50 min-h-screen flex items-center relative overflow-hidden">
     <div class="absolute top-20 right-10 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl"></div>
     <div class="absolute bottom-20 left-10 w-96 h-96 bg-beige-200/30 rounded-full blur-3xl"></div>
 

@@ -1,31 +1,27 @@
 <template>
-  <div class="flex items-center space-x-3">
-    <div :class="['rounded-2xl flex items-center justify-center', iconClass]">
-      <Sparkles :size="iconSize" :class="sparkleClass" />
-    </div>
-    <span :class="['font-bold', textClass]">Noras</span>
+  <div class="flex items-center">
+    <img 
+      :src="logoSrc" 
+      :alt="altText"
+      :class="['object-contain', imageClass]"
+      loading="lazy"
+    />
   </div>
 </template>
 
 <script setup>
-import { Sparkles } from 'lucide-vue-next'
-
 defineProps({
-  iconClass: {
+  logoSrc: {
     type: String,
-    default: 'w-12 h-12 bg-blue-600'
+    default: '/Noras Logo.jpg'
   },
-  iconSize: {
-    type: Number,
-    default: 24
-  },
-  sparkleClass: {
+  altText: {
     type: String,
-    default: 'text-white'
+    default: 'Noras - AI-Powered Academic Platform'
   },
-  textClass: {
+  imageClass: {
     type: String,
-    default: 'text-4xl text-white'
+    default: 'h-10'
   }
 })
 </script>

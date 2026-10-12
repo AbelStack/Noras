@@ -1,11 +1,18 @@
 <template>
   <nav class="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-gray-200/50">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="flex justify-between items-center h-20">
-        <router-link to="/" class="flex items-center">
-          <span class="text-3xl font-bold text-gray-900">Noras</span>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="flex justify-between items-center h-16 sm:h-18 md:h-20">
+        <!-- Logo -->
+        <router-link to="/" class="flex items-center flex-shrink-0">
+          <img 
+            src="/Noras Logo.jpg" 
+            alt="Noras - AI-Powered Academic Platform"
+            class="h-8 sm:h-9 md:h-10 w-auto object-contain"
+            loading="eager"
+          />
         </router-link>
 
+        <!-- Desktop Navigation -->
         <div class="hidden md:flex items-center space-x-2">
           <a 
             href="#home" 
@@ -65,15 +72,22 @@
           </router-link>
         </div>
 
-        <button @click="toggleMenu" class="md:hidden text-gray-700">
+        <!-- Mobile Menu Button -->
+        <button 
+          @click="toggleMenu" 
+          class="md:hidden text-gray-700 p-2 -mr-2 hover:bg-gray-100/50 rounded-lg transition-colors"
+          :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+          :aria-expanded="mobileMenuOpen"
+        >
           <Menu v-if="!mobileMenuOpen" :size="24" />
           <X v-else :size="24" />
         </button>
       </div>
     </div>
 
+    <!-- Mobile Menu -->
     <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-200/50 glass-effect">
-      <div class="px-6 py-5 space-y-2">
+      <div class="px-4 py-4 space-y-1">
         <a 
           href="#home" 
           @click="toggleMenu" 

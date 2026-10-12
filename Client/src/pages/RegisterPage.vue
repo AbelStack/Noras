@@ -8,11 +8,13 @@
       </div>
 
       <div class="relative z-10">
-        <router-link to="/" class="inline-flex items-center space-x-3 mb-16">
-          <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center">
-            <Sparkles :size="24" class="text-blue-600" />
-          </div>
-          <span class="text-4xl font-bold text-white">Noras</span>
+        <router-link to="/" class="inline-block mb-16">
+          <img 
+            src="/Noras Logo.jpg" 
+            alt="Noras - AI-Powered Academic Platform"
+            class="h-12 w-auto object-contain"
+            loading="eager"
+          />
         </router-link>
 
         <h2 class="text-5xl font-bold text-white mb-6 leading-tight">
@@ -63,11 +65,13 @@
       <div class="max-w-md w-full">
         <!-- Mobile Logo -->
         <div class="lg:hidden text-center mb-10">
-          <router-link to="/" class="inline-flex items-center space-x-2 mb-8">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Sparkles :size="20" class="text-white" />
-            </div>
-            <span class="text-3xl font-bold text-gray-900">Noras</span>
+          <router-link to="/" class="inline-block">
+            <img 
+              src="/Noras Logo.jpg" 
+              alt="Noras - AI-Powered Academic Platform"
+              class="h-10 w-auto object-contain mx-auto"
+              loading="eager"
+            />
           </router-link>
         </div>
 
@@ -192,7 +196,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Sparkles, Zap, Award, BarChart3, ArrowLeft } from 'lucide-vue-next'
+import { Zap, Award, BarChart3, ArrowLeft } from 'lucide-vue-next'
 
 const router = useRouter()
 const fullName = ref('')
