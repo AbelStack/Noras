@@ -15,7 +15,7 @@
 defineProps({
   logoSrc: {
     type: String,
-    default: '/Noras Logo.jpg'
+    default: '/Noras logo-sm.png'
   },
   altText: {
     type: String,

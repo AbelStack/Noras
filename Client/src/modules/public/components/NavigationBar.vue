@@ -5,7 +5,7 @@
         <!-- Logo -->
         <router-link to="/" class="flex items-center gap-2 flex-shrink-0">
           <img 
-            src="/Noras Logo.jpg" 
+            src="/Noras logo-sm.png" 
             alt="Noras"
             class="h-8 sm:h-9 md:h-10 w-auto object-contain"
             loading="eager"

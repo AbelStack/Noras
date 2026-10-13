@@ -10,7 +10,7 @@
       <div class="relative z-10">
         <router-link to="/" class="inline-flex items-center gap-2 mb-16">
           <img 
-            src="/Noras Logo.jpg" 
+            src="/Noras logo-md.png" 
             alt="Noras"
             class="h-12 w-auto object-contain"
             loading="eager"
@@ -71,7 +71,7 @@
         <div class="lg:hidden text-center mb-10">
           <router-link to="/" class="inline-flex items-center gap-2 justify-center">
             <img 
-              src="/Noras Logo.jpg" 
+              src="/Noras logo-sm.png" 
               alt="Noras"
               class="h-10 w-auto object-contain"
               loading="eager"
