@@ -36,17 +36,17 @@ return [
     ],
 
     'ai' => [
-        'provider' => env('AI_PROVIDER', 'gemini'),
+        'provider' => env('AI_PROVIDER', 'groq'), // Changed default to Groq (verified working)
         
         'gemini' => [
             'api_key' => env('GEMINI_API_KEY'),
-            'model' => env('GEMINI_MODEL', 'gemini-2.0-flash-exp'),
+            'model' => env('GEMINI_MODEL', 'gemini-3.8-flash'), // Updated: Latest stable model (Oct 2026)
             'max_chars' => env('GEMINI_MAX_CHARS', 800000),
         ],
         
         'groq' => [
             'api_key' => env('GROQ_API_KEY'),
-            'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+            'model' => env('GROQ_MODEL', 'openai/gpt-oss-20b'), // Updated: Current free tier model (Oct 2026)
             'max_chars' => env('GROQ_MAX_CHARS', 400000),
         ],
     ],

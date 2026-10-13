@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\StudentApprovalController;
 use App\Http\Controllers\Api\V1\Admin\UniversityController as AdminUniversityController;
 use App\Http\Controllers\Api\V1\Admin\DepartmentController as AdminDepartmentController;
@@ -15,6 +16,9 @@ use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\CourseMaterialController;
 use App\Http\Controllers\Api\V1\GeneratedNoteController;
 use App\Http\Controllers\Api\V1\GeneratedQuizController;
+use App\Http\Controllers\Api\V1\BookmarkController;
+use App\Http\Controllers\Api\V1\StudyTaskController;
+use App\Http\Controllers\Api\V1\LearningHistoryController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/health', [HealthController::class, 'index']);
@@ -56,11 +60,34 @@ Route::prefix('v1')->group(function () {
             Route::get('/quizzes', [GeneratedQuizController::class, 'index']);
             Route::get('/quizzes/{id}', [GeneratedQuizController::class, 'show']);
             Route::delete('/quizzes/{id}', [GeneratedQuizController::class, 'destroy']);
+
+            // Phase 8: Learning History & Progress
+            Route::get('/learning/history', [LearningHistoryController::class, 'history']);
+            Route::get('/learning/progress', [LearningHistoryController::class, 'progress']);
+
+            // Phase 8: Bookmarks
+            Route::get('/bookmarks', [BookmarkController::class, 'index']);
+            Route::post('/bookmarks', [BookmarkController::class, 'store']);
+            Route::get('/bookmarks/{id}', [BookmarkController::class, 'show']);
+            Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy']);
+
+            // Phase 8: Study Tasks
+            Route::get('/tasks', [StudyTaskController::class, 'index']);
+            Route::post('/tasks', [StudyTaskController::class, 'store']);
+            Route::get('/tasks/{id}', [StudyTaskController::class, 'show']);
+            Route::put('/tasks/{id}', [StudyTaskController::class, 'update']);
+            Route::delete('/tasks/{id}', [StudyTaskController::class, 'destroy']);
+            Route::post('/tasks/{id}/complete', [StudyTaskController::class, 'complete']);
+            Route::post('/tasks/{id}/reopen', [StudyTaskController::class, 'reopen']);
         });
 
         Route::middleware('admin')->prefix('admin')->group(function () {
-            // Student approval
+            // Dashboard
+            Route::get('/dashboard', [DashboardController::class, 'summary']);
+
+            // Student management
             Route::get('/students', [StudentApprovalController::class, 'index']);
+            Route::get('/students/{id}', [StudentApprovalController::class, 'show']);
             Route::post('/students/{id}/approve', [StudentApprovalController::class, 'approve']);
             Route::post('/students/{id}/reject', [StudentApprovalController::class, 'reject']);
             Route::post('/students/{id}/suspend', [StudentApprovalController::class, 'suspend']);

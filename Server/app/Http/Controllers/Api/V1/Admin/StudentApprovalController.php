@@ -132,15 +132,32 @@ class StudentApprovalController extends Controller
 
     public function index(Request $request)
     {
+        $request->validate([
+            'status' => 'nullable|in:pending,approved,rejected,suspended',
+            'search' => 'nullable|string|max:255',
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $status = $request->query('status');
+        $search = $request->query('search');
+        $perPage = min((int) $request->query('per_page', 15), 100);
         
         $query = User::where('role', 'student');
         
-        if ($status && in_array($status, ['pending', 'approved', 'rejected', 'suspended'])) {
+        if ($status) {
             $query->where('account_status', $status);
         }
 
-        $students = $query->orderBy('created_at', 'desc')->get();
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('student_id', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
@@ -156,6 +173,35 @@ class StudentApprovalController extends Controller
                         'created_at' => $student->created_at->toISOString(),
                     ];
                 }),
+                'pagination' => [
+                    'current_page' => $students->currentPage(),
+                    'per_page' => $students->perPage(),
+                    'total' => $students->total(),
+                    'last_page' => $students->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    public function show($id)
+    {
+        $student = User::where('role', 'student')->findOrFail($id);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'student' => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'student_id' => $student->student_id,
+                    'role' => $student->role,
+                    'account_status' => $student->account_status,
+                    'approved_at' => $student->approved_at?->toISOString(),
+                    'approved_by' => $student->approved_by,
+                    'created_at' => $student->created_at->toISOString(),
+                    'updated_at' => $student->updated_at->toISOString(),
+                ],
             ],
         ]);
     }
