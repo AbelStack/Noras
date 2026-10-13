@@ -64,38 +64,38 @@ class StudyTaskController extends Controller
         // Verify ownership of linked resources
         if (isset($validated['generated_note_id'])) {
             $note = GeneratedNote::find($validated['generated_note_id']);
-            if ($note->generated_by !== auth()->id()) {
+            if (!$note || $note->generated_by !== auth()->id()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You can only link your own notes to tasks.',
-                ], 403);
+                    'message' => !$note ? 'Linked note not found.' : 'You can only link your own notes to tasks.',
+                ], !$note ? 404 : 403);
             }
         }
 
         if (isset($validated['generated_quiz_id'])) {
             $quiz = GeneratedQuiz::find($validated['generated_quiz_id']);
-            if ($quiz->generated_by !== auth()->id()) {
+            if (!$quiz || $quiz->generated_by !== auth()->id()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You can only link your own quizzes to tasks.',
-                ], 403);
+                    'message' => !$quiz ? 'Linked quiz not found.' : 'You can only link your own quizzes to tasks.',
+                ], !$quiz ? 404 : 403);
             }
         }
 
         // For course material, verify it's published
         if (isset($validated['course_material_id'])) {
             $material = CourseMaterial::find($validated['course_material_id']);
-            if ($material->status !== 'published') {
+            if (!$material || $material->status !== 'published') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You can only link published materials to tasks.',
-                ], 403);
+                    'message' => !$material ? 'Linked material not found.' : 'You can only link published materials to tasks.',
+                ], !$material ? 404 : 403);
             }
         }
 
-        $task = StudyTask::create(array_merge($validated, [
-            'user_id' => auth()->id(),
-        ]));
+        $task = new StudyTask($validated);
+        $task->user_id = auth()->id();
+        $task->save();
 
         $task->load(['courseMaterial', 'generatedNote', 'generatedQuiz']);
 
@@ -173,32 +173,32 @@ class StudyTaskController extends Controller
         // Verify ownership of linked resources
         if (isset($validated['generated_note_id'])) {
             $note = GeneratedNote::find($validated['generated_note_id']);
-            if ($note->generated_by !== auth()->id()) {
+            if (!$note || $note->generated_by !== auth()->id()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You can only link your own notes to tasks.',
-                ], 403);
+                    'message' => !$note ? 'Linked note not found.' : 'You can only link your own notes to tasks.',
+                ], !$note ? 404 : 403);
             }
         }
 
         if (isset($validated['generated_quiz_id'])) {
             $quiz = GeneratedQuiz::find($validated['generated_quiz_id']);
-            if ($quiz->generated_by !== auth()->id()) {
+            if (!$quiz || $quiz->generated_by !== auth()->id()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You can only link your own quizzes to tasks.',
-                ], 403);
+                    'message' => !$quiz ? 'Linked quiz not found.' : 'You can only link your own quizzes to tasks.',
+                ], !$quiz ? 404 : 403);
             }
         }
 
         // For course material, verify it's published
         if (isset($validated['course_material_id'])) {
             $material = CourseMaterial::find($validated['course_material_id']);
-            if ($material->status !== 'published') {
+            if (!$material || $material->status !== 'published') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You can only link published materials to tasks.',
-                ], 403);
+                    'message' => !$material ? 'Linked material not found.' : 'You can only link published materials to tasks.',
+                ], !$material ? 404 : 403);
             }
         }
 
@@ -281,10 +281,9 @@ class StudyTaskController extends Controller
             ], 400);
         }
 
-        $task->update([
-            'completed' => true,
-            'completed_at' => now(),
-        ]);
+        $task->completed = true;
+        $task->completed_at = now();
+        $task->save();
 
         $task->load(['courseMaterial', 'generatedNote', 'generatedQuiz']);
 
@@ -329,10 +328,9 @@ class StudyTaskController extends Controller
             ], 400);
         }
 
-        $task->update([
-            'completed' => false,
-            'completed_at' => null,
-        ]);
+        $task->completed = false;
+        $task->completed_at = null;
+        $task->save();
 
         $task->load(['courseMaterial', 'generatedNote', 'generatedQuiz']);
 

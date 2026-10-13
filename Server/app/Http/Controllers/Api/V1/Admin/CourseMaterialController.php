@@ -297,8 +297,17 @@ class CourseMaterialController extends Controller
         DB::beginTransaction();
         try {
             $filePath = $material->file_path;
-            
-            // Delete the material record first
+
+            // Clear study task references (set to null) before deleting
+            \App\Models\StudyTask::where('course_material_id', $material->id)
+                ->update(['course_material_id' => null]);
+
+            // Clean up polymorphic bookmarks
+            \App\Models\Bookmark::where('bookmarkable_type', CourseMaterial::class)
+                ->where('bookmarkable_id', $material->id)
+                ->delete();
+
+            // Delete the material record
             $material->delete();
 
             // Then delete the file
@@ -318,7 +327,7 @@ class CourseMaterialController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to delete material',
+                'message' => 'Failed to delete material: ' . $e->getMessage(),
             ], 500);
         }
     }

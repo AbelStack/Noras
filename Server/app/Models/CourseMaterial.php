@@ -32,6 +32,14 @@ class CourseMaterial extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (CourseMaterial $material) {
+            // Clean up polymorphic bookmarks to prevent orphans
+            $material->bookmarks()->delete();
+        });
+    }
+
     public function courseOffering()
     {
         return $this->belongsTo(CourseOffering::class);
@@ -50,6 +58,11 @@ class CourseMaterial extends Model
     public function replacedBy()
     {
         return $this->hasMany(CourseMaterial::class, 'replaces_material_id');
+    }
+
+    public function bookmarks()
+    {
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
     }
 
     public function isPublished(): bool

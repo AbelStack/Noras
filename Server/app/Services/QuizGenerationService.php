@@ -210,6 +210,15 @@ class QuizGenerationService
             throw new Exception('Unauthorized to delete this quiz');
         }
 
+        // Clear study task references before deleting
+        \App\Models\StudyTask::where('generated_quiz_id', $quiz->id)
+            ->update(['generated_quiz_id' => null]);
+
+        // Clean up polymorphic bookmarks
+        \App\Models\Bookmark::where('bookmarkable_type', GeneratedQuiz::class)
+            ->where('bookmarkable_id', $quiz->id)
+            ->delete();
+
         return $quiz->delete();
     }
 }

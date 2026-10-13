@@ -182,6 +182,15 @@ class NoteGenerationService
             throw new Exception('Unauthorized to delete this note');
         }
 
+        // Clear study task references before deleting
+        \App\Models\StudyTask::where('generated_note_id', $note->id)
+            ->update(['generated_note_id' => null]);
+
+        // Clean up polymorphic bookmarks
+        \App\Models\Bookmark::where('bookmarkable_type', GeneratedNote::class)
+            ->where('bookmarkable_id', $note->id)
+            ->delete();
+
         return $note->delete();
     }
 

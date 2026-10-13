@@ -10,12 +10,9 @@ class StudyTask extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id',
         'title',
         'description',
-        'completed',
         'due_date',
-        'completed_at',
         'course_material_id',
         'generated_note_id',
         'generated_quiz_id',

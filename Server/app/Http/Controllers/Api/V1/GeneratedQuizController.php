@@ -118,19 +118,19 @@ class GeneratedQuizController extends Controller
                             'ai_model' => $quiz->ai_model,
                             'generation_time_ms' => $quiz->generation_time_ms,
                             'created_at' => $quiz->created_at->toISOString(),
-                            'material' => [
+                            'material' => $quiz->courseMaterial ? [
                                 'id' => $quiz->courseMaterial->id,
                                 'title' => $quiz->courseMaterial->title,
                                 'version' => $quiz->courseMaterial->version,
-                                'course' => [
+                                'course' => $quiz->courseMaterial->courseOffering?->course ? [
                                     'code' => $quiz->courseMaterial->courseOffering->course->code,
                                     'name' => $quiz->courseMaterial->courseOffering->course->name,
-                                ],
-                                'department' => [
+                                ] : null,
+                                'department' => $quiz->courseMaterial->courseOffering?->department ? [
                                     'code' => $quiz->courseMaterial->courseOffering->department->code,
                                     'name' => $quiz->courseMaterial->courseOffering->department->name,
-                                ],
-                            ],
+                                ] : null,
+                            ] : null,
                         ];
                     }),
                     'pagination' => [
@@ -181,11 +181,11 @@ class GeneratedQuizController extends Controller
                         'generation_time_ms' => $quiz->generation_time_ms,
                         'created_at' => $quiz->created_at->toISOString(),
                     ],
-                    'material' => [
+                    'material' => $quiz->courseMaterial ? [
                         'id' => $quiz->courseMaterial->id,
                         'title' => $quiz->courseMaterial->title,
                         'version' => $quiz->courseMaterial->version,
-                    ],
+                    ] : null,
                     'questions' => $quiz->questions->map(function ($question) {
                         return [
                             'id' => $question->id,

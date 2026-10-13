@@ -31,6 +31,14 @@ class GeneratedNote extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (GeneratedNote $note) {
+            // Clean up polymorphic bookmarks to prevent orphans
+            $note->bookmarks()->delete();
+        });
+    }
+
     /**
      * Get the course material this note was generated from.
      */
@@ -45,5 +53,10 @@ class GeneratedNote extends Model
     public function generatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');
+    }
+
+    public function bookmarks()
+    {
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
     }
 }

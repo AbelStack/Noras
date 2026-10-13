@@ -120,19 +120,19 @@ class GeneratedNoteController extends Controller
                             'notes_char_count' => $note->notes_char_count,
                             'generation_time_ms' => $note->generation_time_ms,
                             'created_at' => $note->created_at->toISOString(),
-                            'material' => [
+                            'material' => $note->courseMaterial ? [
                                 'id' => $note->courseMaterial->id,
                                 'title' => $note->courseMaterial->title,
                                 'version' => $note->courseMaterial->version,
-                                'course' => [
+                                'course' => $note->courseMaterial->courseOffering?->course ? [
                                     'code' => $note->courseMaterial->courseOffering->course->code,
                                     'name' => $note->courseMaterial->courseOffering->course->name,
-                                ],
-                                'department' => [
+                                ] : null,
+                                'department' => $note->courseMaterial->courseOffering?->department ? [
                                     'code' => $note->courseMaterial->courseOffering->department->code,
                                     'name' => $note->courseMaterial->courseOffering->department->name,
-                                ],
-                            ],
+                                ] : null,
+                            ] : null,
                         ];
                     }),
                     'pagination' => [
@@ -189,19 +189,19 @@ class GeneratedNoteController extends Controller
                         'created_at' => $note->created_at->toISOString(),
                         'updated_at' => $note->updated_at->toISOString(),
                     ],
-                    'material' => [
+                    'material' => $note->courseMaterial ? [
                         'id' => $note->courseMaterial->id,
                         'title' => $note->courseMaterial->title,
                         'version' => $note->courseMaterial->version,
-                        'course' => [
+                        'course' => $note->courseMaterial->courseOffering?->course ? [
                             'code' => $note->courseMaterial->courseOffering->course->code,
                             'name' => $note->courseMaterial->courseOffering->course->name,
-                        ],
-                        'department' => [
+                        ] : null,
+                        'department' => $note->courseMaterial->courseOffering?->department ? [
                             'code' => $note->courseMaterial->courseOffering->department->code,
                             'name' => $note->courseMaterial->courseOffering->department->name,
-                        ],
-                    ],
+                        ] : null,
+                    ] : null,
                 ],
             ]);
 

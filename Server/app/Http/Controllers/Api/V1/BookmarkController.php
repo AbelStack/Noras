@@ -16,6 +16,7 @@ class BookmarkController extends Controller
 {
     /**
      * Display a listing of the authenticated user's bookmarks.
+     * Filters out orphaned bookmarks where the referenced resource no longer exists.
      */
     public function index(Request $request): JsonResponse
     {
@@ -26,6 +27,7 @@ class BookmarkController extends Controller
 
         $perPage = $validated['per_page'] ?? 15;
         $query = Bookmark::where('user_id', auth()->id())
+            ->whereHasMorph('bookmarkable', [CourseMaterial::class, GeneratedNote::class, GeneratedQuiz::class])
             ->with('bookmarkable')
             ->latest();
 
@@ -99,11 +101,12 @@ class BookmarkController extends Controller
             ], 409);
         }
 
-        $bookmark = Bookmark::create([
-            'user_id' => auth()->id(),
+        $bookmark = new Bookmark([
             'bookmarkable_type' => $validated['bookmarkable_type'],
             'bookmarkable_id' => $validated['bookmarkable_id'],
         ]);
+        $bookmark->user_id = auth()->id();
+        $bookmark->save();
 
         $bookmark->load('bookmarkable');
 
@@ -123,6 +126,7 @@ class BookmarkController extends Controller
 
     /**
      * Display the specified bookmark.
+     * If the bookmarked resource no longer exists, the orphaned bookmark is cleaned up.
      */
     public function show(string $id): JsonResponse
     {
@@ -141,6 +145,16 @@ class BookmarkController extends Controller
                 'success' => false,
                 'message' => 'You can only view your own bookmarks.',
             ], 403);
+        }
+
+        // Handle orphaned bookmark: resource was deleted
+        if (!$bookmark->bookmarkable) {
+            $bookmark->delete();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'The bookmarked resource no longer exists. Bookmark has been removed.',
+            ], 404);
         }
 
         return response()->json([

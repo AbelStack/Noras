@@ -31,6 +31,14 @@ class GeneratedQuiz extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (GeneratedQuiz $quiz) {
+            // Clean up polymorphic bookmarks to prevent orphans
+            $quiz->bookmarks()->delete();
+        });
+    }
+
     public function courseMaterial(): BelongsTo
     {
         return $this->belongsTo(CourseMaterial::class);
@@ -44,5 +52,10 @@ class GeneratedQuiz extends Model
     public function questions(): HasMany
     {
         return $this->hasMany(QuizQuestion::class, 'quiz_id');
+    }
+
+    public function bookmarks()
+    {
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
     }
 }
