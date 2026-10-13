@@ -87,6 +87,16 @@
         </div>
 
         <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+          <!-- Success Message -->
+          <div v-if="successMessage" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <p class="text-sm text-green-600 font-medium">{{ successMessage }}</p>
+          </div>
+
+          <!-- Error Message -->
+          <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p class="text-sm text-red-600 font-medium">{{ errorMessage }}</p>
+          </div>
+
           <form @submit.prevent="handleRegister" class="space-y-4">
             <div>
               <label for="fullName" class="block text-sm font-semibold text-gray-900 mb-2">Full Name</label>
@@ -125,21 +135,6 @@
             </div>
 
             <div>
-              <label for="department" class="block text-sm font-semibold text-gray-900 mb-2">Department</label>
-              <select 
-                id="department" 
-                v-model="department"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white font-medium"
-                required
-              >
-                <option value="">Select your department</option>
-                <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                  {{ dept.name }}
-                </option>
-              </select>
-            </div>
-
-            <div>
               <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">Password</label>
               <input 
                 type="password" 
@@ -174,9 +169,10 @@
 
             <button 
               type="submit" 
-              class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-yellow-400 hover:text-gray-900 transition-all font-semibold shadow-md hover:shadow-lg"
+              :disabled="isLoading"
+              class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-yellow-400 hover:text-gray-900 transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {{ isLoading ? 'Creating Account...' : 'Create Account' }}
             </button>
           </form>
 
@@ -200,49 +196,71 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Zap, Award, BarChart3, ArrowLeft } from 'lucide-vue-next'
+import { authService } from '../services/auth'
 
 const router = useRouter()
 const fullName = ref('')
 const email = ref('')
 const studentId = ref('')
-const department = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const isLoading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
 
-// TODO: Fetch from API/Database
-const departments = ref([])
+const handleRegister = async () => {
+  if (isLoading.value) return
 
-// TODO: Replace with actual API call
-// Example:
-// const fetchDepartments = async () => {
-//   const response = await fetch('/api/departments')
-//   departments.value = await response.json()
-// }
-//
-// onMounted(() => {
-//   fetchDepartments()
-// })
+  errorMessage.value = ''
+  successMessage.value = ''
 
-const handleRegister = () => {
   if (password.value !== confirmPassword.value) {
-    alert('Passwords do not match!')
+    errorMessage.value = 'Passwords do not match!'
     return
   }
-  // TODO: Replace with actual API call to register user
-  // const response = await fetch('/api/auth/register', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({
-  //     fullName: fullName.value,
-  //     email: email.value,
-  //     studentId: studentId.value,
-  //     department: department.value,
-  //     password: password.value
-  //   })
-  // })
-  alert('Registration functionality will be implemented with backend integration.')
+
+  if (password.value.length < 8) {
+    errorMessage.value = 'Password must be at least 8 characters long.'
+    return
+  }
+
+  isLoading.value = true
+
+  try {
+    await authService.register({
+      name: fullName.value,
+      email: email.value,
+      student_id: studentId.value,
+      password: password.value,
+      password_confirmation: confirmPassword.value,
+    })
+
+    successMessage.value = 'Registration successful! Your account is pending approval. You will be notified once approved.'
+    
+    // Clear form
+    fullName.value = ''
+    email.value = ''
+    studentId.value = ''
+    password.value = ''
+    confirmPassword.value = ''
+
+    // Redirect to login after 3 seconds
+    setTimeout(() => {
+      router.push('/login')
+    }, 3000)
+  } catch (error) {
+    const errors = error.response?.data?.errors
+    if (errors) {
+      // Display validation errors
+      errorMessage.value = Object.values(errors).flat().join(' ')
+    } else {
+      errorMessage.value = error.response?.data?.message || error.message || 'Registration failed. Please try again.'
+    }
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>

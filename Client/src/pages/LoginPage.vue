@@ -87,6 +87,11 @@
         </div>
 
         <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+          <!-- Error Message -->
+          <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p class="text-sm text-red-600 font-medium">{{ errorMessage }}</p>
+          </div>
+
           <form @submit.prevent="handleLogin" class="space-y-6">
             <div>
               <label for="email" class="block text-sm font-semibold text-gray-900 mb-2">Email Address</label>
@@ -122,9 +127,10 @@
 
             <button 
               type="submit" 
-              class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-yellow-400 hover:text-gray-900 transition-all font-semibold shadow-md hover:shadow-lg"
+              :disabled="isLoading"
+              class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-yellow-400 hover:text-gray-900 transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Log In
+              {{ isLoading ? 'Logging in...' : 'Log In' }}
             </button>
           </form>
 
@@ -151,27 +157,33 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { BookOpen, Brain, TrendingUp, ArrowLeft } from 'lucide-vue-next'
+import { authService } from '../services/auth'
 
 const router = useRouter()
 const email = ref('')
 const password = ref('')
+const isLoading = ref(false)
+const errorMessage = ref('')
 
-const handleLogin = () => {
-  // TODO: Replace with actual API call to authenticate user
-  // const response = await fetch('/api/auth/login', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({
-  //     email: email.value,
-  //     password: password.value
-  //   })
-  // })
-  // if (response.ok) {
-  //   const data = await response.json()
-  //   // Store token and redirect to dashboard
-  //   localStorage.setItem('token', data.token)
-  //   router.push('/dashboard')
-  // }
-  alert('Login functionality will be implemented with backend integration.')
+const handleLogin = async () => {
+  if (isLoading.value) return
+
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    const { user } = await authService.login(email.value, password.value)
+    
+    // Redirect based on role
+    if (user.role === 'admin') {
+      router.push('/admin/dashboard')
+    } else {
+      router.push('/dashboard')
+    }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || error.message || 'Login failed. Please check your credentials.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
