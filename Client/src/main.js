@@ -18,6 +18,8 @@ import AdminDashboard from './pages/AdminDashboard.vue'
 import DepartmentsPage from './pages/DepartmentsPage.vue'
 import CourseOfferingsPage from './pages/CourseOfferingsPage.vue'
 import MaterialsPage from './pages/MaterialsPage.vue'
+import NotesLibraryPage from './pages/NotesLibraryPage.vue'
+import NoteDetailPage from './pages/NoteDetailPage.vue'
 
 const routes = [
   { path: '/', component: LandingPage, meta: { public: true } },
@@ -46,6 +48,18 @@ const routes = [
   { 
     path: '/offerings/:offeringId/materials', 
     component: MaterialsPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  
+  // AI Notes routes
+  { 
+    path: '/notes', 
+    component: NotesLibraryPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  { 
+    path: '/notes/:id', 
+    component: NoteDetailPage,
     meta: { requiresAuth: true, requiresApproval: true }
   },
   

@@ -89,20 +89,37 @@
                 </div>
               </div>
               
-              <button
-                @click="downloadMaterial(material)"
-                :disabled="downloadingId === material.id"
-                class="ml-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-              >
-                <span v-if="downloadingId === material.id" class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Downloading...
-                </span>
-                <span v-else>Download</span>
-              </button>
+              <div class="flex space-x-2 ml-4">
+                <button
+                  @click="downloadMaterial(material)"
+                  :disabled="downloadingId === material.id"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  <span v-if="downloadingId === material.id" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Downloading...
+                  </span>
+                  <span v-else>Download PDF</span>
+                </button>
+                
+                <button
+                  @click="generateNotes(material)"
+                  :disabled="generatingId === material.id"
+                  class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  <span v-if="generatingId === material.id" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generating...
+                  </span>
+                  <span v-else>Generate Notes</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -141,6 +158,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { authService } from '../services/auth'
 import { catalogService } from '../services/catalog'
+import { notesService } from '../services/notes'
 import CatalogBreadcrumb from '../components/CatalogBreadcrumb.vue'
 
 const router = useRouter()
@@ -153,6 +171,8 @@ const currentPage = ref(1)
 const isLoading = ref(true)
 const errorMessage = ref('')
 const downloadingId = ref(null)
+const generatingId = ref(null)
+const generationSuccess = ref(null)
 
 const courseTitle = computed(() => {
   return offering.value?.course?.title || 'Course Materials'
@@ -235,6 +255,48 @@ const downloadMaterial = async (material) => {
     alert(error.response?.data?.message || 'Failed to download file. Please try again.')
   } finally {
     downloadingId.value = null
+  }
+}
+
+const generateNotes = async (material) => {
+  if (generatingId.value) return
+  
+  generatingId.value = material.id
+  generationSuccess.value = null
+  errorMessage.value = ''
+  
+  try {
+    const data = await notesService.generateNotes(material.id, false)
+    
+    // Show success message briefly
+    generationSuccess.value = material.id
+    setTimeout(() => {
+      generationSuccess.value = null
+    }, 3000)
+    
+    // Redirect to the generated note
+    router.push(`/notes/${data.note.id}`)
+  } catch (error) {
+    console.error('Note generation failed:', error)
+    
+    if (error.response?.status === 403) {
+      errorMessage.value = 'Your account must be approved to generate notes.'
+    } else if (error.response?.status === 429) {
+      errorMessage.value = 'Rate limit exceeded. You can generate up to 10 notes per hour. Please try again later.'
+    } else if (error.response?.status === 401) {
+      errorMessage.value = 'Your session has expired. Please log in again.'
+      setTimeout(() => {
+        authService.logout()
+        router.push('/login')
+      }, 2000)
+    } else {
+      errorMessage.value = error.response?.data?.message || 'Failed to generate notes. Please try again.'
+    }
+    
+    // Scroll to error message
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } finally {
+    generatingId.value = null
   }
 }
 
