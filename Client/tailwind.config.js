@@ -15,6 +15,20 @@ export default {
         },
         cream: '#f5f3f0',
         softOrange: '#ff9d76',
+        // Dashboard colors matching the reference
+        primary: {
+          DEFAULT: '#2E5CCC', // Main blue
+          50: '#EEF2FF',
+          100: '#E0E7FF',
+          500: '#2E5CCC',
+          600: '#2548A6',
+          700: '#1D3A80',
+        },
+        accent: {
+          DEFAULT: '#FDB022', // Yellow/Orange
+          500: '#FDB022',
+          600: '#D9941C',
+        },
       },
       fontFamily: {
         sans: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],

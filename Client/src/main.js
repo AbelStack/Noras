@@ -15,6 +15,9 @@ import TermsOfUsePage from './pages/legal/TermsOfUsePage.vue'
 // Protected pages
 import StudentDashboard from './pages/StudentDashboard.vue'
 import AdminDashboard from './pages/AdminDashboard.vue'
+import DepartmentsPage from './pages/DepartmentsPage.vue'
+import CourseOfferingsPage from './pages/CourseOfferingsPage.vue'
+import MaterialsPage from './pages/MaterialsPage.vue'
 
 const routes = [
   { path: '/', component: LandingPage, meta: { public: true } },
@@ -28,6 +31,21 @@ const routes = [
   { 
     path: '/dashboard', 
     component: StudentDashboard,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  { 
+    path: '/departments', 
+    component: DepartmentsPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  { 
+    path: '/departments/:departmentId/courses', 
+    component: CourseOfferingsPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  { 
+    path: '/offerings/:offeringId/materials', 
+    component: MaterialsPage,
     meta: { requiresAuth: true, requiresApproval: true }
   },
   
