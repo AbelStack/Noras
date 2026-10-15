@@ -7,13 +7,25 @@
         sidebarCollapsed ? 'w-20' : 'w-64'
       ]"
     >
-      <!-- Logo & Menu Toggle -->
-      <div class="h-16 flex items-center justify-center border-b border-gray-200">
+      <!-- Logo & Toggle Button -->
+      <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200">
+        <router-link v-if="!sidebarCollapsed" to="/" class="flex items-center gap-2">
+          <NorasLogo :size="32" />
+          <div class="h-8 w-px bg-gray-300"></div>
+          <span class="text-xl font-bold text-gray-900 tracking-tight">Noras</span>
+        </router-link>
+        <div v-else class="flex items-center justify-center w-full">
+          <NorasLogo :size="32" />
+        </div>
         <button 
           @click="sidebarCollapsed = !sidebarCollapsed"
-          class="w-12 h-12 rounded-full bg-white border-2 border-primary-500 flex items-center justify-center text-primary-500 font-bold text-lg hover:bg-primary-50 transition-colors"
+          class="p-2 hover:bg-gray-100 rounded transition-colors"
+          :class="sidebarCollapsed ? 'absolute right-2' : ''"
         >
-          <span>M</span>
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path v-if="sidebarCollapsed" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
       </div>
 
@@ -89,28 +101,88 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 class="text-xl font-semibold text-gray-800">{{ pageTitle }}</h1>
+          <h1 class="text-xl font-semibold text-gray-800">{{ pageTitle === 'Admin' ? 'Noras Admin' : pageTitle }}</h1>
         </div>
 
         <div class="flex items-center space-x-4">
           <!-- Notification Bell -->
-          <button class="p-2 rounded-full hover:bg-gray-100 relative">
-            <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </button>
+          <div class="relative">
+            <button 
+              @click="showNotifications = !showNotifications"
+              class="p-2 rounded-full hover:bg-gray-100 relative"
+            >
+              <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span v-if="notificationCount > 0" class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            
+            <!-- Notification Dropdown -->
+            <div 
+              v-if="showNotifications"
+              v-click-outside="() => showNotifications = false"
+              class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+            >
+              <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">Notifications</h3>
+              </div>
+              <div class="max-h-96 overflow-y-auto">
+                <div v-if="notificationCount === 0" class="p-4 text-center text-gray-500 text-sm">
+                  No new notifications
+                </div>
+                <div v-else class="divide-y divide-gray-100">
+                  <div v-for="notif in notifications" :key="notif.id" class="p-4 hover:bg-gray-50 cursor-pointer">
+                    <p class="text-sm text-gray-900">{{ notif.message }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ notif.time }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- User Profile Dropdown -->
-          <div class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 rounded-lg px-3 py-2">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium text-sm">
-              {{ userInitials }}
+          <div class="relative">
+            <button
+              @click="showUserMenu = !showUserMenu"
+              class="flex items-center space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2"
+            >
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium text-sm">
+                {{ userInitials }}
+              </div>
+              <div class="hidden md:block text-sm">
+                <p class="font-medium text-gray-900">{{ userName }}</p>
+              </div>
+              <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- User Dropdown Menu -->
+            <div 
+              v-if="showUserMenu"
+              v-click-outside="() => showUserMenu = false"
+              class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+            >
+              <div class="p-3 border-b border-gray-200">
+                <p class="font-medium text-gray-900">{{ userName }}</p>
+                <p class="text-sm text-gray-500">{{ user?.email }}</p>
+              </div>
+              <div class="py-2">
+                <router-link
+                  to="/admin/settings"
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  @click="showUserMenu = false"
+                >
+                  Settings
+                </router-link>
+                <button
+                  @click="handleLogout"
+                  class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
-            <div class="hidden md:block text-sm">
-              <p class="font-medium text-gray-900">{{ userName }}</p>
-            </div>
-            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
           </div>
         </div>
       </header>
@@ -127,6 +199,7 @@
 import { ref, computed, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { authService } from '../services/auth'
+import NorasLogo from './NorasLogo.vue'
 
 // Create icon components using h() render function
 const DashboardIcon = () => h('svg', { class: 'w-5 h-5', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
@@ -176,6 +249,10 @@ const props = defineProps({
 const route = useRoute()
 const router = useRouter()
 const sidebarCollapsed = ref(false)
+const showNotifications = ref(false)
+const showUserMenu = ref(false)
+const notifications = ref([])
+const notificationCount = computed(() => notifications.value.length)
 
 const user = computed(() => authService.getUser())
 const userName = computed(() => user.value?.name || 'User')
@@ -183,6 +260,21 @@ const userInitials = computed(() => {
   const name = userName.value
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 })
+
+// Click outside directive
+const vClickOutside = {
+  mounted(el, binding) {
+    el.clickOutsideEvent = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value()
+      }
+    }
+    document.addEventListener('click', el.clickOutsideEvent)
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el.clickOutsideEvent)
+  }
+}
 
 const handleLogout = async () => {
   try {

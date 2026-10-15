@@ -169,6 +169,11 @@ const navigationItems = [
     icon: 'SalesIcon',
   },
   { 
+    path: '/progress', 
+    label: 'Learning Progress', 
+    icon: 'UsersIcon',
+  },
+  { 
     path: '/settings', 
     label: 'Settings', 
     icon: 'SettingsIcon',

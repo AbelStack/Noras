@@ -8,6 +8,8 @@ import { authService } from './services/auth'
 import LandingPage from './pages/LandingPage.vue'
 import LoginPage from './pages/LoginPage.vue'
 import RegisterPage from './pages/RegisterPage.vue'
+import ForgotPasswordPage from './pages/ForgotPasswordPage.vue'
+import ResetPasswordPage from './pages/ResetPasswordPage.vue'
 import ContactPage from './pages/legal/ContactPage.vue'
 import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage.vue'
 import TermsOfUsePage from './pages/legal/TermsOfUsePage.vue'
@@ -15,16 +17,24 @@ import TermsOfUsePage from './pages/legal/TermsOfUsePage.vue'
 // Protected pages
 import StudentDashboard from './pages/StudentDashboard.vue'
 import AdminDashboard from './pages/AdminDashboard.vue'
+import AdminStudentApprovalsPage from './pages/AdminStudentApprovalsPage.vue'
 import DepartmentsPage from './pages/DepartmentsPage.vue'
 import CourseOfferingsPage from './pages/CourseOfferingsPage.vue'
 import MaterialsPage from './pages/MaterialsPage.vue'
 import NotesLibraryPage from './pages/NotesLibraryPage.vue'
 import NoteDetailPage from './pages/NoteDetailPage.vue'
+import QuizzesLibraryPage from './pages/QuizzesLibraryPage.vue'
+import QuizTakingPage from './pages/QuizTakingPage.vue'
+import StudyTasksPage from './pages/StudyTasksPage.vue'
+import BookmarksPage from './pages/BookmarksPage.vue'
+import LearningProgressPage from './pages/LearningProgressPage.vue'
 
 const routes = [
   { path: '/', component: LandingPage, meta: { public: true } },
   { path: '/login', component: LoginPage, meta: { public: true } },
   { path: '/register', component: RegisterPage, meta: { public: true } },
+  { path: '/forgot-password', component: ForgotPasswordPage, meta: { public: true } },
+  { path: '/reset-password', component: ResetPasswordPage, meta: { public: true } },
   { path: '/legal/contact', component: ContactPage, meta: { public: true } },
   { path: '/legal/privacy-policy', component: PrivacyPolicyPage, meta: { public: true } },
   { path: '/legal/terms-of-use', component: TermsOfUsePage, meta: { public: true } },
@@ -63,10 +73,48 @@ const routes = [
     meta: { requiresAuth: true, requiresApproval: true }
   },
   
+  // AI Quiz routes
+  { 
+    path: '/quizzes', 
+    component: QuizzesLibraryPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  { 
+    path: '/quizzes/:id', 
+    component: QuizTakingPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  
+  // Study Tasks routes
+  { 
+    path: '/tasks', 
+    component: StudyTasksPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  
+  // Bookmarks routes
+  { 
+    path: '/bookmarks', 
+    component: BookmarksPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  
+  // Learning Progress routes
+  { 
+    path: '/progress', 
+    component: LearningProgressPage,
+    meta: { requiresAuth: true, requiresApproval: true }
+  },
+  
   // Protected admin routes
   { 
     path: '/admin/dashboard', 
     component: AdminDashboard,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/students', 
+    component: AdminStudentApprovalsPage,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
 ]

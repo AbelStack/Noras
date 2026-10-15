@@ -119,6 +119,21 @@
                   </span>
                   <span v-else>Generate Notes</span>
                 </button>
+                
+                <button
+                  @click="generateQuiz(material)"
+                  :disabled="generatingQuizId === material.id"
+                  class="px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  <span v-if="generatingQuizId === material.id" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generating...
+                  </span>
+                  <span v-else>Generate Quiz</span>
+                </button>
               </div>
             </div>
           </div>
@@ -159,6 +174,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { authService } from '../services/auth'
 import { catalogService } from '../services/catalog'
 import { notesService } from '../services/notes'
+import { quizzesService } from '../services/quizzes'
 import CatalogBreadcrumb from '../components/CatalogBreadcrumb.vue'
 
 const router = useRouter()
@@ -172,6 +188,7 @@ const isLoading = ref(true)
 const errorMessage = ref('')
 const downloadingId = ref(null)
 const generatingId = ref(null)
+const generatingQuizId = ref(null)
 const generationSuccess = ref(null)
 
 const courseTitle = computed(() => {
@@ -297,6 +314,49 @@ const generateNotes = async (material) => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   } finally {
     generatingId.value = null
+  }
+}
+
+const generateQuiz = async (material) => {
+  if (generatingQuizId.value) return
+  
+  generatingQuizId.value = material.id
+  generationSuccess.value = null
+  errorMessage.value = ''
+  
+  try {
+    // Generate quiz with default parameters: 10 questions, 4 options per question
+    const data = await quizzesService.generateQuiz(material.id, 10, 4)
+    
+    // Show success message briefly
+    generationSuccess.value = material.id
+    setTimeout(() => {
+      generationSuccess.value = null
+    }, 3000)
+    
+    // Redirect to the generated quiz
+    router.push(`/quizzes/${data.quiz.id}`)
+  } catch (error) {
+    console.error('Quiz generation failed:', error)
+    
+    if (error.response?.status === 403) {
+      errorMessage.value = 'Your account must be approved to generate quizzes.'
+    } else if (error.response?.status === 429) {
+      errorMessage.value = 'Rate limit exceeded. You can generate up to 10 quizzes per hour. Please try again later.'
+    } else if (error.response?.status === 401) {
+      errorMessage.value = 'Your session has expired. Please log in again.'
+      setTimeout(() => {
+        authService.logout()
+        router.push('/login')
+      }, 2000)
+    } else {
+      errorMessage.value = error.response?.data?.message || 'Failed to generate quiz. Please try again.'
+    }
+    
+    // Scroll to error message
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } finally {
+    generatingQuizId.value = null
   }
 }
 

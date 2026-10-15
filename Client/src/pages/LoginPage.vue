@@ -122,7 +122,9 @@
                 <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-600">
                 <span class="ml-2 text-sm text-gray-600 font-medium">Remember me</span>
               </label>
-              <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">Forgot password?</a>
+              <router-link to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                Forgot password?
+              </router-link>
             </div>
 
             <button 

@@ -13,6 +13,7 @@ class Bookmark extends Model
     protected $fillable = [
         'bookmarkable_type',
         'bookmarkable_id',
+        'user_id',
     ];
 
     /**
