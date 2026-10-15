@@ -132,4 +132,63 @@ class CourseManagementTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_admin_can_create_course_with_department_and_study_years(): void
+    {
+        $admin = $this->createAdmin();
+        $department = Department::factory()->create();
+
+        $response = $this->actingAs($admin)->postJson('/api/v1/admin/courses', [
+            'code' => 'SE201',
+            'title' => 'Software Construction',
+            'description' => 'Advanced software design and construction',
+            'credit_hours' => 4,
+            'department_id' => $department->id,
+            'study_years' => [2, 3, 4, 5],
+            'semester' => '1',
+            'academic_year' => 2026,
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('courses', ['code' => 'SE201']);
+
+        $courseId = $response->json('data.course.id');
+        $this->assertDatabaseCount('course_offerings', 4);
+        $this->assertDatabaseHas('course_offerings', [
+            'course_id' => $courseId,
+            'department_id' => $department->id,
+            'study_year' => 2,
+            'semester' => '1',
+        ]);
+        $this->assertDatabaseHas('course_offerings', [
+            'course_id' => $courseId,
+            'department_id' => $department->id,
+            'study_year' => 5,
+            'semester' => '1',
+        ]);
+    }
+
+    public function test_admin_can_delete_deactivated_course_with_offerings(): void
+    {
+        $admin = $this->createAdmin();
+        $course = Course::factory()->create(['is_active' => false]);
+        CourseOffering::factory()->create(['course_id' => $course->id]);
+
+        $response = $this->actingAs($admin)->deleteJson("/api/v1/admin/courses/{$course->id}");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing('courses', ['id' => $course->id]);
+    }
+
+    public function test_admin_can_force_delete_active_course_with_offerings(): void
+    {
+        $admin = $this->createAdmin();
+        $course = Course::factory()->create(['is_active' => true]);
+        CourseOffering::factory()->create(['course_id' => $course->id]);
+
+        $response = $this->actingAs($admin)->deleteJson("/api/v1/admin/courses/{$course->id}?force=true");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing('courses', ['id' => $course->id]);
+    }
 }

@@ -4,10 +4,13 @@
       :src="logoSrc" 
       :alt="altText"
       :class="['object-contain', imageClass]"
+      :style="size ? { height: `${size}px` } : {}"
       :loading="eager ? 'eager' : 'lazy'"
     />
-    <div :class="['h-8 w-px bg-gray-300', dividerClass]"></div>
-    <span :class="['font-bold tracking-tight', textClass]">Noras</span>
+    <template v-if="showText">
+      <div :class="['h-8 w-px bg-gray-300', dividerClass]"></div>
+      <span :class="['font-bold tracking-tight', textClass]">Noras</span>
+    </template>
   </div>
 </template>
 
@@ -20,6 +23,14 @@ defineProps({
   altText: {
     type: String,
     default: 'Noras'
+  },
+  size: {
+    type: [Number, String],
+    default: null
+  },
+  showText: {
+    type: Boolean,
+    default: true
   },
   imageClass: {
     type: String,

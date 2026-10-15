@@ -1,134 +1,129 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/30">
-    <!-- Navigation -->
-    <nav class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <router-link to="/dashboard" class="flex items-center">
-              <img src="/Noras logo-sm.png" alt="Noras" class="h-8 w-auto" />
-              <span class="ml-2 text-xl font-bold text-gray-900">Noras</span>
-            </router-link>
-          </div>
-          <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">{{ user?.name }}</span>
-            <button
-              @click="handleLogout"
-              class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <DashboardLayout 
+    pageTitle="Student" 
+    :navigationItems="studentNavigationItems"
+  >
+    <div class="p-6 sm:p-8 max-w-4xl mx-auto space-y-6">
       <!-- Back Button -->
-      <div class="mb-6">
-        <router-link
-          to="/quizzes"
-          class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+      <div>
+        <button
+          @click="$router.push('/quizzes')"
+          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
         >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Quizzes
-        </router-link>
+        </button>
       </div>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <p class="mt-4 text-gray-600">Loading quiz...</p>
+      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
+        <p class="text-sm text-gray-500 mt-3 font-medium">Loading quiz...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6">
-        <p class="text-red-600">{{ errorMessage }}</p>
-        <div class="mt-4 space-x-4">
+      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-red-700 font-medium">{{ errorMessage }}</p>
+        </div>
+        <div class="flex items-center gap-3">
           <button
             @click="loadQuiz"
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            class="text-sm text-red-700 hover:text-red-800 underline font-medium"
           >
             Try Again
           </button>
-          <router-link
-            to="/quizzes"
-            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+          <button
+            @click="$router.push('/quizzes')"
+            class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-xs font-medium"
           >
             Back to Library
-          </router-link>
+          </button>
         </div>
       </div>
 
       <!-- Quiz Content -->
       <div v-else-if="quiz && questions.length > 0" class="space-y-6">
         <!-- Quiz Header -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div class="flex items-start justify-between">
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div class="flex-1">
-              <div class="flex items-center space-x-2 mb-3">
-                <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
-                </svg>
-                <h1 class="text-2xl font-bold text-gray-900">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex-shrink-0">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                  </svg>
+                </span>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                   {{ material?.title || 'Quiz' }}
                 </h1>
               </div>
 
-              <div class="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                <span>{{ questions.length }} Questions</span>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-500 ml-10 mb-3">
+                <span class="font-medium text-emerald-600">{{ questions.length }} Questions</span>
                 <span>•</span>
                 <span>Generated {{ formatDate(quiz.created_at) }}</span>
+                <span v-if="quiz.ai_provider">•</span>
+                <span v-if="quiz.ai_provider">{{ quiz.ai_provider }} ({{ quiz.ai_model }})</span>
               </div>
 
-              <!-- Security Warning -->
-              <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div class="flex items-start">
-                  <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              <!-- Study Mode Notice -->
+              <div class="mt-4 p-4 bg-emerald-50/60 border border-emerald-200/80 rounded-xl ml-10">
+                <div class="flex items-start gap-2.5">
+                  <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                   </svg>
-                  <div class="flex-1">
-                    <p class="text-sm font-medium text-yellow-800 mb-1">
-                      Study Mode (No Grading)
+                  <div>
+                    <p class="text-xs sm:text-sm font-semibold text-emerald-900 mb-0.5">
+                      Practice & Study Mode
                     </p>
-                    <p class="text-sm text-yellow-700">
-                      This is a practice quiz for studying. Answers and explanations are shown immediately to help you learn. This quiz does not track attempts or provide a score.
+                    <p class="text-xs text-emerald-800">
+                      Answers and explanations are available immediately to reinforce your learning.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <button
-              @click="showDeleteConfirm = true"
-              :disabled="isDeleting"
-              class="ml-4 px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {{ isDeleting ? 'Deleting...' : 'Delete' }}
-            </button>
+            <div class="flex items-center gap-2 self-start sm:self-center ml-10 sm:ml-0 flex-shrink-0">
+              <button
+                @click="confirmDelete"
+                :disabled="isDeleting"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 text-xs sm:text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>{{ isDeleting ? 'Deleting...' : 'Delete' }}</span>
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Question Navigation -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</h2>
-            <div class="flex space-x-2">
+            <h2 class="text-base sm:text-lg font-bold text-gray-900">
+              Question {{ currentQuestionIndex + 1 }} <span class="text-xs font-normal text-gray-500">of {{ questions.length }}</span>
+            </h2>
+            <div class="flex gap-2">
               <button
                 @click="previousQuestion"
                 :disabled="currentQuestionIndex === 0"
-                class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1.5 text-xs sm:text-sm border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-gray-700 transition-colors"
               >
                 ← Previous
               </button>
               <button
                 @click="nextQuestion"
                 :disabled="currentQuestionIndex === questions.length - 1"
-                class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1.5 text-xs sm:text-sm border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-gray-700 transition-colors"
               >
                 Next →
               </button>
@@ -136,18 +131,18 @@
           </div>
 
           <!-- Question Progress Dots -->
-          <div class="flex space-x-2 overflow-x-auto pb-2">
+          <div class="flex space-x-2 overflow-x-auto pb-1 scrollbar-thin">
             <button
               v-for="(q, index) in questions"
               :key="q.id"
               @click="goToQuestion(index)"
               :class="[
-                'w-8 h-8 rounded-full text-sm font-medium transition-colors flex-shrink-0',
+                'w-8 h-8 rounded-xl text-xs font-semibold transition-all flex-shrink-0 flex items-center justify-center',
                 index === currentQuestionIndex
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-300'
                   : userAnswers[q.id]
-                  ? 'bg-green-100 text-green-700 border border-green-300'
-                  : 'bg-gray-100 text-gray-600 border border-gray-300'
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
               ]"
             >
               {{ index + 1 }}
@@ -156,8 +151,8 @@
         </div>
 
         <!-- Current Question -->
-        <div v-if="currentQuestion" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 class="text-xl font-semibold text-gray-900 mb-6">
+        <div v-if="currentQuestion" class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-6 leading-relaxed">
             {{ currentQuestion.question_text }}
           </h3>
 
@@ -168,31 +163,31 @@
               :key="option.id"
               @click="selectAnswer(option.id)"
               :class="[
-                'w-full text-left p-4 rounded-lg border-2 transition-all',
+                'w-full text-left p-4 rounded-xl border-2 transition-all',
                 userAnswers[currentQuestion.id] === option.id
                   ? showAnswers
                     ? option.is_correct
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-red-500 bg-red-50'
-                    : 'border-blue-500 bg-blue-50'
+                      ? 'border-emerald-500 bg-emerald-50/60'
+                      : 'border-red-500 bg-red-50/60'
+                    : 'border-emerald-500 bg-emerald-50/40'
                   : showAnswers && option.is_correct
-                  ? 'border-green-300 bg-green-50'
-                  : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                  ? 'border-emerald-400 bg-emerald-50/40'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/80'
               ]"
             >
               <div class="flex items-start">
-                <div class="flex-shrink-0 mt-1">
+                <div class="flex-shrink-0 mt-0.5">
                   <div :class="[
-                    'w-5 h-5 rounded-full border-2 flex items-center justify-center',
+                    'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors',
                     userAnswers[currentQuestion.id] === option.id
                       ? showAnswers
                         ? option.is_correct
-                          ? 'border-green-600 bg-green-600'
+                          ? 'border-emerald-600 bg-emerald-600'
                           : 'border-red-600 bg-red-600'
-                        : 'border-blue-600 bg-blue-600'
+                        : 'border-emerald-600 bg-emerald-600'
                       : showAnswers && option.is_correct
-                      ? 'border-green-600'
-                      : 'border-gray-400'
+                      ? 'border-emerald-600 bg-emerald-600'
+                      : 'border-gray-300'
                   ]">
                     <svg v-if="userAnswers[currentQuestion.id] === option.id || (showAnswers && option.is_correct)" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -200,11 +195,11 @@
                   </div>
                 </div>
                 <div class="ml-3 flex-1">
-                  <p class="text-gray-900 font-medium">{{ option.option_text }}</p>
-                  <div v-if="showAnswers && option.is_correct" class="mt-2 text-sm text-green-700 font-medium">
+                  <p class="text-sm sm:text-base text-gray-900 font-medium">{{ option.option_text }}</p>
+                  <div v-if="showAnswers && option.is_correct" class="mt-1 text-xs text-emerald-700 font-semibold">
                     ✓ Correct Answer
                   </div>
-                  <div v-else-if="showAnswers && userAnswers[currentQuestion.id] === option.id && !option.is_correct" class="mt-2 text-sm text-red-700 font-medium">
+                  <div v-else-if="showAnswers && userAnswers[currentQuestion.id] === option.id && !option.is_correct" class="mt-1 text-xs text-red-600 font-semibold">
                     ✗ Incorrect
                   </div>
                 </div>
@@ -213,41 +208,41 @@
           </div>
 
           <!-- Explanation (shown after answer selection) -->
-          <div v-if="showAnswers && currentQuestion.explanation && userAnswers[currentQuestion.id]" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p class="text-sm font-semibold text-blue-900 mb-2">Explanation:</p>
-            <p class="text-sm text-blue-800">{{ currentQuestion.explanation }}</p>
+          <div v-if="showAnswers && currentQuestion.explanation && userAnswers[currentQuestion.id]" class="mt-6 p-4 bg-primary-50/50 border border-primary-200/80 rounded-xl">
+            <p class="text-xs font-bold text-primary-900 mb-1">Explanation:</p>
+            <p class="text-xs sm:text-sm text-primary-800 leading-relaxed">{{ currentQuestion.explanation }}</p>
           </div>
 
           <!-- Toggle Answers Button -->
-          <div class="mt-6 flex justify-between items-center">
+          <div class="mt-6 pt-4 border-t border-gray-100 flex flex-wrap justify-between items-center gap-3">
             <button
               @click="showAnswers = !showAnswers"
-              class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+              class="px-4 py-2 text-xs sm:text-sm font-medium border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-gray-700"
             >
               {{ showAnswers ? 'Hide' : 'Show' }} Correct Answers
             </button>
-            <div v-if="showAnswers" class="text-sm text-gray-500">
+            <div class="text-xs sm:text-sm text-gray-500 font-medium">
               Answered: {{ Object.keys(userAnswers).length }} / {{ questions.length }}
             </div>
           </div>
         </div>
 
         <!-- Summary Card -->
-        <div v-if="Object.keys(userAnswers).length === questions.length" class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl shadow-sm border border-green-200 p-6">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">All Questions Answered!</h3>
-          <p class="text-gray-600 mb-4">
+        <div v-if="Object.keys(userAnswers).length === questions.length" class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 p-6 sm:p-8 shadow-sm">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">All Questions Answered!</h3>
+          <p class="text-sm text-gray-600 mb-5">
             You've answered all {{ questions.length }} questions. Review your answers and check the explanations to reinforce your learning.
           </p>
-          <div class="flex space-x-4">
+          <div class="flex flex-wrap gap-3">
             <button
               @click="goToQuestion(0)"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium text-sm shadow-sm transition-colors"
             >
               Review from Start
             </button>
             <router-link
               to="/quizzes"
-              class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white"
+              class="px-5 py-2.5 border border-gray-300 bg-white rounded-xl hover:bg-gray-50 text-gray-700 font-medium text-sm shadow-sm transition-colors"
             >
               Back to Library
             </router-link>
@@ -255,47 +250,21 @@
         </div>
       </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div
-      v-if="showDeleteConfirm"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-      @click.self="showDeleteConfirm = false"
-    >
-      <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Quiz?</h3>
-        <p class="text-gray-600 mb-6">
-          Are you sure you want to delete this quiz? This action cannot be undone.
-        </p>
-        <div class="flex justify-end space-x-4">
-          <button
-            @click="showDeleteConfirm = false"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            @click="handleDelete"
-            :disabled="isDeleting"
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-          >
-            {{ isDeleting ? 'Deleting...' : 'Delete Quiz' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { authService } from '../services/auth'
+import DashboardLayout from '../components/DashboardLayout.vue'
 import { quizzesService } from '../services/quizzes'
+import { authService } from '../services/auth'
+import { studentNavigationItems } from '../config/navigation'
+import { useNotification } from '../composables/useNotification'
 
 const router = useRouter()
 const route = useRoute()
-const user = authService.getUser()
+const notify = useNotification()
 
 const quiz = ref(null)
 const material = ref(null)
@@ -306,7 +275,6 @@ const showAnswers = ref(false)
 const isLoading = ref(true)
 const isDeleting = ref(false)
 const errorMessage = ref('')
-const showDeleteConfirm = ref(false)
 
 const quizId = computed(() => parseInt(route.params.id))
 const currentQuestion = computed(() => questions.value[currentQuestionIndex.value])
@@ -372,23 +340,36 @@ const goToQuestion = (index) => {
   }
 }
 
+const confirmDelete = async () => {
+  const confirmed = await notify.confirm({
+    title: 'Delete Quiz?',
+    message: 'Are you sure you want to delete this quiz? This action cannot be undone.',
+    confirmText: 'Delete Quiz',
+    cancelText: 'Cancel',
+    type: 'danger',
+  })
+
+  if (!confirmed) return
+  await handleDelete()
+}
+
 const handleDelete = async () => {
   isDeleting.value = true
 
   try {
     await quizzesService.deleteQuiz(quizId.value)
+    notify.success('Quiz deleted successfully.')
     router.push('/quizzes')
   } catch (error) {
     console.error('Failed to delete quiz:', error)
-    showDeleteConfirm.value = false
     
     if (error.response?.status === 403) {
-      errorMessage.value = 'You do not have permission to delete this quiz.'
+      notify.error('You do not have permission to delete this quiz.')
     } else if (error.response?.status === 404) {
-      errorMessage.value = 'Quiz not found. It may have been deleted already.'
+      notify.error('Quiz not found. It may have been deleted already.')
       setTimeout(() => router.push('/quizzes'), 2000)
     } else {
-      errorMessage.value = error.response?.data?.message || 'Failed to delete quiz. Please try again.'
+      notify.error(error.response?.data?.message || 'Failed to delete quiz. Please try again.')
     }
   } finally {
     isDeleting.value = false
@@ -409,15 +390,5 @@ const formatDate = (dateString) => {
   if (diffDays < 7) return `${diffDays}d ago`
   
   return date.toLocaleDateString()
-}
-
-const handleLogout = async () => {
-  try {
-    await authService.logout()
-    router.push('/login')
-  } catch (error) {
-    console.error('Logout failed:', error)
-    router.push('/login')
-  }
 }
 </script>

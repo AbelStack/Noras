@@ -60,7 +60,7 @@
         <!-- Additional Stats Row -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">Universities</p>
+            <p class="text-sm text-gray-600 mb-2">Campuses</p>
             <p class="text-3xl font-bold text-gray-900">{{ stats.catalog.universities }}</p>
           </div>
           <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -303,8 +303,8 @@ const navigationItems = [
     icon: 'ApprovalIcon',
   },
   { 
-    path: '/admin/universities', 
-    label: 'Universities', 
+    path: '/admin/campus', 
+    label: 'Campuses', 
     icon: 'ProductsIcon',
   },
   { 

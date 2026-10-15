@@ -5,9 +5,27 @@
   >
     <div class="p-8">
       <!-- Page Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ user?.name }}!</h1>
-        <p class="text-gray-600 mt-1">Continue your learning journey</p>
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ user?.name }}!</h1>
+          <p class="text-gray-600 mt-1">
+            <span v-if="user?.department">
+              {{ user.department.name }} &bull; {{ user.university?.name || 'Campus' }}
+            </span>
+            <span v-else>Continue your learning journey</span>
+          </p>
+        </div>
+
+        <router-link
+          v-if="user?.department_id"
+          :to="`/departments/${user.department_id}/courses`"
+          class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-medium text-sm shadow-sm transition-colors self-start sm:self-auto"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span>My Department Courses &rarr;</span>
+        </router-link>
       </div>
 
       <!-- Stats Cards -->
@@ -127,6 +145,7 @@ import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import { authService } from '../services/auth'
 import api from '../services/api'
+import { studentNavigationItems } from '../config/navigation'
 
 const router = useRouter()
 const user = authService.getUser()
@@ -137,48 +156,7 @@ const stats = ref({
   progress: 0,
 })
 
-const navigationItems = [
-  { 
-    path: '/dashboard', 
-    label: 'Dashboard', 
-    icon: 'DashboardIcon',
-  },
-  { 
-    path: '/departments', 
-    label: 'Browse Courses', 
-    icon: 'BookIcon',
-  },
-  { 
-    path: '/notes', 
-    label: 'AI Study Notes', 
-    icon: 'ProductsIcon',
-  },
-  { 
-    path: '/quizzes', 
-    label: 'AI Quizzes', 
-    icon: 'ApprovalIcon',
-  },
-  { 
-    path: '/tasks', 
-    label: 'Study Tasks', 
-    icon: 'ReportsIcon',
-  },
-  { 
-    path: '/bookmarks', 
-    label: 'My Bookmarks', 
-    icon: 'SalesIcon',
-  },
-  { 
-    path: '/progress', 
-    label: 'Learning Progress', 
-    icon: 'UsersIcon',
-  },
-  { 
-    path: '/settings', 
-    label: 'Settings', 
-    icon: 'SettingsIcon',
-  },
-]
+const navigationItems = studentNavigationItems
 
 onMounted(async () => {
   try {

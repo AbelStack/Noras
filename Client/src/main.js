@@ -18,6 +18,11 @@ import TermsOfUsePage from './pages/legal/TermsOfUsePage.vue'
 import StudentDashboard from './pages/StudentDashboard.vue'
 import AdminDashboard from './pages/AdminDashboard.vue'
 import AdminStudentApprovalsPage from './pages/AdminStudentApprovalsPage.vue'
+import AdminCampusPage from './pages/AdminCampusPage.vue'
+import AdminDepartmentsPage from './pages/AdminDepartmentsPage.vue'
+import AdminCoursesPage from './pages/AdminCoursesPage.vue'
+import AdminMaterialsPage from './pages/AdminMaterialsPage.vue'
+import AdminSettingsPage from './pages/AdminSettingsPage.vue'
 import DepartmentsPage from './pages/DepartmentsPage.vue'
 import CourseOfferingsPage from './pages/CourseOfferingsPage.vue'
 import MaterialsPage from './pages/MaterialsPage.vue'
@@ -108,13 +113,43 @@ const routes = [
   
   // Protected admin routes
   { 
+    path: '/admin', 
+    component: AdminDashboard,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
     path: '/admin/dashboard', 
     component: AdminDashboard,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   { 
+    path: '/admin/campus', 
+    component: AdminCampusPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/departments', 
+    component: AdminDepartmentsPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/courses', 
+    component: AdminCoursesPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/materials', 
+    component: AdminMaterialsPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
     path: '/admin/students', 
     component: AdminStudentApprovalsPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/settings', 
+    component: AdminSettingsPage,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
 ]

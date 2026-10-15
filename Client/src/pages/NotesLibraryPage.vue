@@ -1,153 +1,153 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/30">
-    <!-- Navigation -->
-    <nav class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <router-link to="/dashboard" class="flex items-center">
-              <img src="/Noras logo-sm.png" alt="Noras" class="h-8 w-auto" />
-              <span class="ml-2 text-xl font-bold text-gray-900">Noras</span>
-            </router-link>
-          </div>
-          <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">{{ user?.name }}</span>
-            <button
-              @click="handleLogout"
-              class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Logout
-            </button>
-          </div>
+  <DashboardLayout 
+    pageTitle="Student" 
+    :navigationItems="studentNavigationItems"
+  >
+    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+      <!-- Back Button & Page Header -->
+      <div>
+        <button 
+          @click="$router.push('/dashboard')"
+          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+        >
+          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Dashboard
+        </button>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">AI Study Notes</h1>
+          <p class="text-sm text-gray-600 mt-1">Your AI-generated study notes library</p>
         </div>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">AI Study Notes</h1>
-        <p class="mt-2 text-gray-600">Your AI-generated study notes library</p>
       </div>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <p class="mt-4 text-gray-600">Loading your notes...</p>
+      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+        <p class="text-sm text-gray-500 mt-3 font-medium">Loading your notes...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6">
-        <p class="text-red-600">{{ errorMessage }}</p>
+      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-red-700 font-medium">{{ errorMessage }}</p>
+        </div>
         <button
           @click="loadNotes"
-          class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          class="text-sm text-red-700 hover:text-red-800 underline font-medium"
         >
           Try Again
         </button>
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="notes.length === 0" class="text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No notes yet</h3>
-        <p class="mt-1 text-sm text-gray-500">Generate AI study notes from your course materials to see them here.</p>
+      <div v-else-if="notes.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+        <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">No notes yet</h3>
+        <p class="text-sm text-gray-500 max-w-sm mx-auto mb-6">Generate AI study notes from your course materials to see them here.</p>
         <router-link
           to="/departments"
-          class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-colors"
         >
           Browse Course Materials
         </router-link>
       </div>
 
       <!-- Notes List -->
-      <div v-else>
-        <div class="space-y-4">
-          <div
-            v-for="note in notes"
-            :key="note.id"
-            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-          >
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center space-x-2 mb-2">
-                  <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path>
-                    <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"></path>
-                  </svg>
-                  <h3 class="text-lg font-bold text-gray-900">
-                    {{ note.material?.title || 'Untitled Material' }}
-                  </h3>
-                </div>
-
-                <div class="flex items-center space-x-4 text-sm text-gray-500 mb-2">
-                  <span v-if="note.material?.course">
-                    {{ note.material.course.code }} - {{ note.material.course.name }}
-                  </span>
-                  <span v-if="note.material?.department" class="text-gray-400">•</span>
-                  <span v-if="note.material?.department">
-                    {{ note.material.department.name }}
-                  </span>
-                </div>
-
-                <div class="flex items-center space-x-4 text-xs text-gray-400">
-                  <span>Generated {{ formatDate(note.created_at) }}</span>
-                  <span>•</span>
-                  <span>{{ Math.round(note.notes_char_count / 1000) }}k characters</span>
-                  <span>•</span>
-                  <span>{{ note.ai_provider }} ({{ note.ai_model }})</span>
-                </div>
-              </div>
-
-              <div class="flex space-x-2 ml-4">
-                <router-link
-                  :to="`/notes/${note.id}`"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  View Notes
-                </router-link>
-              </div>
+      <div v-else class="space-y-4">
+        <div
+          v-for="note in notes"
+          :key="note.id"
+          class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:border-primary-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex-shrink-0">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path>
+                  <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"></path>
+                </svg>
+              </span>
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">
+                {{ note.material?.title || 'Untitled Material' }}
+              </h3>
             </div>
+
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-500 ml-10 mb-2">
+              <span v-if="note.material?.course" class="font-medium text-gray-700">
+                {{ note.material.course.code }} - {{ note.material.course.name }}
+              </span>
+              <span v-if="note.material?.department" class="text-gray-300">•</span>
+              <span v-if="note.material?.department">
+                {{ note.material.department.name }}
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-x-2 text-xs text-gray-400 ml-10">
+              <span>Generated {{ formatDate(note.created_at) }}</span>
+              <span>•</span>
+              <span>{{ Math.round((note.notes_char_count || 0) / 1000) }}k characters</span>
+              <span v-if="note.ai_provider">•</span>
+              <span v-if="note.ai_provider">{{ note.ai_provider }} ({{ note.ai_model }})</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 sm:self-center ml-10 sm:ml-0 flex-shrink-0">
+            <router-link
+              :to="`/notes/${note.id}`"
+              class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors text-sm font-medium shadow-sm"
+            >
+              <span>View Notes</span>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </router-link>
           </div>
         </div>
 
         <!-- Pagination -->
-        <div v-if="pagination.last_page > 1" class="mt-8 flex items-center justify-between">
+        <div v-if="pagination.last_page > 1" class="pt-4 flex items-center justify-between">
           <button
             @click="loadPage(pagination.current_page - 1)"
             :disabled="pagination.current_page <= 1"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
           >
             Previous
           </button>
 
-          <span class="text-sm text-gray-600">
+          <span class="text-xs sm:text-sm text-gray-500">
             Page {{ pagination.current_page }} of {{ pagination.last_page }}
           </span>
 
           <button
             @click="loadPage(pagination.current_page + 1)"
             :disabled="pagination.current_page >= pagination.last_page"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
           >
             Next
           </button>
         </div>
       </div>
     </div>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService } from '../services/auth'
+import DashboardLayout from '../components/DashboardLayout.vue'
 import { notesService } from '../services/notes'
+import { authService } from '../services/auth'
+import { studentNavigationItems } from '../config/navigation'
 
 const router = useRouter()
-const user = authService.getUser()
 
 const notes = ref([])
 const pagination = ref({
@@ -208,15 +208,5 @@ const formatDate = (dateString) => {
   if (diffDays < 7) return `${diffDays}d ago`
   
   return date.toLocaleDateString()
-}
-
-const handleLogout = async () => {
-  try {
-    await authService.logout()
-    router.push('/login')
-  } catch (error) {
-    console.error('Logout failed:', error)
-    router.push('/login')
-  }
 }
 </script>

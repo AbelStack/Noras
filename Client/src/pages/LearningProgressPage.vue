@@ -1,120 +1,123 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/30">
-    <!-- Navigation -->
-    <nav class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <img src="/Noras logo-sm.png" alt="Noras" class="h-8 w-auto" />
-            <span class="ml-2 text-xl font-bold text-gray-900">Noras</span>
-          </div>
-          <div class="flex items-center space-x-4">
-            <router-link to="/dashboard" class="text-sm text-gray-600 hover:text-gray-900">Dashboard</router-link>
-            <span class="text-sm text-gray-600">{{ user?.name }}</span>
-            <button
-              @click="handleLogout"
-              class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Logout
-            </button>
-          </div>
+  <DashboardLayout 
+    pageTitle="Student" 
+    :navigationItems="studentNavigationItems"
+  >
+    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-8">
+      <!-- Back Button & Page Header -->
+      <div>
+        <button 
+          @click="$router.push('/dashboard')"
+          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+        >
+          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Dashboard
+        </button>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Learning Progress</h1>
+          <p class="text-sm text-gray-600 mt-1">Track your learning activities, completed tasks, and achievements</p>
         </div>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Learning Progress</h1>
-        <p class="mt-2 text-gray-600">Track your learning activities and achievements</p>
       </div>
 
       <!-- Progress Summary Cards -->
-      <div v-if="progressLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
-        <div v-for="i in 5" :key="i" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+      <div v-if="progressLoading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div v-for="i in 5" :key="i" class="bg-white rounded-2xl border border-gray-200 p-5 animate-pulse">
           <div class="h-8 bg-gray-200 rounded w-16 mb-2"></div>
           <div class="h-4 bg-gray-200 rounded w-24"></div>
         </div>
       </div>
 
-      <div v-else-if="progress" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-3xl font-bold text-blue-600">{{ progress.notes_generated }}</p>
-              <p class="mt-1 text-sm text-gray-600">Notes Generated</p>
-            </div>
-            <svg class="w-10 h-10 text-blue-600 opacity-20" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
-            </svg>
+      <div v-else-if="progress" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <!-- Notes Generated -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Study Notes</span>
+            <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
+              </svg>
+            </span>
           </div>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.notes_generated }}</p>
+          <p class="mt-0.5 text-xs text-gray-500">Generated notes</p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-3xl font-bold text-green-600">{{ progress.quizzes_generated }}</p>
-              <p class="mt-1 text-sm text-gray-600">Quizzes Generated</p>
-            </div>
-            <svg class="w-10 h-10 text-green-600 opacity-20" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-              <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
+        <!-- Quizzes Generated -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Quizzes</span>
+            <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </span>
           </div>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.quizzes_generated }}</p>
+          <p class="mt-0.5 text-xs text-gray-500">Generated quizzes</p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-3xl font-bold text-orange-600">{{ progress.active_tasks }}</p>
-              <p class="mt-1 text-sm text-gray-600">Active Tasks</p>
-            </div>
-            <svg class="w-10 h-10 text-orange-600 opacity-20" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-              <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clip-rule="evenodd"></path>
-            </svg>
+        <!-- Active Tasks -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Active Tasks</span>
+            <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
           </div>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.active_tasks }}</p>
+          <p class="mt-0.5 text-xs text-gray-500">Tasks in progress</p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-3xl font-bold text-purple-600">{{ progress.completed_tasks }}</p>
-              <p class="mt-1 text-sm text-gray-600">Completed Tasks</p>
-            </div>
-            <svg class="w-10 h-10 text-purple-600 opacity-20" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
+        <!-- Completed Tasks -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Completed</span>
+            <span class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </span>
           </div>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.completed_tasks }}</p>
+          <p class="mt-0.5 text-xs text-gray-500">Finished tasks</p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-3xl font-bold text-pink-600">{{ progress.bookmarks }}</p>
-              <p class="mt-1 text-sm text-gray-600">Bookmarks</p>
-            </div>
-            <svg class="w-10 h-10 text-pink-600 opacity-20" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path>
-            </svg>
+        <!-- Bookmarks -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow col-span-2 sm:col-span-1">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Bookmarks</span>
+            <span class="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path>
+              </svg>
+            </span>
           </div>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.bookmarks }}</p>
+          <p class="mt-0.5 text-xs text-gray-500">Saved resources</p>
         </div>
       </div>
 
-      <!-- Learning History -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-gray-900">Learning History</h2>
-          <p class="text-sm text-gray-600">Recent notes and quizzes you've generated</p>
+      <!-- Learning History Section -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">Learning History</h2>
+            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Recent study notes and quizzes you've generated</p>
+          </div>
         </div>
 
         <!-- Error State -->
         <div v-if="historyError" class="p-6">
-          <div class="bg-red-50 border border-red-200 rounded-xl p-6">
-            <p class="text-red-600">{{ historyError }}</p>
+          <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
+            <p class="text-sm text-red-700 font-medium">{{ historyError }}</p>
             <button
-              @click="loadHistory"
-              class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              @click="loadHistory(currentHistoryPage)"
+              class="text-sm text-red-700 hover:text-red-800 underline font-medium"
             >
               Try Again
             </button>
@@ -122,104 +125,130 @@
         </div>
 
         <!-- Loading State -->
-        <div v-else-if="historyLoading" class="p-6 text-center py-12">
-          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p class="mt-4 text-gray-600">Loading history...</p>
+        <div v-else-if="historyLoading" class="p-12 text-center">
+          <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+          <p class="mt-3 text-sm text-gray-500 font-medium">Loading history...</p>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="history.length === 0" class="p-6 text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No activity yet</h3>
-          <p class="mt-1 text-sm text-gray-500">
-            Generate notes or quizzes from course materials to start building your history.
+        <div v-else-if="history.length === 0" class="p-12 text-center">
+          <div class="w-16 h-16 rounded-2xl bg-gray-50 text-gray-400 mx-auto flex items-center justify-center mb-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 mb-1">No activity yet</h3>
+          <p class="text-sm text-gray-500 max-w-sm mx-auto mb-6">
+            Generate notes or quizzes from course materials to start building your learning history.
           </p>
+          <router-link
+            to="/departments"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-colors"
+          >
+            Explore Materials
+          </router-link>
         </div>
 
         <!-- History Timeline -->
         <div v-else class="p-6">
-          <div class="space-y-4">
+          <div class="space-y-3">
             <div
               v-for="item in history"
               :key="`${item.type}-${item.id}`"
-              class="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+              class="flex items-start justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/60 transition-all gap-4"
             >
-              <!-- Type Icon -->
-              <div :class="item.type === 'note' ? 'text-blue-600' : 'text-green-600'" class="flex-shrink-0 mt-1">
-                <svg v-if="item.type === 'note'" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
-                </svg>
-                <svg v-else class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-              </div>
-
-              <!-- Content -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center space-x-2 mb-1">
-                  <span :class="item.type === 'note' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'" class="px-2 py-1 rounded-full text-xs font-medium">
-                    {{ item.type === 'note' ? 'Study Note' : 'Practice Quiz' }}
-                  </span>
-                  <span class="text-sm text-gray-500">
-                    {{ formatDate(item.created_at) }}
+              <div class="flex items-start gap-3.5 min-w-0">
+                <!-- Type Icon -->
+                <div class="flex-shrink-0 mt-0.5">
+                  <span 
+                    :class="[
+                      'inline-flex items-center justify-center w-9 h-9 rounded-xl',
+                      item.type === 'note' ? 'bg-primary-50 text-primary-600' : 'bg-emerald-50 text-emerald-600'
+                    ]"
+                  >
+                    <svg v-if="item.type === 'note'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
+                    </svg>
+                    <svg v-else class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                      <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
                   </span>
                 </div>
 
-                <h3 class="text-base font-semibold text-gray-900 mb-1">
-                  {{ item.course_material?.title || 'Course Material' }}
-                </h3>
+                <!-- Content -->
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span 
+                      :class="[
+                        'px-2 py-0.5 rounded-md text-xs font-semibold',
+                        item.type === 'note' ? 'bg-primary-50 text-primary-700' : 'bg-emerald-50 text-emerald-700'
+                      ]"
+                    >
+                      {{ item.type === 'note' ? 'Study Note' : 'Practice Quiz' }}
+                    </span>
+                    <span class="text-xs text-gray-400">
+                      {{ formatDate(item.created_at) }}
+                    </span>
+                  </div>
 
+                  <h3 class="text-sm sm:text-base font-bold text-gray-900 truncate">
+                    {{ item.course_material?.title || 'Course Material' }}
+                  </h3>
+                </div>
+              </div>
+
+              <!-- Action Link -->
+              <div class="flex-shrink-0 self-center">
                 <router-link
                   :to="item.type === 'note' ? `/notes/${item.id}` : `/quizzes/${item.id}`"
-                  class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-xl text-primary-600 hover:text-primary-700 hover:bg-primary-50 transition-colors"
                 >
-                  View {{ item.type === 'note' ? 'Notes' : 'Quiz' }} →
+                  <span>View {{ item.type === 'note' ? 'Notes' : 'Quiz' }}</span>
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
                 </router-link>
               </div>
             </div>
           </div>
 
           <!-- Pagination -->
-          <div v-if="historyPagination && historyPagination.last_page > 1" class="mt-6 pt-6 border-t border-gray-200">
-            <nav class="flex justify-center space-x-2">
-              <button
-                @click="changeHistoryPage(historyPagination.current_page - 1)"
-                :disabled="historyPagination.current_page === 1"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              
-              <span class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300">
-                Page {{ historyPagination.current_page }} of {{ historyPagination.last_page }}
-              </span>
-              
-              <button
-                @click="changeHistoryPage(historyPagination.current_page + 1)"
-                :disabled="historyPagination.current_page === historyPagination.last_page"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </nav>
+          <div v-if="historyPagination && historyPagination.last_page > 1" class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <button
+              @click="changeHistoryPage(historyPagination.current_page - 1)"
+              :disabled="historyPagination.current_page === 1"
+              class="px-4 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
+            >
+              Previous
+            </button>
+            
+            <span class="text-xs sm:text-sm text-gray-500">
+              Page {{ historyPagination.current_page }} of {{ historyPagination.last_page }}
+            </span>
+            
+            <button
+              @click="changeHistoryPage(historyPagination.current_page + 1)"
+              :disabled="historyPagination.current_page === historyPagination.last_page"
+              class="px-4 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService } from '../services/auth'
+import DashboardLayout from '../components/DashboardLayout.vue'
 import { learningService } from '../services/learning'
+import { studentNavigationItems } from '../config/navigation'
 
 const router = useRouter()
-const user = ref(authService.getUser())
 
 // Progress state
 const progress = ref(null)
@@ -243,7 +272,6 @@ const loadProgress = async () => {
     progress.value = result.data
   } catch (error) {
     console.error('Failed to load progress:', error)
-    // Don't block the page, just log the error
     progress.value = {
       notes_generated: 0,
       quizzes_generated: 0,
@@ -290,15 +318,5 @@ const formatDate = (dateString) => {
   if (diffDays <= 7) return `${diffDays - 1} days ago`
   
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-const handleLogout = async () => {
-  try {
-    await authService.logout()
-    router.push('/login')
-  } catch (error) {
-    console.error('Logout failed:', error)
-    router.push('/login')
-  }
 }
 </script>

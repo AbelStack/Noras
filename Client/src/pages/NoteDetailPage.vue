@@ -1,132 +1,121 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/30">
-    <!-- Navigation -->
-    <nav class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <router-link to="/dashboard" class="flex items-center">
-              <img src="/Noras logo-sm.png" alt="Noras" class="h-8 w-auto" />
-              <span class="ml-2 text-xl font-bold text-gray-900">Noras</span>
-            </router-link>
-          </div>
-          <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">{{ user?.name }}</span>
-            <button
-              @click="handleLogout"
-              class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <DashboardLayout 
+    pageTitle="Student" 
+    :navigationItems="studentNavigationItems"
+  >
+    <div class="p-6 sm:p-8 max-w-5xl mx-auto space-y-6">
       <!-- Back Button -->
-      <div class="mb-6">
-        <router-link
-          to="/notes"
-          class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+      <div>
+        <button
+          @click="$router.push('/notes')"
+          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
         >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Notes Library
-        </router-link>
+        </button>
       </div>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <p class="mt-4 text-gray-600">Loading note...</p>
+      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+        <p class="text-sm text-gray-500 mt-3 font-medium">Loading note...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6">
-        <p class="text-red-600">{{ errorMessage }}</p>
-        <div class="mt-4 space-x-4">
+      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-red-700 font-medium">{{ errorMessage }}</p>
+        </div>
+        <div class="flex items-center gap-3">
           <button
             @click="loadNote"
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            class="text-sm text-red-700 hover:text-red-800 underline font-medium"
           >
             Try Again
           </button>
-          <router-link
-            to="/notes"
-            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+          <button
+            @click="$router.push('/notes')"
+            class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-xs font-medium"
           >
             Back to Library
-          </router-link>
+          </button>
         </div>
       </div>
 
       <!-- Note Content -->
       <div v-else-if="note" class="space-y-6">
         <!-- Note Header -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div class="flex items-start justify-between">
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div class="flex-1">
-              <div class="flex items-center space-x-2 mb-3">
-                <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path>
-                  <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"></path>
-                </svg>
-                <h1 class="text-2xl font-bold text-gray-900">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex-shrink-0">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path>
+                    <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"></path>
+                  </svg>
+                </span>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                   {{ material?.title || 'Study Notes' }}
                 </h1>
               </div>
 
-              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 mb-3">
-                <span v-if="material?.course">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600 ml-10 mb-3">
+                <span v-if="material?.course" class="font-medium text-gray-800">
                   {{ material.course.code }} - {{ material.course.name }}
                 </span>
-                <span v-if="material?.department" class="text-gray-400">•</span>
+                <span v-if="material?.department" class="text-gray-300">•</span>
                 <span v-if="material?.department">
                   {{ material.department.name }}
                 </span>
               </div>
 
-              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 ml-10">
                 <span>Generated {{ formatDate(note.created_at) }}</span>
                 <span>•</span>
-                <span>{{ Math.round(note.notes_char_count / 1000) }}k characters</span>
-                <span>•</span>
-                <span>{{ note.ai_provider }} ({{ note.ai_model }})</span>
-                <span>•</span>
-                <span>{{ note.generation_time_ms }}ms generation time</span>
+                <span>{{ Math.round((note.notes_char_count || 0) / 1000) }}k characters</span>
+                <span v-if="note.ai_provider">•</span>
+                <span v-if="note.ai_provider">{{ note.ai_provider }} ({{ note.ai_model }})</span>
+                <span v-if="note.generation_time_ms">•</span>
+                <span v-if="note.generation_time_ms">{{ note.generation_time_ms }}ms</span>
               </div>
 
               <!-- Version Warning -->
               <div 
                 v-if="material?.version && note.material_version && material.version !== note.material_version"
-                class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+                class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 ml-10"
               >
-                <div class="flex items-start">
-                  <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                  </svg>
-                  <p class="text-sm text-yellow-800">
-                    <strong>Outdated notes:</strong> The source material has been updated (v{{ material.version }}). These notes were generated from v{{ note.material_version }}. Consider regenerating for the latest content.
-                  </p>
-                </div>
+                <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                <p class="text-xs sm:text-sm text-amber-800">
+                  <strong class="font-semibold">Outdated notes:</strong> The source material has been updated (v{{ material.version }}). These notes were generated from v{{ note.material_version }}.
+                </p>
               </div>
             </div>
 
-            <button
-              @click="showDeleteConfirm = true"
-              :disabled="isDeleting"
-              class="ml-4 px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {{ isDeleting ? 'Deleting...' : 'Delete' }}
-            </button>
+            <div class="flex items-center gap-2 self-start sm:self-center ml-10 sm:ml-0 flex-shrink-0">
+              <button
+                @click="confirmDelete"
+                :disabled="isDeleting"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 text-xs sm:text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>{{ isDeleting ? 'Deleting...' : 'Delete' }}</span>
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Note Content Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 shadow-sm">
           <div 
             class="prose prose-blue max-w-none"
             v-html="sanitizedContent"
@@ -134,70 +123,43 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center pt-2">
           <router-link
             v-if="material?.id"
             :to="`/offerings/${material.course_offering_id}/materials`"
-            class="inline-flex items-center text-sm text-blue-600 hover:text-blue-700"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
           >
-            View Source Material
-            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span>View Source Material</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </router-link>
         </div>
       </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div
-      v-if="showDeleteConfirm"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-      @click.self="showDeleteConfirm = false"
-    >
-      <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Study Notes?</h3>
-        <p class="text-gray-600 mb-6">
-          Are you sure you want to delete these study notes? This action cannot be undone.
-        </p>
-        <div class="flex justify-end space-x-4">
-          <button
-            @click="showDeleteConfirm = false"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            @click="handleDelete"
-            :disabled="isDeleting"
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-          >
-            {{ isDeleting ? 'Deleting...' : 'Delete Notes' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { authService } from '../services/auth'
+import DashboardLayout from '../components/DashboardLayout.vue'
 import { notesService } from '../services/notes'
+import { authService } from '../services/auth'
+import { studentNavigationItems } from '../config/navigation'
+import { useNotification } from '../composables/useNotification'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 
 const router = useRouter()
 const route = useRoute()
-const user = authService.getUser()
+const notify = useNotification()
 
 const note = ref(null)
 const material = ref(null)
 const isLoading = ref(true)
 const isDeleting = ref(false)
 const errorMessage = ref('')
-const showDeleteConfirm = ref(false)
 
 const noteId = computed(() => parseInt(route.params.id))
 
@@ -248,23 +210,36 @@ const loadNote = async () => {
   }
 }
 
+const confirmDelete = async () => {
+  const confirmed = await notify.confirm({
+    title: 'Delete Study Notes?',
+    message: 'Are you sure you want to delete these study notes? This action cannot be undone.',
+    confirmText: 'Delete Notes',
+    cancelText: 'Cancel',
+    type: 'danger',
+  })
+
+  if (!confirmed) return
+  await handleDelete()
+}
+
 const handleDelete = async () => {
   isDeleting.value = true
 
   try {
     await notesService.deleteNote(noteId.value)
+    notify.success('Study notes deleted successfully.')
     router.push('/notes')
   } catch (error) {
     console.error('Failed to delete note:', error)
-    showDeleteConfirm.value = false
     
     if (error.response?.status === 403) {
-      errorMessage.value = 'You do not have permission to delete this note.'
+      notify.error('You do not have permission to delete this note.')
     } else if (error.response?.status === 404) {
-      errorMessage.value = 'Note not found. It may have been deleted already.'
+      notify.error('Note not found. It may have been deleted already.')
       setTimeout(() => router.push('/notes'), 2000)
     } else {
-      errorMessage.value = error.response?.data?.message || 'Failed to delete note. Please try again.'
+      notify.error(error.response?.data?.message || 'Failed to delete note. Please try again.')
     }
   } finally {
     isDeleting.value = false
@@ -285,16 +260,6 @@ const formatDate = (dateString) => {
   if (diffDays < 7) return `${diffDays}d ago`
   
   return date.toLocaleDateString()
-}
-
-const handleLogout = async () => {
-  try {
-    await authService.logout()
-    router.push('/login')
-  } catch (error) {
-    console.error('Logout failed:', error)
-    router.push('/login')
-  }
 }
 </script>
 

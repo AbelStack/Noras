@@ -1,6 +1,17 @@
 import api from './api'
 
 export const authService = {
+  async getCampuses() {
+    const response = await api.get('/auth/campuses')
+    return response.data.data.campuses
+  },
+
+  async getDepartments(campusId = null) {
+    const params = campusId ? { university_id: campusId } : {}
+    const response = await api.get('/auth/departments', { params })
+    return response.data.data.departments
+  },
+
   async register(data) {
     const response = await api.post('/auth/register', data)
     return response.data

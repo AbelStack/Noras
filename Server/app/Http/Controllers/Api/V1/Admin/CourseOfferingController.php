@@ -146,11 +146,41 @@ class CourseOfferingController extends Controller
     public function destroy($id)
     {
         $offering = CourseOffering::findOrFail($id);
-        $offering->delete();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Course offering deleted successfully',
-        ]);
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            $materials = \App\Models\CourseMaterial::where('course_offering_id', $offering->id)->get();
+
+            foreach ($materials as $material) {
+                \App\Models\StudyTask::where('course_material_id', $material->id)
+                    ->update(['course_material_id' => null]);
+
+                \App\Models\Bookmark::where('bookmarkable_type', \App\Models\CourseMaterial::class)
+                    ->where('bookmarkable_id', $material->id)
+                    ->delete();
+
+                if (\Illuminate\Support\Facades\Storage::disk('local')->exists($material->file_path)) {
+                    \Illuminate\Support\Facades\Storage::disk('local')->delete($material->file_path);
+                }
+
+                $material->delete();
+            }
+
+            $offering->delete();
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Course offering deleted successfully',
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to delete course offering: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

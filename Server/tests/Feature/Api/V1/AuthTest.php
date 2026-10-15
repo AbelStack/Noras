@@ -3,6 +3,8 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Models\User;
+use App\Models\University;
+use App\Models\Department;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -31,6 +33,56 @@ class AuthTest extends TestCase
             'student_id' => 'WU2024001',
             'role' => 'student',
             'account_status' => 'pending',
+        ]);
+    }
+
+    public function test_public_can_fetch_campuses_and_departments_for_registration(): void
+    {
+        $campus = University::factory()->create(['name' => 'Kombolcha Campus', 'is_active' => true]);
+        $dept = Department::factory()->create(['university_id' => $campus->id, 'name' => 'Computer Science', 'is_active' => true]);
+
+        // Public can list campuses
+        $campusRes = $this->getJson('/api/v1/auth/campuses');
+        $campusRes->assertOk()
+            ->assertJsonStructure(['status', 'data' => ['campuses']]);
+
+        // Public can list departments filtered by campus
+        $deptRes = $this->getJson('/api/v1/auth/departments?university_id=' . $campus->id);
+        $deptRes->assertOk()
+            ->assertJsonStructure(['status', 'data' => ['departments']]);
+        $this->assertCount(1, $deptRes->json('data.departments'));
+    }
+
+    public function test_user_can_register_with_campus_and_department(): void
+    {
+        $campus = University::factory()->create(['name' => 'Dessie Campus', 'is_active' => true]);
+        $dept = Department::factory()->create(['university_id' => $campus->id, 'name' => 'Software Engineering', 'is_active' => true]);
+
+        $response = $this->postJson('/api/v1/auth/register', [
+            'name' => 'Campus Student',
+            'email' => 'campus_student@test.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'student_id' => 'WU2024999',
+            'university_id' => $campus->id,
+            'department_id' => $dept->id,
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJson([
+                'status' => 'success',
+                'data' => [
+                    'user' => [
+                        'university_id' => $campus->id,
+                        'department_id' => $dept->id,
+                    ],
+                ],
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'campus_student@test.com',
+            'university_id' => $campus->id,
+            'department_id' => $dept->id,
         ]);
     }
 

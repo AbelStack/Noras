@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'student_id', 'account_status', 'role', 'approved_at', 'approved_by'])]
+#[Fillable(['name', 'email', 'password', 'student_id', 'account_status', 'role', 'approved_at', 'approved_by', 'university_id', 'department_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -66,6 +66,16 @@ class User extends Authenticatable
     public function approvedStudents()
     {
         return $this->hasMany(User::class, 'approved_by');
+    }
+
+    public function university()
+    {
+        return $this->belongsTo(University::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 
     /**

@@ -1,37 +1,69 @@
 <template>
-  <div class="flex h-screen bg-gray-50">
+  <div class="flex h-screen bg-gray-50 overflow-hidden">
+    <!-- Mobile Backdrop Overlay -->
+    <div 
+      v-if="mobileMenuOpen" 
+      @click="mobileMenuOpen = false" 
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+      aria-hidden="true"
+    ></div>
+
     <!-- Sidebar -->
     <aside 
       :class="[
-        'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col',
-        sidebarCollapsed ? 'w-20' : 'w-64'
+        'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col z-50',
+        'fixed inset-y-0 left-0 lg:static lg:translate-x-0',
+        mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0',
+        sidebarCollapsed ? 'lg:w-20' : 'lg:w-64',
+        'w-64'
       ]"
     >
       <!-- Logo & Toggle Button -->
-      <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200">
-        <router-link v-if="!sidebarCollapsed" to="/" class="flex items-center gap-2">
-          <NorasLogo :size="32" />
-          <div class="h-8 w-px bg-gray-300"></div>
-          <span class="text-xl font-bold text-gray-900 tracking-tight">Noras</span>
-        </router-link>
-        <div v-else class="flex items-center justify-center w-full">
-          <NorasLogo :size="32" />
-        </div>
-        <button 
-          @click="sidebarCollapsed = !sidebarCollapsed"
-          class="p-2 hover:bg-gray-100 rounded transition-colors"
-          :class="sidebarCollapsed ? 'absolute right-2' : ''"
-        >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path v-if="sidebarCollapsed" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+      <div class="h-16 flex items-center border-b border-gray-200 px-3 justify-between">
+        <!-- Expanded state on desktop OR on mobile: Logo on left, collapse/close button on right -->
+        <template v-if="!sidebarCollapsed || isMobileView">
+          <router-link to="/" class="flex items-center min-w-0" title="Noras Home" @click="mobileMenuOpen = false">
+            <NorasLogo imageClass="h-8 w-auto" textClass="text-xl text-gray-900" dividerClass="h-6" />
+          </router-link>
+          <button 
+            type="button"
+            @click="handleSidebarCloseOrCollapse"
+            class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 ml-1"
+            :title="isMobileView ? 'Close navigation' : 'Collapse sidebar'"
+          >
+            <!-- Close icon on mobile, left arrows on desktop -->
+            <svg v-if="isMobileView" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+          </button>
+        </template>
+
+        <!-- Collapsed state on desktop: Centered logo and clear expand button -->
+        <template v-else>
+          <div class="w-full flex items-center justify-between px-0.5">
+            <router-link to="/" class="flex items-center justify-center p-1" title="Noras Home">
+              <img src="/Noras logo-sm.png" alt="Noras" class="h-7 w-auto object-contain" />
+            </router-link>
+            <button 
+              type="button"
+              @click="toggleSidebarCollapse(false)"
+              class="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
+              title="Expand sidebar"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </template>
       </div>
 
       <!-- MENU Label -->
       <div class="px-4 py-3">
-        <p class="text-xs text-gray-500 font-medium" v-if="!sidebarCollapsed">MENU</p>
+        <p class="text-xs text-gray-500 font-medium" v-if="!sidebarCollapsed || isMobileView">MENU</p>
       </div>
 
       <!-- Navigation Items -->
@@ -45,7 +77,7 @@
         >
           <a
             :href="item.path"
-            @click.prevent="$router.push(item.path)"
+            @click.prevent="navigateAndCloseMenu(item.path)"
             :class="[
               'flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group',
               isActive 
@@ -57,12 +89,12 @@
               :is="iconComponents[item.icon]" 
               :class="[
                 'flex-shrink-0',
-                sidebarCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3'
+                sidebarCollapsed && !isMobileView ? 'w-5 h-5' : 'w-5 h-5 mr-3'
               ]"
             />
-            <span v-if="!sidebarCollapsed" class="flex-1">{{ item.label }}</span>
+            <span v-if="!sidebarCollapsed || isMobileView" class="flex-1">{{ item.label }}</span>
             <svg 
-              v-if="!sidebarCollapsed && item.children" 
+              v-if="(!sidebarCollapsed || isMobileView) && item.children" 
               :class="[
                 'w-4 h-4 transition-transform',
                 item.expanded ? 'transform rotate-180' : ''
@@ -83,10 +115,10 @@
           @click="handleLogout"
           class="w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
         >
-          <svg class="w-5 h-5" :class="sidebarCollapsed ? '' : 'mr-3'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-5 h-5" :class="sidebarCollapsed && !isMobileView ? '' : 'mr-3'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span v-if="!sidebarCollapsed">Logout</span>
+          <span v-if="!sidebarCollapsed || isMobileView">Logout</span>
         </button>
       </div>
     </aside>
@@ -94,14 +126,21 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Top Navigation Bar -->
-      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-        <div class="flex items-center space-x-4">
-          <button class="lg:hidden p-2 rounded-md hover:bg-gray-100">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6">
+        <div class="flex items-center space-x-3">
+          <button 
+            type="button"
+            @click="handleMenuToggle"
+            class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+            :title="isMobileView ? 'Open navigation' : (sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 class="text-xl font-semibold text-gray-800">{{ pageTitle === 'Admin' ? 'Noras Admin' : pageTitle }}</h1>
+          <h1 class="text-lg sm:text-xl font-bold text-gray-900">
+            {{ pageTitle === 'Admin' ? 'Noras Admin' : (pageTitle === 'Student' ? 'Noras Student' : pageTitle) }}
+          </h1>
         </div>
 
         <div class="flex items-center space-x-4">
@@ -169,6 +208,7 @@
               </div>
               <div class="py-2">
                 <router-link
+                  v-if="user?.role === 'admin'"
                   to="/admin/settings"
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   @click="showUserMenu = false"
@@ -192,14 +232,80 @@
         <slot></slot>
       </main>
     </div>
+
+    <!-- Centralized Toast & Confirmation Modals -->
+    <NotificationContainer />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, h } from 'vue'
+import { ref, computed, h, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { authService } from '../services/auth'
 import NorasLogo from './NorasLogo.vue'
+import NotificationContainer from './NotificationContainer.vue'
+
+// Responsive viewport detection
+const isMobileView = ref(typeof window !== 'undefined' ? window.innerWidth < 1024 : false)
+
+const checkMobile = () => {
+  if (typeof window !== 'undefined') {
+    isMobileView.value = window.innerWidth < 1024
+  }
+}
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
+
+// Mobile menu and sidebar collapse state
+const mobileMenuOpen = ref(false)
+const sidebarCollapsed = ref(
+  typeof localStorage !== 'undefined' 
+    ? localStorage.getItem('noras_sidebar_collapsed') === 'true' 
+    : false
+)
+
+const toggleSidebarCollapse = (val) => {
+  sidebarCollapsed.value = val !== undefined ? val : !sidebarCollapsed.value
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('noras_sidebar_collapsed', sidebarCollapsed.value)
+  }
+}
+
+const handleSidebarCloseOrCollapse = () => {
+  if (isMobileView.value) {
+    mobileMenuOpen.value = false
+  } else {
+    toggleSidebarCollapse()
+  }
+}
+
+const handleMenuToggle = () => {
+  if (isMobileView.value) {
+    mobileMenuOpen.value = !mobileMenuOpen.value
+  } else {
+    toggleSidebarCollapse()
+  }
+}
+
+const navigateAndCloseMenu = (path) => {
+  mobileMenuOpen.value = false
+  router.push(path)
+}
+
+// Automatically close mobile menu whenever route changes
+const route = useRoute()
+const router = useRouter()
+
+watch(() => route.path, () => {
+  mobileMenuOpen.value = false
+})
 
 // Create icon components using h() render function
 const DashboardIcon = () => h('svg', { class: 'w-5 h-5', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
@@ -235,6 +341,10 @@ const BookIcon = () => h('svg', { class: 'w-5 h-5', fill: 'none', viewBox: '0 0 
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' })
 ])
 
+const UsersIcon = () => h('svg', { class: 'w-5 h-5', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
+  h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' })
+])
+
 const props = defineProps({
   pageTitle: {
     type: String,
@@ -242,13 +352,10 @@ const props = defineProps({
   },
   navigationItems: {
     type: Array,
-    required: true
+    default: () => []
   }
 })
 
-const route = useRoute()
-const router = useRouter()
-const sidebarCollapsed = ref(false)
 const showNotifications = ref(false)
 const showUserMenu = ref(false)
 const notifications = ref([])
@@ -295,5 +402,6 @@ const iconComponents = {
   ReportsIcon,
   SettingsIcon,
   BookIcon,
+  UsersIcon,
 }
 </script>

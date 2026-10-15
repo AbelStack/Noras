@@ -134,6 +134,46 @@
               />
             </div>
 
+            <!-- Campus Selection -->
+            <div>
+              <label for="campus" class="block text-sm font-semibold text-gray-900 mb-2">
+                Campus <span class="text-red-500">*</span>
+              </label>
+              <select 
+                id="campus" 
+                v-model="selectedCampusId"
+                @change="onCampusChange"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white text-gray-900 text-sm"
+              >
+                <option :value="null" disabled>Select your campus...</option>
+                <option v-for="campus in campuses" :key="campus.id" :value="campus.id">
+                  {{ campus.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Department Selection -->
+            <div>
+              <label for="department" class="block text-sm font-semibold text-gray-900 mb-2">
+                Department <span class="text-red-500">*</span>
+              </label>
+              <select 
+                id="department" 
+                v-model="selectedDepartmentId"
+                :disabled="!selectedCampusId || isDepartmentsLoading"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white text-gray-900 text-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+              >
+                <option :value="null" disabled>
+                  {{ !selectedCampusId ? 'Please select a campus first...' : (isDepartmentsLoading ? 'Loading departments...' : 'Select your department...') }}
+                </option>
+                <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                  {{ dept.name }} ({{ dept.code }})
+                </option>
+              </select>
+            </div>
+
             <div>
               <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">Password</label>
               <input 
@@ -196,7 +236,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Zap, Award, BarChart3, ArrowLeft } from 'lucide-vue-next'
 import { authService } from '../services/auth'
@@ -205,17 +245,59 @@ const router = useRouter()
 const fullName = ref('')
 const email = ref('')
 const studentId = ref('')
+const selectedCampusId = ref(null)
+const selectedDepartmentId = ref(null)
+const campuses = ref([])
+const departments = ref([])
+const isCampusesLoading = ref(false)
+const isDepartmentsLoading = ref(false)
 const password = ref('')
 const confirmPassword = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 
+onMounted(async () => {
+  isCampusesLoading.value = true
+  try {
+    campuses.value = await authService.getCampuses()
+  } catch (err) {
+    console.error('Failed to load campuses:', err)
+  } finally {
+    isCampusesLoading.value = false
+  }
+})
+
+const onCampusChange = async () => {
+  selectedDepartmentId.value = null
+  departments.value = []
+  if (!selectedCampusId.value) return
+
+  isDepartmentsLoading.value = true
+  try {
+    departments.value = await authService.getDepartments(selectedCampusId.value)
+  } catch (err) {
+    console.error('Failed to load departments:', err)
+  } finally {
+    isDepartmentsLoading.value = false
+  }
+}
+
 const handleRegister = async () => {
   if (isLoading.value) return
 
   errorMessage.value = ''
   successMessage.value = ''
+
+  if (!selectedCampusId.value) {
+    errorMessage.value = 'Please select your campus.'
+    return
+  }
+
+  if (!selectedDepartmentId.value) {
+    errorMessage.value = 'Please select your department.'
+    return
+  }
 
   if (password.value !== confirmPassword.value) {
     errorMessage.value = 'Passwords do not match!'
@@ -234,6 +316,8 @@ const handleRegister = async () => {
       name: fullName.value,
       email: email.value,
       student_id: studentId.value,
+      university_id: selectedCampusId.value,
+      department_id: selectedDepartmentId.value,
       password: password.value,
       password_confirmation: confirmPassword.value,
     })
@@ -244,6 +328,9 @@ const handleRegister = async () => {
     fullName.value = ''
     email.value = ''
     studentId.value = ''
+    selectedCampusId.value = null
+    selectedDepartmentId.value = null
+    departments.value = []
     password.value = ''
     confirmPassword.value = ''
 
@@ -254,7 +341,6 @@ const handleRegister = async () => {
   } catch (error) {
     const errors = error.response?.data?.errors
     if (errors) {
-      // Display validation errors
       errorMessage.value = Object.values(errors).flat().join(' ')
     } else {
       errorMessage.value = error.response?.data?.message || error.message || 'Registration failed. Please try again.'

@@ -24,6 +24,8 @@ use App\Http\Controllers\Api\V1\LearningHistoryController;
 Route::prefix('v1')->group(function () {
     Route::get('/health', [HealthController::class, 'index']);
 
+    Route::get('/auth/campuses', [AuthController::class, 'campuses']);
+    Route::get('/auth/departments', [AuthController::class, 'departments']);
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
 
