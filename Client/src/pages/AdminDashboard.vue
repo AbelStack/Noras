@@ -304,6 +304,11 @@ const navigationItems = [
     icon: 'ApprovalIcon',
   },
   { 
+    path: '/admin/notifications', 
+    label: 'Notifications', 
+    icon: 'ReportsIcon',
+  },
+  { 
     path: '/admin/campus', 
     label: 'Campuses', 
     icon: 'ProductsIcon',

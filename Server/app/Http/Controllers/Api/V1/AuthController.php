@@ -68,6 +68,30 @@ class AuthController extends Controller
             'account_status' => 'pending',
         ]);
 
+        // Notify admins of new registration
+        $user->load(['university', 'department']);
+        $admins = User::where('role', 'admin')->get();
+        $campusName = $user->university?->name ?? 'Campus';
+        $deptName = $user->department?->name ?? 'Department';
+
+        foreach ($admins as $admin) {
+            \App\Models\AppNotification::create([
+                'user_id' => $admin->id,
+                'type' => 'student_registered',
+                'title' => 'New Student Registration',
+                'message' => "New student {$user->name} ({$user->student_id}) has registered from {$campusName}, {$deptName} and is waiting for approval.",
+                'data' => [
+                    'student_id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'student_id_code' => $user->student_id,
+                    'campus' => $campusName,
+                    'department' => $deptName,
+                ],
+                'action_url' => '/admin/approvals',
+            ]);
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Registration successful. Your account is pending approval.',
@@ -81,6 +105,7 @@ class AuthController extends Controller
                     'department_id' => $user->department_id,
                     'account_status' => $user->account_status,
                     'role' => $user->role,
+                    'avatar_url' => $user->avatar_url,
                 ],
             ],
         ], 201);
@@ -136,6 +161,7 @@ class AuthController extends Controller
                         'name' => $user->department->name,
                         'code' => $user->department->code,
                     ] : null,
+                    'avatar_url' => $user->avatar_url,
                 ],
             ],
         ]);
@@ -178,6 +204,7 @@ class AuthController extends Controller
                         'code' => $user->department->code,
                     ] : null,
                     'approved_at' => $user->approved_at?->toISOString(),
+                    'avatar_url' => $user->avatar_url,
                 ],
             ],
         ]);

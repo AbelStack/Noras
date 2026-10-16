@@ -80,6 +80,32 @@
         <!-- Right: 3D Model -->
         <div class="relative">
           <div class="relative w-full h-[600px] bg-gradient-to-br from-blue-50/50 to-beige-100/50 rounded-[40px] overflow-hidden border border-gray-200/50 shadow-2xl">
+            <!-- 3D Mascot Skeleton Loader -->
+            <transition name="fade">
+              <div 
+                v-if="loadingModel" 
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-50/80 via-white/70 to-blue-100/50 backdrop-blur-xs z-10"
+              >
+                <!-- Animated Mascot Silhouette Placeholder -->
+                <div class="relative flex flex-col items-center justify-center w-64 h-80 animate-pulse">
+                  <!-- Head -->
+                  <div class="w-24 h-24 rounded-full bg-gradient-to-b from-blue-200/90 to-blue-300/80 shadow-inner mb-3"></div>
+                  <!-- Torso / Mascot Body -->
+                  <div class="w-36 h-40 rounded-3xl bg-gradient-to-b from-blue-200/90 to-blue-300/70 shadow-inner relative flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-2xl bg-white/70 shadow-xs"></div>
+                  </div>
+                  <!-- Floating base shadow pulse -->
+                  <div class="w-40 h-4 rounded-full bg-blue-200/60 mt-6 blur-xs"></div>
+                </div>
+
+                <!-- Skeleton Status Pill -->
+                <div class="mt-6 flex items-center space-x-2.5 px-4 py-2 bg-white/90 rounded-full border border-blue-100 shadow-sm animate-pulse">
+                  <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></div>
+                  <span class="text-xs font-semibold text-blue-800 tracking-wide">Loading 3D Mascot...</span>
+                </div>
+              </div>
+            </transition>
+
             <canvas ref="canvasRef" class="w-full h-full"></canvas>
             
             <!-- Floating elements around model -->
@@ -113,6 +139,7 @@ import { publicService } from '../../../services/public'
 const canvasRef = ref(null)
 let scene, camera, renderer, model
 
+const loadingModel = ref(true)
 const loadingStats = ref(true)
 const stats = ref({
   materials: 0,
@@ -191,10 +218,12 @@ onMounted(() => {
       
       scene.add(model)
       renderer.render(scene, camera)
+      loadingModel.value = false
     },
     undefined,
     (error) => {
       console.error('Error loading 3D model:', error)
+      loadingModel.value = false
     }
   )
 
@@ -239,5 +268,15 @@ onMounted(() => {
 
 .animate-float-delayed {
   animation: float-delayed 3s ease-in-out infinite 1.5s;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

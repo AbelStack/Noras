@@ -221,6 +221,7 @@ const security = ref({
 const navigationItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: 'DashboardIcon' },
   { path: '/admin/students', label: 'Student Approvals', icon: 'ApprovalIcon' },
+  { path: '/admin/notifications', label: 'Notifications', icon: 'ReportsIcon' },
   { path: '/admin/campus', label: 'Campuses', icon: 'ProductsIcon' },
   { path: '/admin/departments', label: 'Departments', icon: 'InventoryIcon' },
   { path: '/admin/courses', label: 'Courses', icon: 'BookIcon' },

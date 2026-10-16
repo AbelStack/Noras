@@ -21,6 +21,8 @@ use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\StudyTaskController;
 use App\Http\Controllers\Api\V1\LearningHistoryController;
 use App\Http\Controllers\Api\V1\PublicStatsController;
+use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\UserProfileController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/health', [HealthController::class, 'index']);
@@ -37,9 +39,22 @@ Route::prefix('v1')->group(function () {
         Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
     });
 
+    // Avatar image access (public streaming)
+    Route::get('/user/avatar/{filename}', [UserProfileController::class, 'getAvatar']);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
+
+        // User profile picture (admin and student)
+        Route::post('/user/profile-picture', [UserProfileController::class, 'uploadAvatar']);
+        Route::delete('/user/profile-picture', [UserProfileController::class, 'removeAvatar']);
+
+        // Notifications
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 
         Route::middleware('approved')->group(function () {
             // Student read-only catalog access

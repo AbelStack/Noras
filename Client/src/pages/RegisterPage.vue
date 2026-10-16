@@ -1,72 +1,72 @@
 <template>
-  <div class="min-h-screen bg-white flex">
-    <!-- Left Sidebar -->
-    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 relative overflow-hidden p-12 flex-col justify-between">
+  <div class="min-h-screen lg:h-screen lg:overflow-hidden bg-white flex flex-col lg:flex-row">
+    <!-- Left Sidebar (fixed, non-scrolling on desktop) -->
+    <div class="hidden lg:flex lg:w-1/2 lg:h-full bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 relative overflow-hidden p-8 xl:p-12 flex-col justify-between flex-shrink-0">
       <div class="absolute top-0 left-0 w-full h-full opacity-20">
         <div class="absolute top-20 right-20 w-96 h-96 bg-blue-200 rounded-full blur-3xl"></div>
         <div class="absolute bottom-20 left-20 w-96 h-96 bg-yellow-200 rounded-full blur-3xl"></div>
       </div>
 
       <div class="relative z-10">
-        <router-link to="/" class="inline-flex items-center gap-2 mb-16">
+        <router-link to="/" class="inline-flex items-center gap-2 mb-8 xl:mb-12">
           <img 
             src="/Noras logo-md.png" 
             alt="Noras"
-            class="h-12 w-auto object-contain"
+            class="h-10 xl:h-12 w-auto object-contain"
             loading="eager"
           />
-          <div class="h-10 w-px bg-blue-300"></div>
-          <span class="text-3xl font-bold text-blue-700 tracking-tight">Noras</span>
+          <div class="h-8 xl:h-10 w-px bg-blue-300"></div>
+          <span class="text-2xl xl:text-3xl font-bold text-blue-700 tracking-tight">Noras</span>
         </router-link>
 
-        <div class="text-center max-w-md mx-auto mb-12">
-          <h2 class="text-5xl font-bold text-blue-700 mb-6 leading-tight">
+        <div class="text-center max-w-md mx-auto mb-8 xl:mb-10">
+          <h2 class="text-3xl xl:text-4xl font-bold text-blue-700 mb-3 xl:mb-4 leading-tight">
             Start Your Academic Success Story
           </h2>
-          <p class="text-xl text-blue-700 font-normal leading-relaxed">
+          <p class="text-base xl:text-lg text-blue-700 font-normal leading-relaxed">
             Join hundreds of Wollo University students who are studying smarter with AI-powered tools.
           </p>
         </div>
 
-        <div class="space-y-6">
+        <div class="space-y-4 xl:space-y-5">
           <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Zap :size="24" class="text-blue-700" />
+            <div class="w-10 h-10 xl:w-12 xl:h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Zap :size="22" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-blue-700 font-bold text-lg mb-1">Quick Setup</h3>
-              <p class="text-blue-600 font-normal">Get started in less than 2 minutes</p>
+              <h3 class="text-blue-700 font-bold text-base xl:text-lg mb-0.5">Quick Setup</h3>
+              <p class="text-blue-600 text-sm font-normal">Get started in less than 2 minutes</p>
             </div>
           </div>
           <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Award :size="24" class="text-blue-700" />
+            <div class="w-10 h-10 xl:w-12 xl:h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Award :size="22" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-blue-700 font-bold text-lg mb-1">Verified Students Only</h3>
-              <p class="text-blue-600 font-normal">Secure platform for university students</p>
+              <h3 class="text-blue-700 font-bold text-base xl:text-lg mb-0.5">Verified Students Only</h3>
+              <p class="text-blue-600 text-sm font-normal">Secure platform for university students</p>
             </div>
           </div>
           <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
-              <BarChart3 :size="24" class="text-blue-700" />
+            <div class="w-10 h-10 xl:w-12 xl:h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <BarChart3 :size="22" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-blue-700 font-bold text-lg mb-1">Track Your Growth</h3>
-              <p class="text-blue-600 font-normal">See your progress in real-time</p>
+              <h3 class="text-blue-700 font-bold text-base xl:text-lg mb-0.5">Track Your Growth</h3>
+              <p class="text-blue-600 text-sm font-normal">See your progress in real-time</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="relative z-10 text-blue-600 font-normal">
+      <div class="relative z-10 text-blue-600 font-normal text-xs xl:text-sm">
         <p>&copy; 2026 Noras. Developed by Abel T.</p>
       </div>
     </div>
 
-    <!-- Right Content -->
-    <div class="flex-1 flex items-center justify-center px-6 py-12 bg-gradient-to-br from-beige-50 via-white to-blue-50/30">
-      <div class="max-w-md w-full">
+    <!-- Right Content (form scrolls independently on desktop) -->
+    <div class="flex-1 lg:h-full lg:overflow-y-auto flex items-center justify-center px-6 py-8 sm:py-12 bg-gradient-to-br from-beige-50 via-white to-blue-50/30">
+      <div class="max-w-md w-full my-auto py-4">
         <!-- Mobile Logo -->
         <div class="lg:hidden text-center mb-10">
           <router-link to="/" class="inline-flex items-center gap-2 justify-center">
@@ -229,6 +229,11 @@
             <ArrowLeft :size="16" />
             <span>Back to home</span>
           </router-link>
+        </div>
+
+        <!-- Mobile Footer -->
+        <div class="lg:hidden text-center mt-8 text-xs text-gray-500 font-normal">
+          <p>&copy; 2026 Noras. Developed by Abel T.</p>
         </div>
       </div>
     </div>

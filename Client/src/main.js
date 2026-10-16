@@ -22,6 +22,7 @@ import AdminCampusPage from './pages/AdminCampusPage.vue'
 import AdminDepartmentsPage from './pages/AdminDepartmentsPage.vue'
 import AdminCoursesPage from './pages/AdminCoursesPage.vue'
 import AdminMaterialsPage from './pages/AdminMaterialsPage.vue'
+import AdminNotificationsPage from './pages/AdminNotificationsPage.vue'
 import AdminSettingsPage from './pages/AdminSettingsPage.vue'
 import DepartmentsPage from './pages/DepartmentsPage.vue'
 import CourseOfferingsPage from './pages/CourseOfferingsPage.vue'
@@ -145,6 +146,16 @@ const routes = [
   { 
     path: '/admin/students', 
     component: AdminStudentApprovalsPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/approvals', 
+    component: AdminStudentApprovalsPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/notifications', 
+    component: AdminNotificationsPage,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   { 

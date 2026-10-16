@@ -1,74 +1,74 @@
 <template>
-  <div class="min-h-screen bg-white flex">
-    <!-- Left Sidebar -->
-    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 relative overflow-hidden p-12 flex-col justify-between">
+  <div class="min-h-screen lg:h-screen lg:overflow-hidden bg-white flex flex-col lg:flex-row">
+    <!-- Left Sidebar (compacted so entire page fits in viewport without scrolling) -->
+    <div class="hidden lg:flex lg:w-1/2 lg:h-full bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 relative overflow-hidden p-8 xl:p-12 flex-col justify-between flex-shrink-0">
       <div class="absolute top-0 left-0 w-full h-full opacity-20">
         <div class="absolute top-20 right-20 w-96 h-96 bg-blue-200 rounded-full blur-3xl"></div>
         <div class="absolute bottom-20 left-20 w-96 h-96 bg-yellow-200 rounded-full blur-3xl"></div>
       </div>
 
       <div class="relative z-10">
-        <router-link to="/" class="inline-flex items-center gap-2 mb-16">
+        <router-link to="/" class="inline-flex items-center gap-2 mb-6 xl:mb-10">
           <img 
             src="/Noras logo-md.png" 
             alt="Noras"
-            class="h-12 w-auto object-contain"
+            class="h-10 xl:h-12 w-auto object-contain"
             loading="eager"
           />
-          <div class="h-10 w-px bg-blue-300"></div>
-          <span class="text-3xl font-bold text-blue-700 tracking-tight">Noras</span>
+          <div class="h-8 xl:h-10 w-px bg-blue-300"></div>
+          <span class="text-2xl xl:text-3xl font-bold text-blue-700 tracking-tight">Noras</span>
         </router-link>
 
-        <div class="text-center max-w-md mx-auto mb-12">
-          <h2 class="text-5xl font-bold text-blue-700 mb-6 leading-tight">
+        <div class="text-center max-w-md mx-auto mb-6 xl:mb-8">
+          <h2 class="text-3xl xl:text-4xl font-bold text-blue-700 mb-2.5 xl:mb-3.5 leading-tight">
             Welcome Back to Your Learning Journey
           </h2>
-          <p class="text-xl text-blue-700 font-normal leading-relaxed">
+          <p class="text-sm xl:text-base text-blue-700 font-normal leading-relaxed">
             Access your personalized study materials, AI-generated notes, and track your academic progress.
           </p>
         </div>
 
-        <div class="space-y-6">
-          <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
-              <BookOpen :size="24" class="text-blue-700" />
+        <div class="space-y-3.5 xl:space-y-4">
+          <div class="flex items-start space-x-3.5">
+            <div class="w-10 h-10 xl:w-11 xl:h-11 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <BookOpen :size="20" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-blue-700 font-bold text-lg mb-1">Organized Materials</h3>
-              <p class="text-blue-600 font-normal">All your course materials in one place</p>
+              <h3 class="text-blue-700 font-bold text-base mb-0.5">Organized Materials</h3>
+              <p class="text-blue-600 text-xs sm:text-sm font-normal">All your course materials in one place</p>
             </div>
           </div>
-          <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Brain :size="24" class="text-blue-700" />
+          <div class="flex items-start space-x-3.5">
+            <div class="w-10 h-10 xl:w-11 xl:h-11 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Brain :size="20" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-blue-700 font-bold text-lg mb-1">AI Study Notes</h3>
-              <p class="text-blue-600 font-normal">Smart summaries for efficient learning</p>
+              <h3 class="text-blue-700 font-bold text-base mb-0.5">AI Study Notes</h3>
+              <p class="text-blue-600 text-xs sm:text-sm font-normal">Smart summaries for efficient learning</p>
             </div>
           </div>
-          <div class="flex items-start space-x-4">
-            <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
-              <TrendingUp :size="24" class="text-blue-700" />
+          <div class="flex items-start space-x-3.5">
+            <div class="w-10 h-10 xl:w-11 xl:h-11 bg-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+              <TrendingUp :size="20" class="text-blue-700" />
             </div>
             <div>
-              <h3 class="text-blue-700 font-bold text-lg mb-1">Track Progress</h3>
-              <p class="text-blue-600 font-normal">Monitor your learning achievements</p>
+              <h3 class="text-blue-700 font-bold text-base mb-0.5">Track Progress</h3>
+              <p class="text-blue-600 text-xs sm:text-sm font-normal">Monitor your learning achievements</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="relative z-10 text-blue-600 font-normal">
+      <div class="relative z-10 text-blue-600 font-normal text-xs xl:text-sm">
         <p>&copy; 2026 Noras. Developed by Abel T.</p>
       </div>
     </div>
 
-    <!-- Right Content -->
-    <div class="flex-1 flex items-center justify-center px-6 py-12 bg-gradient-to-br from-beige-50 via-white to-blue-50/30">
-      <div class="max-w-md w-full">
+    <!-- Right Content (centered, no scrolling on desktop) -->
+    <div class="flex-1 lg:h-full flex items-center justify-center px-6 py-8 sm:py-10 bg-gradient-to-br from-beige-50 via-white to-blue-50/30 overflow-y-auto lg:overflow-hidden">
+      <div class="max-w-md w-full my-auto">
         <!-- Mobile Logo -->
-        <div class="lg:hidden text-center mb-10">
+        <div class="lg:hidden text-center mb-6">
           <router-link to="/" class="inline-flex items-center gap-2 justify-center">
             <img 
               src="/Noras logo-sm.png" 
@@ -81,43 +81,43 @@
           </router-link>
         </div>
 
-        <div class="mb-10 text-center">
-          <h1 class="text-4xl font-bold text-gray-900 mb-3 tracking-tight">Welcome Back</h1>
-          <p class="text-gray-600 text-lg font-normal">Log in to continue your studies</p>
+        <div class="mb-6 text-center">
+          <h1 class="text-3xl xl:text-4xl font-bold text-gray-900 mb-2 tracking-tight">Welcome Back</h1>
+          <p class="text-gray-600 text-sm sm:text-base font-normal">Log in to continue your studies</p>
         </div>
 
-        <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-8">
+        <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 p-6 sm:p-8">
           <!-- Error Message -->
           <div v-if="errorMessage" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
             <p class="text-sm text-red-600 font-medium">{{ errorMessage }}</p>
           </div>
 
-          <form @submit.prevent="handleLogin" class="space-y-6">
+          <form @submit.prevent="handleLogin" class="space-y-4 sm:space-y-5">
             <div>
-              <label for="email" class="block text-sm font-semibold text-gray-900 mb-2">Email Address</label>
+              <label for="email" class="block text-sm font-semibold text-gray-900 mb-1.5">Email Address</label>
               <input 
                 type="email" 
                 id="email" 
                 v-model="email"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
+                class="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
                 placeholder="your.email@university.edu"
                 required
               />
             </div>
 
             <div>
-              <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">Password</label>
+              <label for="password" class="block text-sm font-semibold text-gray-900 mb-1.5">Password</label>
               <input 
                 type="password" 
                 id="password" 
                 v-model="password"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
+                class="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
                 placeholder="Enter your password"
                 required
               />
             </div>
 
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between pt-1">
               <label class="flex items-center">
                 <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-600">
                 <span class="ml-2 text-sm text-gray-600 font-medium">Remember me</span>
@@ -136,7 +136,7 @@
             </button>
           </form>
 
-          <div class="mt-6 text-center">
+          <div class="mt-5 text-center">
             <p class="text-gray-600 font-normal text-sm">
               Don't have an account? 
               <router-link to="/register" class="text-blue-600 hover:text-blue-700 font-semibold">Create one now</router-link>
@@ -144,11 +144,16 @@
           </div>
         </div>
 
-        <div class="text-center mt-6">
+        <div class="text-center mt-5">
           <router-link to="/" class="text-gray-600 hover:text-gray-900 font-medium text-sm flex items-center justify-center space-x-1">
             <ArrowLeft :size="16" />
             <span>Back to home</span>
           </router-link>
+        </div>
+
+        <!-- Mobile Footer -->
+        <div class="lg:hidden text-center mt-6 text-xs text-gray-500 font-normal">
+          <p>&copy; 2026 Noras. Developed by Abel T.</p>
         </div>
       </div>
     </div>
