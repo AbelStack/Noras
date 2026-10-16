@@ -57,10 +57,9 @@
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
-        <p class="text-sm text-gray-500 mt-3 font-medium">Loading departments...</p>
+      <!-- Loading State (Skeleton Table) -->
+      <div v-if="loading" class="py-2">
+        <SkeletonLoader type="table" :rows="6" />
       </div>
 
       <!-- Error State -->
@@ -292,6 +291,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 

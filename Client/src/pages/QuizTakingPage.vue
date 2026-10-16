@@ -18,9 +18,8 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
-        <p class="text-sm text-gray-500 mt-3 font-medium">Loading quiz...</p>
+      <div v-if="isLoading">
+        <SkeletonLoader type="quiz" />
       </div>
 
       <!-- Error State -->
@@ -257,6 +256,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import { quizzesService } from '../services/quizzes'
 import { authService } from '../services/auth'
 import { studentNavigationItems } from '../config/navigation'

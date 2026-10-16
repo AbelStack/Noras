@@ -80,10 +80,9 @@
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
-        <p class="text-sm text-gray-500 mt-3 font-medium">Loading course offerings...</p>
+      <!-- Loading State (Skeleton Cards) -->
+      <div v-if="isLoading" class="py-2">
+        <SkeletonLoader type="cards" :count="6" columnsClass="grid-cols-1 md:grid-cols-2 lg:grid-cols-3" />
       </div>
 
       <!-- Error State -->
@@ -177,6 +176,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import { catalogService } from '../services/catalog'
 import { studentNavigationItems } from '../config/navigation'
 import { authService } from '../services/auth'

@@ -22,11 +22,8 @@
       </div>
 
       <!-- Progress Summary Cards -->
-      <div v-if="progressLoading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div v-for="i in 5" :key="i" class="bg-white rounded-2xl border border-gray-200 p-5 animate-pulse">
-          <div class="h-8 bg-gray-200 rounded w-16 mb-2"></div>
-          <div class="h-4 bg-gray-200 rounded w-24"></div>
-        </div>
+      <div v-if="progressLoading">
+        <SkeletonLoader type="stats" :count="5" />
       </div>
 
       <div v-else-if="progress" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -125,9 +122,8 @@
         </div>
 
         <!-- Loading State -->
-        <div v-else-if="historyLoading" class="p-12 text-center">
-          <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
-          <p class="mt-3 text-sm text-gray-500 font-medium">Loading history...</p>
+        <div v-else-if="historyLoading" class="p-6">
+          <SkeletonLoader type="tasks" :count="5" />
         </div>
 
         <!-- Empty State -->
@@ -245,6 +241,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import { learningService } from '../services/learning'
 import { studentNavigationItems } from '../config/navigation'
 

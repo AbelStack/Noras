@@ -86,9 +86,8 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
-        <p class="text-sm text-gray-500 mt-3 font-medium">Loading bookmarks...</p>
+      <div v-if="isLoading">
+        <SkeletonLoader type="cards" :count="6" />
       </div>
 
       <!-- Empty State -->
@@ -227,6 +226,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import { bookmarksService } from '../services/bookmarks'
 import { studentNavigationItems } from '../config/navigation'
 import { useNotification } from '../composables/useNotification'

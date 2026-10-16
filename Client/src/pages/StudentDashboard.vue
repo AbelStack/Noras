@@ -4,8 +4,15 @@
     :navigationItems="navigationItems"
   >
     <div class="p-8">
-      <!-- Page Header -->
-      <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <!-- Loading Skeleton -->
+      <div v-if="isLoading" class="py-4">
+        <SkeletonLoader type="dashboard" />
+      </div>
+
+      <!-- Dashboard Content -->
+      <div v-else>
+        <!-- Page Header -->
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ user?.name }}!</h1>
           <p class="text-gray-600 mt-1">
@@ -136,6 +143,7 @@
         </div>
       </div>
     </div>
+  </div>
   </DashboardLayout>
 </template>
 
@@ -143,12 +151,14 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import { authService } from '../services/auth'
 import api from '../services/api'
 import { studentNavigationItems } from '../config/navigation'
 
 const router = useRouter()
 const user = authService.getUser()
+const isLoading = ref(true)
 const stats = ref({
   materials: 0,
   notes: 0,
@@ -160,6 +170,7 @@ const navigationItems = studentNavigationItems
 
 onMounted(async () => {
   try {
+    isLoading.value = true
     const response = await api.get('/learning/progress')
     if (response.data.status === 'success') {
       const data = response.data.data
@@ -172,6 +183,8 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Failed to fetch stats:', error)
+  } finally {
+    isLoading.value = false
   }
 })
 </script>

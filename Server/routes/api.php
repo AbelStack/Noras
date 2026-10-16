@@ -20,9 +20,11 @@ use App\Http\Controllers\Api\V1\BookmarkController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\StudyTaskController;
 use App\Http\Controllers\Api\V1\LearningHistoryController;
+use App\Http\Controllers\Api\V1\PublicStatsController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/health', [HealthController::class, 'index']);
+    Route::get('/public/stats', [PublicStatsController::class, 'index']);
 
     Route::get('/auth/campuses', [AuthController::class, 'campuses']);
     Route::get('/auth/departments', [AuthController::class, 'departments']);

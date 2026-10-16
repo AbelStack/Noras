@@ -4,9 +4,9 @@
     :navigationItems="navigationItems"
   >
     <div class="p-8">
-      <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center h-64">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      <!-- Loading State (Skeleton) -->
+      <div v-if="loading" class="py-4">
+        <SkeletonLoader type="dashboard" />
       </div>
 
       <!-- Error State -->
@@ -180,6 +180,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import { authService } from '../services/auth'
 import api from '../services/api'
 

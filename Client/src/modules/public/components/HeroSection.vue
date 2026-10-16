@@ -35,19 +35,45 @@
             </router-link>
           </div>
 
-          <div class="flex items-center space-x-8 pt-4">
-            <div class="flex items-center space-x-2 text-gray-600">
-              <BookOpen :size="20" class="text-blue-600" />
-              <span class="font-medium">{{ stats.materials }}+ Materials</span>
-            </div>
-            <div class="flex items-center space-x-2 text-gray-600">
-              <Users :size="20" class="text-blue-600" />
-              <span class="font-medium">{{ stats.students }}+ Students</span>
-            </div>
-            <div class="flex items-center space-x-2 text-gray-600">
-              <GraduationCap :size="20" class="text-blue-600" />
-              <span class="font-medium">{{ stats.courses }}+ Courses</span>
-            </div>
+          <div class="flex flex-wrap items-center gap-6 pt-4">
+            <!-- Skeleton state -->
+            <template v-if="loadingStats">
+              <div class="flex items-center space-x-2">
+                <div class="w-5 h-5 rounded-full bg-blue-200 animate-pulse"></div>
+                <div class="h-4 w-24 bg-gray-200 animate-pulse rounded-md"></div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-5 h-5 rounded-full bg-blue-200 animate-pulse"></div>
+                <div class="h-4 w-24 bg-gray-200 animate-pulse rounded-md"></div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-5 h-5 rounded-full bg-blue-200 animate-pulse"></div>
+                <div class="h-4 w-24 bg-gray-200 animate-pulse rounded-md"></div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-5 h-5 rounded-full bg-blue-200 animate-pulse"></div>
+                <div class="h-4 w-24 bg-gray-200 animate-pulse rounded-md"></div>
+              </div>
+            </template>
+            <!-- Real data loaded from database -->
+            <template v-else>
+              <div class="flex items-center space-x-2 text-gray-700">
+                <BookOpen :size="20" class="text-blue-600 flex-shrink-0" />
+                <span class="font-semibold text-sm">{{ stats.materials || 0 }}+ Materials</span>
+              </div>
+              <div class="flex items-center space-x-2 text-gray-700">
+                <Users :size="20" class="text-blue-600 flex-shrink-0" />
+                <span class="font-semibold text-sm">{{ stats.students || 0 }}+ Students</span>
+              </div>
+              <div class="flex items-center space-x-2 text-gray-700">
+                <GraduationCap :size="20" class="text-blue-600 flex-shrink-0" />
+                <span class="font-semibold text-sm">{{ stats.courses || 0 }}+ Courses</span>
+              </div>
+              <div class="flex items-center space-x-2 text-gray-700">
+                <Building2 :size="20" class="text-blue-600 flex-shrink-0" />
+                <span class="font-semibold text-sm">{{ stats.campuses || 3 }} Campuses</span>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -79,27 +105,37 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { BookOpen, Users, GraduationCap, Sparkles, ArrowRight, Brain, Trophy } from 'lucide-vue-next'
+import { BookOpen, Users, GraduationCap, Building2, Sparkles, ArrowRight, Brain, Trophy } from 'lucide-vue-next'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { publicService } from '../../../services/public'
 
 const canvasRef = ref(null)
 let scene, camera, renderer, model
 
-// TODO: Fetch from API/Database
+const loadingStats = ref(true)
 const stats = ref({
   materials: 0,
   students: 0,
-  courses: 0
+  courses: 0,
+  campuses: 0,
+  departments: 0,
 })
 
-// TODO: Replace with actual API call
-// Example: const fetchStats = async () => {
-//   const response = await fetch('/api/stats')
-//   stats.value = await response.json()
-// }
+const fetchRealStats = async () => {
+  try {
+    loadingStats.value = true
+    const data = await publicService.getStats()
+    stats.value = data
+  } catch (error) {
+    console.error('Failed to load landing stats:', error)
+  } finally {
+    loadingStats.value = false
+  }
+}
 
 onMounted(() => {
+  fetchRealStats()
   if (!canvasRef.value) return
 
   // Scene setup
