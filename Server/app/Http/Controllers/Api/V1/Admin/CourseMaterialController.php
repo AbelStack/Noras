@@ -5,43 +5,98 @@ namespace App\Http\Controllers\Api\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\CourseMaterial;
 use App\Models\CourseOffering;
+use App\Services\CourseMaterialStorageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class CourseMaterialController extends Controller
 {
-    private const MAX_FILE_SIZE = 52428800; // 50MB in bytes
-    private const ALLOWED_MIME_TYPES = ['application/pdf'];
-    private const PDF_MAGIC_BYTES = '%PDF';
+    protected CourseMaterialStorageService $storageService;
+
+    public function __construct(CourseMaterialStorageService $storageService)
+    {
+        $this->storageService = $storageService;
+    }
 
     public function index(Request $request)
     {
-        $query = CourseMaterial::with(['courseOffering.course', 'courseOffering.department', 'uploader:id,name,email']);
+        $query = CourseMaterial::with([
+            'courseOffering.course',
+            'courseOffering.department.university',
+            'uploader:id,name,email'
+        ]);
 
-        if ($request->has('course_offering_id')) {
+        if ($request->filled('course_offering_id')) {
             $query->where('course_offering_id', $request->course_offering_id);
         }
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        if ($request->has('uploaded_by')) {
+        if ($request->filled('uploaded_by')) {
             $query->where('uploaded_by', $request->uploaded_by);
         }
 
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('original_filename', 'like', "%{$search}%");
+        if ($request->filled('file_type')) {
+            $type = strtolower($request->file_type);
+            if ($type === 'pdf') {
+                $query->where(function ($q) {
+                    $q->where('mime_type', 'like', '%pdf%')
+                      ->orWhere('original_filename', 'like', '%.pdf');
+                });
+            } elseif ($type === 'ppt' || $type === 'pptx') {
+                $query->where(function ($q) {
+                    $q->where('mime_type', 'like', '%powerpoint%')
+                      ->orWhere('mime_type', 'like', '%presentation%')
+                      ->orWhere('original_filename', 'like', '%.ppt')
+                      ->orWhere('original_filename', 'like', '%.pptx');
+                });
+            }
+        }
+
+        // Filtering through relationship: course, department, university, study_year, semester
+        if ($request->filled('course_id') || $request->filled('department_id') || $request->filled('university_id') || $request->filled('study_year') || $request->filled('semester')) {
+            $query->whereHas('courseOffering', function ($offeringQuery) use ($request) {
+                if ($request->filled('course_id')) {
+                    $offeringQuery->where('course_id', $request->course_id);
+                }
+                if ($request->filled('department_id')) {
+                    $offeringQuery->where('department_id', $request->department_id);
+                }
+                if ($request->filled('study_year')) {
+                    $offeringQuery->where('study_year', $request->study_year);
+                }
+                if ($request->filled('semester')) {
+                    $offeringQuery->where('semester', $request->semester);
+                }
+                if ($request->filled('university_id')) {
+                    $offeringQuery->whereHas('department', function ($deptQuery) use ($request) {
+                        $deptQuery->where('university_id', $request->university_id);
+                    });
+                }
             });
         }
 
-        $materials = $query->orderBy('created_at', 'desc')
-            ->paginate(20);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('original_filename', 'like', "%{$search}%")
+                  ->orWhereHas('courseOffering.course', function ($cq) use ($search) {
+                      $cq->where('code', 'like', "%{$search}%")
+                         ->orWhere('title', 'like', "%{$search}%")
+                         ->orWhere('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('courseOffering.department', function ($dq) use ($search) {
+                      $dq->where('name', 'like', "%{$search}%")
+                         ->orWhere('code', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $perPage = (int) $request->input('per_page', 50);
+        $materials = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
@@ -60,65 +115,88 @@ class CourseMaterialController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'course_offering_id' => ['required', 'exists:course_offerings,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'file' => ['required', 'file', 'mimes:pdf', 'max:' . (self::MAX_FILE_SIZE / 1024)], // max in KB
+            'status' => ['sometimes', 'in:draft,published'],
+            'file' => ['required', 'file', 'max:' . (CourseMaterialStorageService::MAX_FILE_SIZE / 1024)],
+            'course_offering_id' => ['nullable', 'exists:course_offerings,id'],
+            'course_id' => ['required_without:course_offering_id', 'nullable', 'exists:courses,id'],
+            'department_id' => ['required_without:course_offering_id', 'nullable', 'exists:departments,id'],
+            'study_year' => ['required_without:course_offering_id', 'nullable', 'integer', 'min:1', 'max:8'],
+            'semester' => ['required_without:course_offering_id', 'nullable', 'in:1,2,both'],
+            'academic_year' => ['nullable', 'integer', 'min:2020', 'max:2035'],
         ]);
 
         $file = $request->file('file');
 
-        // Validate file signature
-        if (!$this->isValidPdf($file)) {
+        // Validate file signature and extension (PDF and PPT/PPTX)
+        $fileInfo = $this->storageService->validateAndIdentify($file);
+        if (!$fileInfo) {
+            $msg = in_array(strtolower($file->getClientOriginalExtension()), ['ppt', 'pptx'])
+                ? 'The uploaded file is not a valid PowerPoint presentation'
+                : 'The uploaded file is not a valid PDF';
             return response()->json([
                 'status' => 'error',
-                'message' => 'Invalid PDF file',
-                'errors' => ['file' => ['The uploaded file is not a valid PDF']],
+                'message' => $msg,
+                'errors' => ['file' => [$msg]],
             ], 422);
         }
 
-        // Validate course offering exists
-        $courseOffering = CourseOffering::find($validated['course_offering_id']);
+        // Resolve or create CourseOffering
+        if ($request->filled('course_offering_id')) {
+            $courseOffering = CourseOffering::find($validated['course_offering_id']);
+        } else {
+            $semesterVal = $request->semester === 'both' ? '1' : (string) $request->semester;
+            $courseOffering = CourseOffering::firstOrCreate([
+                'course_id' => $request->course_id,
+                'department_id' => $request->department_id,
+                'study_year' => $request->study_year,
+                'semester' => $semesterVal,
+            ], [
+                'academic_year' => $request->academic_year ?? 2026,
+                'is_active' => true,
+            ]);
+        }
+
         if (!$courseOffering) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Course offering not found',
-                'errors' => ['course_offering_id' => ['The selected course offering does not exist']],
+                'message' => 'Could not link course offering.',
+                'errors' => ['course_offering_id' => ['Course offering could not be determined']],
             ], 422);
         }
 
-        // Generate unique filename before transaction
-        $storedFilename = Str::uuid() . '.pdf';
-        $filePath = 'course-materials/' . $storedFilename;
-
-        // Store file first - fail fast before database transaction
+        // Store file first - writes to Cloudflare R2 and local disk
         try {
-            Storage::disk('local')->put($filePath, file_get_contents($file->getRealPath()));
+            $stored = $this->storageService->storeMaterialFile($file, $fileInfo['extension']);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to store file',
+                'message' => 'Failed to store file: ' . $e->getMessage(),
             ], 500);
         }
 
-        // Now attempt database transaction
         DB::beginTransaction();
         try {
             $material = CourseMaterial::create([
-                'course_offering_id' => $validated['course_offering_id'],
+                'course_offering_id' => $courseOffering->id,
                 'uploaded_by' => auth()->id(),
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
                 'original_filename' => $file->getClientOriginalName(),
-                'stored_filename' => $storedFilename,
-                'file_path' => $filePath,
-                'file_size' => $file->getSize(),
-                'mime_type' => $file->getMimeType(),
-                'status' => 'draft',
+                'stored_filename' => $stored['stored_filename'],
+                'file_path' => $stored['file_path'],
+                'file_size' => $stored['file_size'],
+                'mime_type' => $fileInfo['mime_type'],
+                'status' => $request->input('status', 'draft'),
                 'version' => 1,
             ]);
 
-            $material->load(['courseOffering.course', 'courseOffering.department', 'uploader:id,name,email']);
+            $material->load([
+                'courseOffering.course',
+                'courseOffering.department.university',
+                'uploader:id,name,email'
+            ]);
 
             DB::commit();
 
@@ -130,26 +208,45 @@ class CourseMaterialController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            // Clean up file since database operation failed
-            Storage::disk('local')->delete($filePath);
+
+            // Clean up file if database failed
+            $this->storageService->deleteFile($stored['file_path']);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to upload material',
+                'message' => 'Failed to save material record: ' . $e->getMessage(),
             ], 500);
         }
     }
 
     public function show($id)
     {
-        $material = CourseMaterial::with(['courseOffering.course', 'courseOffering.department', 'uploader:id,name,email', 'replaces'])
-            ->findOrFail($id);
+        $material = CourseMaterial::with([
+            'courseOffering.course',
+            'courseOffering.department.university',
+            'uploader:id,name,email',
+            'replaces'
+        ])->findOrFail($id);
 
         return response()->json([
             'status' => 'success',
             'data' => ['material' => $material],
         ]);
+    }
+
+    public function download($id)
+    {
+        $material = CourseMaterial::findOrFail($id);
+        $response = $this->storageService->download($material);
+
+        if (!$response) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Course material file not found on storage server',
+            ], 404);
+        }
+
+        return $response;
     }
 
     public function update(Request $request, $id)
@@ -159,10 +256,15 @@ class CourseMaterialController extends Controller
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'status' => ['sometimes', 'in:draft,published'],
         ]);
 
         $material->update($validated);
-        $material->load(['courseOffering.course', 'courseOffering.department', 'uploader:id,name,email']);
+        $material->load([
+            'courseOffering.course',
+            'courseOffering.department.university',
+            'uploader:id,name,email'
+        ]);
 
         return response()->json([
             'status' => 'success',
@@ -183,7 +285,11 @@ class CourseMaterialController extends Controller
         }
 
         $material->update(['status' => 'published']);
-        $material->load(['courseOffering.course', 'courseOffering.department', 'uploader:id,name,email']);
+        $material->load([
+            'courseOffering.course',
+            'courseOffering.department.university',
+            'uploader:id,name,email'
+        ]);
 
         return response()->json([
             'status' => 'success',
@@ -204,7 +310,11 @@ class CourseMaterialController extends Controller
         }
 
         $material->update(['status' => 'draft']);
-        $material->load(['courseOffering.course', 'courseOffering.department', 'uploader:id,name,email']);
+        $material->load([
+            'courseOffering.course',
+            'courseOffering.department.university',
+            'uploader:id,name,email'
+        ]);
 
         return response()->json([
             'status' => 'success',
@@ -216,40 +326,35 @@ class CourseMaterialController extends Controller
     public function replace(Request $request, $id)
     {
         $validated = $request->validate([
-            'file' => ['required', 'file', 'mimes:pdf', 'max:' . (self::MAX_FILE_SIZE / 1024)],
+            'file' => ['required', 'file', 'max:' . (CourseMaterialStorageService::MAX_FILE_SIZE / 1024)],
             'title' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $file = $request->file('file');
-
-        // Validate file signature
-        if (!$this->isValidPdf($file)) {
+        $fileInfo = $this->storageService->validateAndIdentify($file);
+        if (!$fileInfo) {
+            $msg = in_array(strtolower($file->getClientOriginalExtension()), ['ppt', 'pptx'])
+                ? 'The uploaded file is not a valid PowerPoint presentation'
+                : 'The uploaded file is not a valid PDF';
             return response()->json([
                 'status' => 'error',
-                'message' => 'Invalid PDF file',
-                'errors' => ['file' => ['The uploaded file is not a valid PDF']],
+                'message' => $msg,
+                'errors' => ['file' => [$msg]],
             ], 422);
         }
 
-        // Generate unique filename before transaction
-        $storedFilename = Str::uuid() . '.pdf';
-        $filePath = 'course-materials/' . $storedFilename;
-
-        // Store file first - fail fast before database transaction
         try {
-            Storage::disk('local')->put($filePath, file_get_contents($file->getRealPath()));
+            $stored = $this->storageService->storeMaterialFile($file, $fileInfo['extension']);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to store file',
+                'message' => 'Failed to store replacement file: ' . $e->getMessage(),
             ], 500);
         }
 
-        // Now attempt database transaction with row locking
         DB::beginTransaction();
         try {
-            // Lock the old material row to prevent concurrent replacements
             $oldMaterial = CourseMaterial::where('id', $id)->lockForUpdate()->firstOrFail();
 
             $newMaterial = CourseMaterial::create([
@@ -258,34 +363,37 @@ class CourseMaterialController extends Controller
                 'title' => $validated['title'] ?? $oldMaterial->title,
                 'description' => $validated['description'] ?? $oldMaterial->description,
                 'original_filename' => $file->getClientOriginalName(),
-                'stored_filename' => $storedFilename,
-                'file_path' => $filePath,
-                'file_size' => $file->getSize(),
-                'mime_type' => $file->getMimeType(),
+                'stored_filename' => $stored['stored_filename'],
+                'file_path' => $stored['file_path'],
+                'file_size' => $stored['file_size'],
+                'mime_type' => $fileInfo['mime_type'],
                 'status' => 'draft',
                 'version' => $oldMaterial->version + 1,
                 'replaces_material_id' => $oldMaterial->id,
             ]);
 
-            $newMaterial->load(['courseOffering.course', 'courseOffering.department', 'uploader:id,name,email', 'replaces']);
+            $newMaterial->load([
+                'courseOffering.course',
+                'courseOffering.department.university',
+                'uploader:id,name,email',
+                'replaces'
+            ]);
 
             DB::commit();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Course material replaced successfully. New version created as draft.',
+                'message' => 'Course material replaced successfully',
                 'data' => ['material' => $newMaterial],
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            // Clean up file since database operation failed
-            Storage::disk('local')->delete($filePath);
+            $this->storageService->deleteFile($stored['file_path']);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to replace material',
+                'message' => 'Failed to replace material: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -310,10 +418,8 @@ class CourseMaterialController extends Controller
             // Delete the material record
             $material->delete();
 
-            // Then delete the file
-            if (Storage::disk('local')->exists($filePath)) {
-                Storage::disk('local')->delete($filePath);
-            }
+            // Delete file from R2 and local
+            $this->storageService->deleteFile($filePath);
 
             DB::commit();
 
@@ -329,38 +435,6 @@ class CourseMaterialController extends Controller
                 'status' => 'error',
                 'message' => 'Failed to delete material: ' . $e->getMessage(),
             ], 500);
-        }
-    }
-
-    /**
-     * Validate PDF file signature by checking magic bytes.
-     * 
-     * SECURITY NOTE: This validation only verifies that the file begins with '%PDF' header.
-     * It does NOT guarantee the file is safe, complete, or non-malicious. This check:
-     * - Prevents upload of files renamed to .pdf that are not PDFs
-     * - Does NOT detect embedded malware, exploits, or malformed PDFs
-     * - Does NOT validate PDF structure beyond the first 4 bytes
-     * 
-     * For production use, consider:
-     * - Malware scanning (ClamAV, VirusTotal API, or commercial solutions)
-     * - PDF structure validation libraries
-     * - Restricted admin review before publication
-     * - Sandboxed rendering environments
-     * - Content Security Policy for downloads
-     * 
-     * @param \Illuminate\Http\UploadedFile $file
-     * @return bool True if file begins with PDF magic bytes
-     */
-    private function isValidPdf($file): bool
-    {
-        try {
-            $handle = fopen($file->getRealPath(), 'r');
-            $header = fread($handle, 4);
-            fclose($handle);
-
-            return strpos($header, self::PDF_MAGIC_BYTES) === 0;
-        } catch (\Exception $e) {
-            return false;
         }
     }
 }

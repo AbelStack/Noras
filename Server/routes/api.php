@@ -129,6 +129,7 @@ Route::prefix('v1')->group(function () {
             Route::get('materials', [AdminCourseMaterialController::class, 'index']);
             Route::post('materials', [AdminCourseMaterialController::class, 'store']);
             Route::get('materials/{id}', [AdminCourseMaterialController::class, 'show']);
+            Route::get('materials/{id}/download', [AdminCourseMaterialController::class, 'download']);
             Route::put('materials/{id}', [AdminCourseMaterialController::class, 'update']);
             Route::delete('materials/{id}', [AdminCourseMaterialController::class, 'destroy']);
             Route::post('materials/{id}/publish', [AdminCourseMaterialController::class, 'publish']);

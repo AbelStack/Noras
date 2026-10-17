@@ -61,13 +61,24 @@
         >
           <div class="flex-1 min-w-0">
             <div class="flex items-start gap-4 mb-2">
-              <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div v-if="isPpt(material)" class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs tracking-wider shadow-2xs">
+                PPT
+              </div>
+              <div v-else class="w-10 h-10 rounded-xl bg-red-50 text-red-600 border border-red-200 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>
               <div class="min-w-0">
-                <h3 class="text-base font-bold text-gray-900 truncate" :title="material.title">{{ material.title }}</h3>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base font-bold text-gray-900 truncate" :title="material.title">{{ material.title }}</h3>
+                  <span 
+                    class="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase"
+                    :class="isPpt(material) ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'"
+                  >
+                    {{ isPpt(material) ? 'PPT' : 'PDF' }}
+                  </span>
+                </div>
                 <p class="text-xs text-gray-400 mt-0.5">{{ material.original_filename }}</p>
               </div>
             </div>
@@ -97,7 +108,10 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span>{{ downloadingId === material.id ? 'Downloading...' : 'Download PDF' }}</span>
+              <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>{{ downloadingId === material.id ? 'Downloading...' : (isPpt(material) ? 'Download PPT' : 'Download PDF') }}</span>
             </button>
             
             <!-- Generate Notes Button -->
@@ -259,6 +273,13 @@ const generateQuiz = async (material) => {
   } finally {
     generatingQuizId.value = null
   }
+}
+
+const isPpt = (material) => {
+  if (!material) return false
+  const name = (material.original_filename || '').toLowerCase()
+  const mime = (material.mime_type || '').toLowerCase()
+  return name.endsWith('.ppt') || name.endsWith('.pptx') || mime.includes('presentation') || mime.includes('powerpoint')
 }
 
 const formatFileSize = (bytes) => {

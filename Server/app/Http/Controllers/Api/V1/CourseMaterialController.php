@@ -4,14 +4,21 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\CourseMaterial;
+use App\Services\CourseMaterialStorageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class CourseMaterialController extends Controller
 {
+    protected CourseMaterialStorageService $storageService;
+
+    public function __construct(CourseMaterialStorageService $storageService)
+    {
+        $this->storageService = $storageService;
+    }
+
     public function index(Request $request)
     {
-        $query = CourseMaterial::with(['courseOffering.course', 'courseOffering.department'])
+        $query = CourseMaterial::with(['courseOffering.course', 'courseOffering.department.university'])
             ->where('status', 'published');
 
         if ($request->has('course_offering_id')) {
@@ -45,7 +52,7 @@ class CourseMaterialController extends Controller
 
     public function show($id)
     {
-        $material = CourseMaterial::with(['courseOffering.course', 'courseOffering.department'])
+        $material = CourseMaterial::with(['courseOffering.course', 'courseOffering.department.university'])
             ->where('status', 'published')
             ->findOrFail($id);
 
@@ -58,21 +65,15 @@ class CourseMaterialController extends Controller
     public function download($id)
     {
         $material = CourseMaterial::where('status', 'published')->findOrFail($id);
+        $response = $this->storageService->download($material);
 
-        if (!Storage::disk('local')->exists($material->file_path)) {
+        if (!$response) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'File not found',
             ], 404);
         }
 
-        return Storage::disk('local')->download(
-            $material->file_path,
-            $material->original_filename,
-            [
-                'Content-Type' => $material->mime_type,
-                'Content-Disposition' => 'attachment; filename="' . $material->original_filename . '"',
-            ]
-        );
+        return $response;
     }
 }

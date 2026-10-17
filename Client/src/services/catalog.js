@@ -56,11 +56,34 @@ export const catalogService = {
     return response.data.data.material
   },
 
-  async downloadMaterial(id) {
-    // Request returns file blob, not JSON
+  async getCourseMaterials(offeringId, params = {}) {
+    return this.getMaterials({ course_offering_id: offeringId, ...params })
+  },
+
+  async downloadMaterial(id, defaultFilename = 'document') {
     const response = await api.get(`/materials/${id}/download`, {
       responseType: 'blob',
     })
+
+    let filename = defaultFilename
+    const disposition = response.headers['content-disposition'] || response.headers['Content-Disposition']
+    if (disposition && disposition.indexOf('filename=') !== -1) {
+      const match = disposition.match(/filename="?([^";]+)"?/i)
+      if (match && match[1]) {
+        filename = match[1]
+      }
+    }
+
+    const blob = new Blob([response.data], { type: response.headers['content-type'] })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+
     return response
   },
 }

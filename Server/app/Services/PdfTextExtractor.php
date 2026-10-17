@@ -6,6 +6,7 @@ use App\Models\CourseMaterial;
 use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Parser;
 use Exception;
+use ZipArchive;
 
 class PdfTextExtractor
 {
@@ -17,7 +18,7 @@ class PdfTextExtractor
     }
 
     /**
-     * Extract text from a PDF course material.
+     * Extract text from a course material (PDF or PPTX).
      * 
      * @param CourseMaterial $material
      * @return string
@@ -30,35 +31,92 @@ class PdfTextExtractor
             throw new Exception('Cannot extract text from unpublished material');
         }
 
-        // Get the file path
         $filePath = $material->file_path;
-        
-        if (!Storage::disk('local')->exists($filePath)) {
-            throw new Exception('Course material file not found');
+        $tempPath = null;
+        $fullPath = null;
+
+        // Check local disk first
+        if (Storage::disk('local')->exists($filePath)) {
+            $fullPath = Storage::disk('local')->path($filePath);
+        } else {
+            // Check Cloudflare R2
+            try {
+                if (Storage::disk('r2')->exists($filePath)) {
+                    $content = Storage::disk('r2')->get($filePath);
+                    $tempPath = tempnam(sys_get_temp_dir(), 'noras_doc_');
+                    file_put_contents($tempPath, $content);
+                    $fullPath = $tempPath;
+                }
+            } catch (\Exception $e) {
+                // fall through
+            }
         }
 
-        // Get the full system path
-        $fullPath = Storage::disk('local')->path($filePath);
+        if (!$fullPath || !file_exists($fullPath)) {
+            throw new Exception('Course material file not found on storage server');
+        }
 
         try {
+            $extension = strtolower(pathinfo($material->original_filename, PATHINFO_EXTENSION));
+            $isPpt = in_array($extension, ['ppt', 'pptx']) || str_contains($material->mime_type ?? '', 'presentation');
+
+            if ($isPpt) {
+                return $this->extractPptxText($fullPath);
+            }
+
             // Parse the PDF
             $pdf = $this->parser->parseFile($fullPath);
-            
-            // Extract text from all pages
             $text = $pdf->getText();
-            
-            // Clean up the text
             $text = $this->cleanText($text);
-            
+
             if (empty(trim($text))) {
                 throw new Exception('No text could be extracted from the PDF');
             }
-            
+
             return $text;
-            
+
         } catch (Exception $e) {
-            throw new Exception('Failed to extract text from PDF: ' . $e->getMessage());
+            throw new Exception('Failed to extract text from document: ' . $e->getMessage());
+        } finally {
+            if ($tempPath && file_exists($tempPath)) {
+                @unlink($tempPath);
+            }
         }
+    }
+
+    /**
+     * Extract slide text from a PowerPoint presentation (PPTX format).
+     */
+    private function extractPptxText(string $fullPath): string
+    {
+        $zip = new ZipArchive();
+        if ($zip->open($fullPath) !== true) {
+            throw new Exception('Could not open presentation file for text extraction.');
+        }
+
+        $allText = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            if (preg_match('#^ppt/slides/slide\d+\.xml$#i', $name)) {
+                $xmlContent = $zip->getFromIndex($i);
+                if ($xmlContent && preg_match_all('#<a:t[^>]*>(.*?)</a:t>#is', $xmlContent, $matches)) {
+                    $slideText = implode(' ', $matches[1]);
+                    if (!empty(trim($slideText))) {
+                        $allText[] = html_entity_decode(trim($slideText));
+                    }
+                }
+            }
+        }
+        $zip->close();
+
+        $text = implode("\n\n", $allText);
+        $clean = $this->cleanText($text);
+
+        if (empty($clean)) {
+            throw new Exception('No readable text could be extracted from the presentation slides');
+        }
+
+        return $clean;
     }
 
     /**
@@ -69,20 +127,13 @@ class PdfTextExtractor
      */
     private function cleanText(string $text): string
     {
-        // Normalize line breaks
         $text = str_replace(["\r\n", "\r"], "\n", $text);
-        
-        // Remove excessive blank lines (more than 2 consecutive newlines)
         $text = preg_replace("/\n{3,}/", "\n\n", $text);
-        
-        // Trim whitespace from each line
         $lines = explode("\n", $text);
         $lines = array_map('trim', $lines);
         $text = implode("\n", $lines);
-        
-        // Remove any remaining excessive spaces
         $text = preg_replace('/ {2,}/', ' ', $text);
-        
+
         return trim($text);
     }
 
@@ -98,13 +149,13 @@ class PdfTextExtractor
     }
 
     /**
-     * Estimate token count (rough approximation: 1 token ≈ 4 characters).
+     * Estimate token count from text (approximately 4 characters per token).
      * 
      * @param string $text
      * @return int
      */
     public function estimateTokenCount(string $text): int
     {
-        return (int) ceil($this->getCharacterCount($text) / 4);
+        return (int) ceil(mb_strlen($text, 'UTF-8') / 4);
     }
 }
