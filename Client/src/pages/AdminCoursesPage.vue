@@ -142,19 +142,30 @@
                       {{ course.description }}
                     </div>
                   </td>
-                  <td class="px-6 py-4">
-                    <div v-if="course.offerings && course.offerings.length > 0" class="flex flex-wrap gap-1.5 max-w-sm">
-                      <span 
-                        v-for="off in getCourseOfferingsSummary(course)" 
-                        :key="off.key"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-100 shadow-xs"
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <button
+                      v-if="course.offerings && course.offerings.length > 0"
+                      type="button"
+                      @click="viewCurriculumDetails(course)"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-xl border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
+                      title="View department & curriculum details"
+                    >
+                      <svg class="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>View</span>
+                    </button>
+                    <div v-else class="flex items-center gap-2">
+                      <span class="text-xs text-gray-400 italic">Not assigned</span>
+                      <button
+                        type="button"
+                        @click="openEditModal(course)"
+                        class="text-xs font-semibold text-primary-600 hover:text-primary-700 underline cursor-pointer"
                       >
-                        <span class="font-semibold">{{ off.deptName }}</span>
-                        <span class="text-indigo-300">|</span>
-                        <span>Yr {{ off.years.join(', ') }} (S{{ off.semesters.join(',') }})</span>
-                      </span>
+                        + Assign
+                      </button>
                     </div>
-                    <span v-else class="text-xs text-gray-400 italic">No department assigned</span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="text-xs font-medium text-gray-700">
@@ -170,18 +181,62 @@
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <button 
-                      @click="openEditModal(course)" 
-                      class="text-xs font-medium text-primary-600 hover:text-primary-800 px-2.5 py-1 rounded-md hover:bg-primary-50 transition-colors mr-2"
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      @click="deleteCourse(course)" 
-                      class="text-xs font-medium text-red-600 hover:text-red-800 px-2.5 py-1 rounded-md hover:bg-red-50 transition-colors"
-                    >
-                      Delete
-                    </button>
+                    <div class="relative inline-block text-left" @click.stop>
+                      <button 
+                        type="button"
+                        @click.stop="toggleActionMenu(course.id)" 
+                        class="p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                        title="Actions"
+                      >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                      </button>
+
+                      <!-- 3-Dots Dropdown Menu -->
+                      <div 
+                        v-if="activeActionMenuId === course.id"
+                        @click.stop
+                        v-click-outside="() => activeActionMenuId = null"
+                        class="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
+                      >
+                        <div class="py-1">
+                          <button 
+                            type="button"
+                            @click="viewCurriculumDetails(course)" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <span>View Curriculum</span>
+                          </button>
+                          <button 
+                            type="button"
+                            @click="openEditModal(course)" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>Edit Course</span>
+                          </button>
+                        </div>
+                        <div class="py-1">
+                          <button 
+                            type="button"
+                            @click="deleteCourse(course)" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span>Delete Course</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -296,7 +351,7 @@
                   >
                     <option value="">-- No Department (General Course) --</option>
                     <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                      {{ dept.name }} {{ dept.university ? `(${dept.university.name})` : '' }}
+                      {{ dept.name }} ({{ dept.total_years || 4 }} Yrs) {{ dept.university ? `[${dept.university.name}]` : '' }}
                     </option>
                   </select>
                   <p class="text-[11px] text-gray-400 mt-1">
@@ -305,39 +360,41 @@
                 </div>
 
                 <!-- Study Years & Semester (shown when department selected) -->
-                <div v-if="form.department_id" class="p-4 bg-gray-50/90 rounded-2xl border border-gray-200 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Study Year(s) <span class="text-red-500">*</span>
-                    </label>
-                    <div class="flex items-center gap-1.5">
+                <div v-if="form.department_id" class="p-4 bg-gray-50/90 rounded-2xl border border-gray-200 space-y-3.5">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Study Year(s) <span class="text-red-500">*</span>
+                      </label>
+                      <p class="text-[11px] text-gray-500 mt-0.5">
+                        {{ selectedDept?.name }} is a {{ selectedDeptTotalYears }}-year program.
+                      </p>
+                    </div>
+
+                    <!-- Dynamic Presets -->
+                    <div class="flex flex-wrap items-center gap-1.5">
                       <button 
                         type="button" 
-                        @click="form.study_years = [2, 3, 4, 5]" 
-                        class="px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors font-semibold text-[11px]"
+                        @click="selectAllYears" 
+                        class="px-2 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors font-semibold text-[11px]"
                       >
-                        Years 2–5 (SE)
+                        All (1–{{ selectedDeptTotalYears }})
                       </button>
                       <button 
+                        v-if="selectedDeptTotalYears >= 2"
                         type="button" 
-                        @click="form.study_years = [2, 3, 4]" 
-                        class="px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors font-semibold text-[11px]"
+                        @click="selectPostFreshman" 
+                        class="px-2 py-1 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors font-semibold text-[11px]"
                       >
-                        Years 2–4 (CS)
-                      </button>
-                      <button 
-                        type="button" 
-                        @click="form.study_years = [1, 2, 3, 4, 5]" 
-                        class="px-2 py-0.5 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors font-semibold text-[11px]"
-                      >
-                        All
+                        Years 2–{{ selectedDeptTotalYears }} (Major)
                       </button>
                     </div>
                   </div>
 
+                  <!-- Year Selection Checkboxes -->
                   <div class="flex flex-wrap gap-2">
                     <label 
-                      v-for="yr in [1, 2, 3, 4, 5]" 
+                      v-for="yr in availableStudyYears" 
                       :key="yr"
                       :class="[
                         'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all select-none',
@@ -358,10 +415,6 @@
                       </svg>
                     </label>
                   </div>
-
-                  <p class="text-[11px] text-gray-500">
-                    Software Engineering spans Years 2 to 5; Computer Science spans Years 2 to 4.
-                  </p>
 
                   <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200">
                     <div>
@@ -428,6 +481,152 @@
         </div>
       </div>
     </transition>
+
+    <!-- Course Curriculum Details Modal -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showCurriculumModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeCurriculumModal"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div 
+            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100"
+            @click.stop
+          >
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/60">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center font-mono font-bold text-sm">
+                  {{ curriculumCourse?.code }}
+                </div>
+                <div>
+                  <h3 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">
+                    {{ curriculumCourse?.title || curriculumCourse?.name }}
+                  </h3>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-xs text-gray-500 font-medium">
+                      {{ curriculumCourse?.credit_hours ?? curriculumCourse?.credits ?? 3 }} Credit Hours
+                    </span>
+                    <span class="text-gray-300">&bull;</span>
+                    <span 
+                      class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                      :class="curriculumCourse?.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'"
+                    >
+                      {{ curriculumCourse?.is_active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button @click="closeCurriculumModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Department Curriculum Breakdown</h4>
+                  <p class="text-xs text-gray-400 mt-0.5">Departments, academic study years, and semesters where this course is taught</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-primary-50 text-primary-700 border border-primary-100">
+                  {{ curriculumCourse?.offerings?.length || 0 }} Offerings
+                </span>
+              </div>
+
+              <!-- Offerings Breakdown Cards -->
+              <div v-if="curriculumCourse?.offerings && curriculumCourse.offerings.length > 0" class="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100 max-h-80 overflow-y-auto">
+                <div 
+                  v-for="(offering, index) in curriculumCourse.offerings" 
+                  :key="offering.id || index"
+                  class="p-4 hover:bg-gray-50/75 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                >
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-sm text-gray-900">
+                        {{ offering.department?.name || 'Department' }}
+                      </span>
+                      <span v-if="offering.department?.total_years" class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        {{ offering.department.total_years }} Yrs Degree
+                      </span>
+                    </div>
+                    <p class="text-xs text-gray-500">
+                      Campus: <span class="font-medium text-gray-700">{{ offering.department?.university?.name || 'Campus' }}</span>
+                      <span v-if="offering.department?.code" class="text-gray-400"> ({{ offering.department.code }})</span>
+                    </p>
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100 shadow-2xs">
+                      Year {{ offering.study_year }}
+                    </span>
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100 shadow-2xs">
+                      Semester {{ offering.semester }}
+                    </span>
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-600">
+                      AY {{ offering.academic_year || 2026 }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty Offerings State -->
+              <div v-else class="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-400 mx-auto flex items-center justify-center mb-2">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">No Department Curriculum Assigned</p>
+                <p class="text-xs text-gray-400 mt-1 mb-4">This course is not yet linked to a specific department study year or semester.</p>
+                <button
+                  type="button"
+                  @click="editFromCurriculumModal"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-xs font-semibold rounded-xl hover:bg-primary-700 transition-colors shadow-xs"
+                >
+                  Assign to Department
+                </button>
+              </div>
+
+              <!-- Course description if available -->
+              <div v-if="curriculumCourse?.description" class="p-3.5 bg-gray-50/80 rounded-xl border border-gray-100 text-xs text-gray-600">
+                <p class="font-semibold text-gray-700 mb-1">Course Description:</p>
+                <p class="leading-relaxed">{{ curriculumCourse.description }}</p>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+              <button
+                type="button"
+                @click="editFromCurriculumModal"
+                class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-primary-600 bg-primary-50 rounded-xl hover:bg-primary-100 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span>Edit Curriculum</span>
+              </button>
+              <button
+                type="button"
+                @click="closeCurriculumModal"
+                class="px-4 py-2 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </DashboardLayout>
 </template>
 
@@ -455,6 +654,28 @@ const editingId = ref(null)
 const saving = ref(false)
 const formError = ref('')
 
+const activeActionMenuId = ref(null)
+const showCurriculumModal = ref(false)
+const curriculumCourse = ref(null)
+
+const vClickOutside = {
+  mounted(el, binding) {
+    el._clickOutsideHandler = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value(event)
+      }
+    }
+    setTimeout(() => {
+      document.addEventListener('click', el._clickOutsideHandler)
+    }, 0)
+  },
+  unmounted(el) {
+    if (el._clickOutsideHandler) {
+      document.removeEventListener('click', el._clickOutsideHandler)
+    }
+  }
+}
+
 const form = ref({
   code: '',
   title: '',
@@ -465,6 +686,20 @@ const form = ref({
   study_years: [2],
   semester: '1',
   academic_year: 2026,
+})
+
+const selectedDept = computed(() => {
+  if (!form.value.department_id) return null
+  return departments.value.find(d => d.id === form.value.department_id) || null
+})
+
+const selectedDeptTotalYears = computed(() => {
+  return selectedDept.value?.total_years || 4
+})
+
+const availableStudyYears = computed(() => {
+  const total = selectedDeptTotalYears.value
+  return Array.from({ length: total }, (_, i) => i + 1)
 })
 
 const navigationItems = [
@@ -524,29 +759,40 @@ const fetchDepartments = async () => {
   }
 }
 
-const getCourseOfferingsSummary = (course) => {
-  if (!course.offerings || course.offerings.length === 0) return []
-  const depts = {}
-  course.offerings.forEach(off => {
-    const deptName = off.department?.name || 'Department'
-    const key = off.department_id || deptName
-    if (!depts[key]) {
-      depts[key] = {
-        key,
-        deptName,
-        years: new Set(),
-        semesters: new Set(),
-      }
-    }
-    if (off.study_year) depts[key].years.add(off.study_year)
-    if (off.semester) depts[key].semesters.add(off.semester)
-  })
-  return Object.values(depts).map(d => ({
-    key: d.key,
-    deptName: d.deptName,
-    years: Array.from(d.years).sort((a, b) => a - b),
-    semesters: Array.from(d.semesters).sort(),
-  }))
+const toggleActionMenu = (courseId) => {
+  activeActionMenuId.value = activeActionMenuId.value === courseId ? null : courseId
+}
+
+const viewCurriculumDetails = (course) => {
+  activeActionMenuId.value = null
+  curriculumCourse.value = course
+  showCurriculumModal.value = true
+}
+
+const closeCurriculumModal = () => {
+  showCurriculumModal.value = false
+  curriculumCourse.value = null
+}
+
+const editFromCurriculumModal = () => {
+  const targetCourse = curriculumCourse.value
+  closeCurriculumModal()
+  if (targetCourse) {
+    openEditModal(targetCourse)
+  }
+}
+
+const selectAllYears = () => {
+  form.value.study_years = [...availableStudyYears.value]
+}
+
+const selectPostFreshman = () => {
+  const total = selectedDeptTotalYears.value
+  if (total >= 2) {
+    form.value.study_years = Array.from({ length: total - 1 }, (_, i) => i + 2)
+  } else {
+    form.value.study_years = [1]
+  }
 }
 
 const onDepartmentSelect = () => {
@@ -555,21 +801,16 @@ const onDepartmentSelect = () => {
     return
   }
 
-  const selectedDept = departments.value.find(d => d.id === form.value.department_id)
-  if (selectedDept) {
-    const nameLower = selectedDept.name.toLowerCase()
-    const codeLower = (selectedDept.code || '').toLowerCase()
-    if (nameLower.includes('software') || codeLower === 'se') {
-      form.value.study_years = [2, 3, 4, 5]
-    } else if (nameLower.includes('computer') || codeLower === 'cs') {
-      form.value.study_years = [2, 3, 4]
-    } else {
-      form.value.study_years = [2]
-    }
+  const total = selectedDeptTotalYears.value
+  if (total >= 2) {
+    form.value.study_years = Array.from({ length: total - 1 }, (_, i) => i + 2)
+  } else {
+    form.value.study_years = [1]
   }
 }
 
 const openAddModal = () => {
+  activeActionMenuId.value = null
   isEditing.value = false
   editingId.value = null
   form.value = {
@@ -588,6 +829,7 @@ const openAddModal = () => {
 }
 
 const openEditModal = (course) => {
+  activeActionMenuId.value = null
   isEditing.value = true
   editingId.value = course.id
   
@@ -672,6 +914,7 @@ const saveCourse = async () => {
 }
 
 const deleteCourse = async (course) => {
+  activeActionMenuId.value = null
   const confirmed = await notify.confirm({
     title: `Delete Course "${course.code}"?`,
     message: `Are you sure you want to permanently delete "${course.title || course.code}"? Associated offerings and course materials will be removed.`,

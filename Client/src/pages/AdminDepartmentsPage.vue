@@ -109,6 +109,7 @@
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Department Name</th>
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Campus</th>
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Code</th>
+                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Duration</th>
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                   <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -133,6 +134,14 @@
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs">
+                      <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {{ dept.total_years || 4 }} Years
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
                     <span 
                       class="px-2.5 py-1 text-xs font-semibold rounded-full"
                       :class="dept.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-700 border border-gray-200'"
@@ -141,18 +150,51 @@
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <button 
-                      @click="openEditModal(dept)" 
-                      class="text-xs font-medium text-primary-600 hover:text-primary-800 px-2.5 py-1 rounded-md hover:bg-primary-50 transition-colors mr-2"
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      @click="deleteDepartment(dept)" 
-                      class="text-xs font-medium text-red-600 hover:text-red-800 px-2.5 py-1 rounded-md hover:bg-red-50 transition-colors"
-                    >
-                      Delete
-                    </button>
+                    <div class="relative inline-block text-left" @click.stop>
+                      <button 
+                        type="button"
+                        @click.stop="toggleActionMenu(dept.id)" 
+                        class="p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                        title="Actions"
+                      >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                      </button>
+
+                      <!-- 3-Dots Dropdown Menu -->
+                      <div 
+                        v-if="activeActionMenuId === dept.id"
+                        @click.stop
+                        v-click-outside="() => activeActionMenuId = null"
+                        class="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
+                      >
+                        <div class="py-1">
+                          <button 
+                            type="button"
+                            @click="openEditModal(dept)" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>Edit Department</span>
+                          </button>
+                        </div>
+                        <div class="py-1">
+                          <button 
+                            type="button"
+                            @click="deleteDepartment(dept)" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span>Delete Department</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -246,6 +288,32 @@
                 <p class="text-xs text-gray-400 mt-1">Unique short code within the selected campus.</p>
               </div>
 
+              <!-- Program Duration (Total Years) -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                  Program Duration (Total Years) <span class="text-red-500">*</span>
+                </label>
+                <div class="grid grid-cols-5 gap-2">
+                  <button
+                    v-for="yr in [3, 4, 5, 6, 7]"
+                    :key="yr"
+                    type="button"
+                    @click="form.total_years = yr"
+                    :class="[
+                      'py-2 rounded-xl text-xs font-bold border transition-all text-center',
+                      form.total_years === yr
+                        ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-primary-400'
+                    ]"
+                  >
+                    {{ yr }} Yrs
+                  </button>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1.5">
+                  Standard: 4 Years (CS, IT), 5 Years (Software Engineering, Law), 7 Years (Medicine).
+                </p>
+              </div>
+
               <!-- Active Status -->
               <div class="flex items-center gap-3 pt-2">
                 <input 
@@ -311,10 +379,35 @@ const editingId = ref(null)
 const saving = ref(false)
 const formError = ref('')
 
+const activeActionMenuId = ref(null)
+
+const vClickOutside = {
+  mounted(el, binding) {
+    el._clickOutsideHandler = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value(event)
+      }
+    }
+    setTimeout(() => {
+      document.addEventListener('click', el._clickOutsideHandler)
+    }, 0)
+  },
+  unmounted(el) {
+    if (el._clickOutsideHandler) {
+      document.removeEventListener('click', el._clickOutsideHandler)
+    }
+  }
+}
+
+const toggleActionMenu = (deptId) => {
+  activeActionMenuId.value = activeActionMenuId.value === deptId ? null : deptId
+}
+
 const form = ref({
   university_id: null,
   name: '',
   code: '',
+  total_years: 4,
   is_active: true,
 })
 
@@ -370,12 +463,14 @@ const fetchDepartments = async () => {
 }
 
 const openAddModal = () => {
+  activeActionMenuId.value = null
   isEditing.value = false
   editingId.value = null
   form.value = {
     university_id: campuses.value.length > 0 ? campuses.value[0].id : null,
     name: '',
     code: '',
+    total_years: 4,
     is_active: true,
   }
   formError.value = ''
@@ -383,12 +478,14 @@ const openAddModal = () => {
 }
 
 const openEditModal = (dept) => {
+  activeActionMenuId.value = null
   isEditing.value = true
   editingId.value = dept.id
   form.value = {
     university_id: dept.university_id,
     name: dept.name,
     code: dept.code,
+    total_years: dept.total_years || 4,
     is_active: Boolean(dept.is_active),
   }
   formError.value = ''
@@ -418,6 +515,7 @@ const saveDepartment = async () => {
       university_id: form.value.university_id,
       name: form.value.name.trim(),
       code: form.value.code.trim().toUpperCase(),
+      total_years: Number(form.value.total_years) || 4,
       is_active: form.value.is_active,
     }
 
@@ -447,6 +545,7 @@ const saveDepartment = async () => {
 }
 
 const deleteDepartment = async (dept) => {
+  activeActionMenuId.value = null
   const confirmed = await notify.confirm({
     title: `Delete Department "${dept.name}"?`,
     message: 'Are you sure you want to delete this department? Courses and offerings linked to this department may be affected.',

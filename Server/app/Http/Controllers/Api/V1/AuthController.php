@@ -38,7 +38,7 @@ class AuthController extends Controller
     public function departments(Request $request)
     {
         $query = Department::where('is_active', true)
-            ->select(['id', 'university_id', 'name', 'code'])
+            ->select(['id', 'university_id', 'name', 'code', 'total_years'])
             ->orderBy('name');
 
         if ($request->filled('university_id')) {

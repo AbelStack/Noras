@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['university_id', 'name', 'code', 'is_active'])]
+#[Fillable(['university_id', 'name', 'code', 'total_years', 'is_active'])]
 class Department extends Model
 {
     use HasFactory;
@@ -15,6 +15,7 @@ class Department extends Model
     {
         return [
             'is_active' => 'boolean',
+            'total_years' => 'integer',
         ];
     }
 

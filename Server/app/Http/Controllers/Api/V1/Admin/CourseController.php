@@ -62,9 +62,9 @@ class CourseController extends Controller
             'credit_hours' => ['required', 'integer', 'min:1', 'max:10'],
             'is_active' => ['boolean'],
             'department_id' => ['nullable', 'exists:departments,id'],
-            'study_year' => ['nullable', 'integer', 'min:1', 'max:6'],
+            'study_year' => ['nullable', 'integer', 'min:1', 'max:8'],
             'study_years' => ['nullable', 'array'],
-            'study_years.*' => ['integer', 'min:1', 'max:6'],
+            'study_years.*' => ['integer', 'min:1', 'max:8'],
             'semester' => ['nullable', 'in:1,2,both'],
             'academic_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
         ]);
@@ -136,9 +136,9 @@ class CourseController extends Controller
             'credit_hours' => ['sometimes', 'integer', 'min:1', 'max:10'],
             'is_active' => ['boolean'],
             'department_id' => ['nullable', 'exists:departments,id'],
-            'study_year' => ['nullable', 'integer', 'min:1', 'max:6'],
+            'study_year' => ['nullable', 'integer', 'min:1', 'max:8'],
             'study_years' => ['nullable', 'array'],
-            'study_years.*' => ['integer', 'min:1', 'max:6'],
+            'study_years.*' => ['integer', 'min:1', 'max:8'],
             'semester' => ['nullable', 'in:1,2,both'],
             'academic_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
         ]);

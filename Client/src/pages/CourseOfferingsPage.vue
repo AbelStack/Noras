@@ -197,15 +197,12 @@ const searchQuery = ref('')
 
 const curriculumSubtitle = computed(() => {
   if (!department.value) return 'Curriculum and semester course offerings'
-  const name = (department.value.name || '').toLowerCase()
-  const code = (department.value.code || '').toLowerCase()
-  if (name.includes('software') || code === 'se') {
-    return 'Bachelor of Science in Software Engineering (Years 2 – 5 Curriculum)'
+  const total = department.value.total_years || 4
+  const name = department.value.name || 'Department'
+  if (total > 1) {
+    return `${name} Curriculum (Years 1 – ${total}, ${total}-Year Degree)`
   }
-  if (name.includes('computer') || code === 'cs') {
-    return 'Bachelor of Science in Computer Science (Years 2 – 4 Curriculum)'
-  }
-  return 'Curriculum courses and academic materials'
+  return `${name} Curriculum`
 })
 
 const availableYears = computed(() => {

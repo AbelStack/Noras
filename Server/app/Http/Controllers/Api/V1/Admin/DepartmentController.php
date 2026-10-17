@@ -44,8 +44,13 @@ class DepartmentController extends Controller
             'university_id' => ['required', 'exists:universities,id'],
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:20'],
+            'total_years' => ['nullable', 'integer', 'min:1', 'max:8'],
             'is_active' => ['boolean'],
         ]);
+
+        if (empty($validated['total_years'])) {
+            $validated['total_years'] = 4;
+        }
 
         // Check for duplicate code within the same university
         $exists = Department::where('university_id', $validated['university_id'])
@@ -88,6 +93,7 @@ class DepartmentController extends Controller
             'university_id' => ['sometimes', 'exists:universities,id'],
             'name' => ['sometimes', 'string', 'max:255'],
             'code' => ['sometimes', 'string', 'max:20'],
+            'total_years' => ['sometimes', 'integer', 'min:1', 'max:8'],
             'is_active' => ['boolean'],
         ]);
 
