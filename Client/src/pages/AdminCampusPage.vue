@@ -89,12 +89,60 @@
                     </span>
                   </div>
                 </div>
-                <span 
-                  class="px-2.5 py-1 text-xs font-semibold rounded-full flex-shrink-0" 
-                  :class="university.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-700 border border-gray-200'"
-                >
-                  {{ university.is_active ? 'Active' : 'Inactive' }}
-                </span>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <span 
+                    class="px-2.5 py-1 text-xs font-semibold rounded-full" 
+                    :class="university.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-700 border border-gray-200'"
+                  >
+                    {{ university.is_active ? 'Active' : 'Inactive' }}
+                  </span>
+
+                  <!-- 3-Dots Action Menu -->
+                  <div class="relative inline-block text-left" @click.stop>
+                    <button 
+                      type="button"
+                      @click.stop="toggleActionMenu(university.id)" 
+                      class="p-1.5 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                      title="Actions"
+                    >
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                      </svg>
+                    </button>
+
+                    <!-- 3-Dots Dropdown Menu -->
+                    <div 
+                      v-if="activeActionMenuId === university.id"
+                      @click.stop
+                      class="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
+                    >
+                      <div class="py-1">
+                        <button 
+                          type="button"
+                          @click="openEditModal(university); activeActionMenuId = null" 
+                          class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
+                        >
+                          <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          <span>Edit Campus</span>
+                        </button>
+                      </div>
+                      <div class="py-1">
+                        <button 
+                          type="button"
+                          @click="deleteUniversity(university); activeActionMenuId = null" 
+                          class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                        >
+                          <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span>Delete Campus</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Campus Stats -->
@@ -104,22 +152,6 @@
                   <span class="font-semibold text-gray-900">{{ university.departments_count ?? university.departments?.length ?? 0 }}</span>
                 </div>
               </div>
-            </div>
-
-            <!-- Card Actions -->
-            <div class="flex items-center gap-2 pt-4 mt-4 border-t border-gray-100">
-              <button
-                @click="openEditModal(university)"
-                class="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                Edit
-              </button>
-              <button
-                @click="deleteUniversity(university)"
-                class="px-3 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
-              >
-                Delete
-              </button>
             </div>
           </div>
         </div>
@@ -233,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
 import api from '../services/api'
@@ -244,6 +276,16 @@ const notify = useNotification()
 const universities = ref([])
 const loading = ref(true)
 const error = ref(null)
+
+const activeActionMenuId = ref(null)
+
+const toggleActionMenu = (id) => {
+  activeActionMenuId.value = activeActionMenuId.value === id ? null : id
+}
+
+const handleClickOutside = () => {
+  activeActionMenuId.value = null
+}
 
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -381,5 +423,10 @@ const deleteUniversity = async (campus) => {
 
 onMounted(() => {
   fetchUniversities()
+  window.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', handleClickOutside)
 })
 </script>

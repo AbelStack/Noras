@@ -231,18 +231,18 @@
 
                   <!-- Target Curriculum -->
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-xs font-bold text-gray-900">
-                      {{ material.course_offering?.course?.code || 'N/A' }} 
-                      <span class="font-normal text-gray-500">- {{ material.course_offering?.course?.title || material.course_offering?.course?.name }}</span>
-                    </div>
-                    <div class="flex items-center gap-1.5 mt-1">
-                      <span class="text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded-md border border-primary-100">
-                        {{ material.course_offering?.department?.name || 'General' }}
-                      </span>
-                      <span v-if="material.course_offering?.study_year" class="text-[11px] font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">
-                        Yr {{ material.course_offering.study_year }} • S{{ material.course_offering.semester }}
-                      </span>
-                    </div>
+                    <button
+                      type="button"
+                      @click="viewCurriculumDetails(material)"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-xl border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
+                      title="View target curriculum details"
+                    >
+                      <svg class="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>View</span>
+                    </button>
                   </td>
 
                   <!-- Type & Size -->
@@ -299,7 +299,18 @@
                         <div class="py-1">
                           <button 
                             type="button"
-                            @click="downloadMaterial(material)" 
+                            @click="viewCurriculumDetails(material); activeActionMenuId = null" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <span>View Curriculum</span>
+                          </button>
+                          <button 
+                            type="button"
+                            @click="downloadMaterial(material); activeActionMenuId = null" 
                             class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
                           >
                             <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -549,7 +560,7 @@
                       <span class="text-xs text-gray-500"> or drag and drop</span>
                     </div>
                     <p class="text-[11px] text-gray-400">
-                      PDF documents or PowerPoint presentations (.pdf, .ppt, .pptx) up to 50MB
+                      PDF documents or PowerPoint presentations (.pdf, .ppt, .pptx) up to 10MB
                     </p>
                   </div>
                 </div>
@@ -594,6 +605,147 @@
         </div>
       </div>
     </transition>
+
+    <!-- Target Curriculum Details Modal -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showCurriculumModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeCurriculumModal"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div 
+            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100"
+            @click.stop
+          >
+            <!-- Modal Header -->
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
+              <div class="flex items-center gap-3">
+                <div 
+                  class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shadow-2xs"
+                  :class="isPpt(curriculumMaterial) ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-red-100 text-red-700 border border-red-200'"
+                >
+                  <span v-if="isPpt(curriculumMaterial)">PPT</span>
+                  <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-base font-bold text-gray-900 truncate max-w-xs sm:max-w-sm">
+                    {{ curriculumMaterial?.title }}
+                  </h3>
+                  <p class="text-xs text-gray-500 truncate max-w-xs">
+                    {{ curriculumMaterial?.original_filename }} &bull; {{ formatFileSize(curriculumMaterial?.file_size) }}
+                  </p>
+                </div>
+              </div>
+              <button @click="closeCurriculumModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Modal Content: Target Curriculum Details -->
+            <div class="p-6 space-y-4">
+              <div>
+                <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Assigned Academic Curriculum</h4>
+                <p class="text-xs text-gray-500 mt-0.5">Students enrolled in this curriculum will see and download this material.</p>
+              </div>
+
+              <div class="bg-gray-50/75 rounded-xl border border-gray-200/80 p-4 space-y-3">
+                <!-- Course -->
+                <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-gray-100">
+                  <span class="text-xs font-semibold text-gray-500">Course</span>
+                  <div class="text-right">
+                    <div class="text-xs font-bold text-gray-900">
+                      {{ curriculumMaterial?.course_offering?.course?.code || 'N/A' }}
+                    </div>
+                    <div class="text-xs text-gray-600">
+                      {{ curriculumMaterial?.course_offering?.course?.title || curriculumMaterial?.course_offering?.course?.name || 'General Course' }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Campus -->
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-gray-100">
+                  <span class="text-xs font-semibold text-gray-500">Campus</span>
+                  <span class="text-xs font-bold text-gray-900">
+                    {{ curriculumMaterial?.course_offering?.department?.university?.name || 'All Campuses' }}
+                  </span>
+                </div>
+
+                <!-- Department -->
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-gray-100">
+                  <span class="text-xs font-semibold text-gray-500">Department</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-primary-700 bg-primary-50 px-2 py-0.5 rounded-md border border-primary-100">
+                      {{ curriculumMaterial?.course_offering?.department?.name || 'General' }}
+                    </span>
+                    <span v-if="curriculumMaterial?.course_offering?.department?.total_years" class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
+                      {{ curriculumMaterial.course_offering.department.total_years }} Yrs
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Study Year & Semester -->
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-gray-100">
+                  <span class="text-xs font-semibold text-gray-500">Cohort Level</span>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                      Year {{ curriculumMaterial?.course_offering?.study_year || 1 }}
+                    </span>
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100">
+                      Semester {{ curriculumMaterial?.course_offering?.semester || 1 }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Academic Year -->
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-semibold text-gray-500">Academic Year</span>
+                  <span class="text-xs font-mono font-medium text-gray-700">
+                    AY {{ curriculumMaterial?.course_offering?.academic_year || 2026 }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Document Description if available -->
+              <div v-if="curriculumMaterial?.description" class="p-3 bg-white rounded-xl border border-gray-200 text-xs text-gray-600">
+                <span class="font-semibold text-gray-800 block mb-0.5">Description:</span>
+                <p>{{ curriculumMaterial.description }}</p>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+              <button 
+                type="button" 
+                @click="downloadMaterial(curriculumMaterial)"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-primary-700 bg-primary-50 border border-primary-200 rounded-xl hover:bg-primary-100 transition-colors cursor-pointer"
+              >
+                <svg class="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download {{ isPpt(curriculumMaterial) ? 'Presentation' : 'Document' }}</span>
+              </button>
+              <button 
+                type="button" 
+                @click="closeCurriculumModal" 
+                class="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </DashboardLayout>
 </template>
 
@@ -615,6 +767,19 @@ const error = ref(null)
 
 const activeActionMenuId = ref(null)
 const showUploadModal = ref(false)
+const showCurriculumModal = ref(false)
+const curriculumMaterial = ref(null)
+
+const viewCurriculumDetails = (material) => {
+  curriculumMaterial.value = material
+  showCurriculumModal.value = true
+}
+
+const closeCurriculumModal = () => {
+  showCurriculumModal.value = false
+  curriculumMaterial.value = null
+}
+
 const isUploading = ref(false)
 const uploadError = ref('')
 const selectedFile = ref(null)
@@ -880,8 +1045,8 @@ const validateAndAssignFile = (file) => {
     uploadError.value = 'Only PDF and PowerPoint (.ppt, .pptx) files are supported.'
     return
   }
-  if (file.size > 52428800) {
-    uploadError.value = 'File size exceeds the 50MB limit.'
+  if (file.size > 10485760) {
+    uploadError.value = 'File size exceeds the 10MB limit.'
     return
   }
   selectedFile.value = file

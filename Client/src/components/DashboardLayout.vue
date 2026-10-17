@@ -886,6 +886,7 @@ const handleUploadAvatar = async () => {
     const updatedUser = await userService.uploadProfilePicture(selectedFile.value)
     currentUser.value = updatedUser
     localStorage.setItem('user', JSON.stringify(updatedUser))
+    window.dispatchEvent(new Event('user-profile-updated'))
     toast.success('Profile picture updated successfully!')
     closeAvatarModal()
   } catch (err) {
@@ -910,6 +911,7 @@ const handleRemoveAvatar = async () => {
     const updatedUser = await userService.removeProfilePicture()
     currentUser.value = updatedUser
     localStorage.setItem('user', JSON.stringify(updatedUser))
+    window.dispatchEvent(new Event('user-profile-updated'))
     toast.success('Profile picture removed.')
     closeAvatarModal()
   } catch (err) {
@@ -919,9 +921,14 @@ const handleRemoveAvatar = async () => {
   }
 }
 
+const handleProfileUpdated = () => {
+  currentUser.value = authService.getUser()
+}
+
 onMounted(async () => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
+  window.addEventListener('user-profile-updated', handleProfileUpdated)
 
   if (authService.isAuthenticated()) {
     try {
@@ -937,6 +944,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile)
+  window.removeEventListener('user-profile-updated', handleProfileUpdated)
   if (notifTimer) {
     clearInterval(notifTimer)
   }

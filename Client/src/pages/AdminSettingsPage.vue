@@ -30,13 +30,125 @@
           <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
               <h2 class="text-base font-bold text-gray-900">Administrator Profile</h2>
-              <p class="text-xs text-gray-500 mt-0.5">Your personal administrative account credentials</p>
+              <p class="text-xs text-gray-500 mt-0.5">Your personal administrative account credentials and profile picture</p>
             </div>
             <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-primary-700 border border-blue-200">
               {{ settings.profile.role }}
             </span>
           </div>
-          <div class="p-6 space-y-4">
+          <div class="p-6 space-y-6">
+            <!-- Profile Photo Section -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-5 p-4 rounded-xl bg-gray-50/70 border border-gray-100">
+              <!-- Avatar Display with Camera Overlay Badge -->
+              <div class="relative flex-shrink-0 self-center sm:self-auto">
+                <img 
+                  v-if="avatarPreview || currentUser?.avatar_url" 
+                  :src="avatarPreview || currentUser.avatar_url" 
+                  :alt="settings.profile.name" 
+                  class="w-20 h-20 rounded-full object-cover ring-4 ring-white shadow-md"
+                />
+                <div 
+                  v-else 
+                  class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white font-bold text-2xl shadow-md ring-4 ring-white"
+                >
+                  {{ userInitials }}
+                </div>
+                <button
+                  type="button"
+                  @click="triggerFileInput"
+                  class="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-full shadow-md border border-gray-200 flex items-center justify-center text-gray-600 hover:text-primary-600 hover:border-primary-300 transition-colors cursor-pointer"
+                  title="Upload profile photo"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Upload Actions & Details -->
+              <div class="flex-1 min-w-0 space-y-2">
+                <div>
+                  <h3 class="text-sm font-bold text-gray-900">Profile Photo</h3>
+                  <p class="text-xs text-gray-500 mt-0.5">
+                    JPG, PNG, WEBP, or GIF. Maximum photo size is 2MB.
+                  </p>
+                </div>
+
+                <!-- Hidden file input -->
+                <input 
+                  ref="fileInputRef"
+                  type="file" 
+                  accept="image/jpeg,image/png,image/jpg,image/webp,image/gif" 
+                  class="hidden" 
+                  @change="handleFileChange"
+                />
+
+                <div class="flex flex-wrap items-center gap-2 pt-1">
+                  <!-- Choose / Upload button -->
+                  <button
+                    type="button"
+                    @click="triggerFileInput"
+                    :disabled="isUploadingPhoto"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
+                  >
+                    <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ selectedFile ? 'Change Selection' : 'Upload New Photo' }}</span>
+                  </button>
+
+                  <!-- Confirm Upload button (if file selected) -->
+                  <button
+                    v-if="selectedFile"
+                    type="button"
+                    @click="saveProfilePhoto"
+                    :disabled="isUploadingPhoto"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-600 text-white rounded-xl text-xs font-semibold hover:bg-primary-700 transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
+                  >
+                    <svg v-if="isUploadingPhoto" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ isUploadingPhoto ? 'Saving...' : 'Save Photo' }}</span>
+                  </button>
+
+                  <!-- Cancel selection button -->
+                  <button
+                    v-if="selectedFile"
+                    type="button"
+                    @click="cancelPhotoSelection"
+                    class="px-2.5 py-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  <!-- Remove photo button if user currently has one -->
+                  <button
+                    v-if="currentUser?.avatar_url && !selectedFile"
+                    type="button"
+                    @click="removeProfilePhoto"
+                    :disabled="isUploadingPhoto"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <svg class="w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Remove Photo</span>
+                  </button>
+                </div>
+
+                <!-- Error notice if any -->
+                <div v-if="photoError" class="p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{{ photoError }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Info Fields -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Full Name</label>
@@ -192,12 +304,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import { authService } from '../services/auth'
+import { userService } from '../services/userService'
 import { useNotification } from '../composables/useNotification'
 
 const notify = useNotification()
+
+const currentUser = ref(authService.getUser())
+const fileInputRef = ref(null)
+const selectedFile = ref(null)
+const avatarPreview = ref(null)
+const isUploadingPhoto = ref(false)
+const photoError = ref('')
 
 const settings = ref({
   profile: {
@@ -211,6 +331,94 @@ const settings = ref({
     maintenanceMode: false,
   },
 })
+
+const userInitials = computed(() => {
+  const name = settings.value.profile.name || currentUser.value?.name || 'Admin'
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+})
+
+const triggerFileInput = () => {
+  fileInputRef.value?.click()
+}
+
+const handleFileChange = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Strict 2MB check
+  const MAX_SIZE = 2 * 1024 * 1024
+  if (file.size > MAX_SIZE) {
+    const sizeInMb = (file.size / (1024 * 1024)).toFixed(2)
+    photoError.value = `File size is ${sizeInMb}MB, which exceeds the 2MB limit. Please choose a smaller photo.`
+    selectedFile.value = null
+    return
+  }
+
+  const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/gif']
+  if (!validTypes.includes(file.type)) {
+    photoError.value = 'Invalid file type. Supported formats are JPG, PNG, WEBP, or GIF.'
+    selectedFile.value = null
+    return
+  }
+
+  photoError.value = ''
+  selectedFile.value = file
+  avatarPreview.value = URL.createObjectURL(file)
+}
+
+const cancelPhotoSelection = () => {
+  if (avatarPreview.value && avatarPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(avatarPreview.value)
+  }
+  selectedFile.value = null
+  avatarPreview.value = null
+  photoError.value = ''
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
+}
+
+const saveProfilePhoto = async () => {
+  if (!selectedFile.value) return
+  isUploadingPhoto.value = true
+  photoError.value = ''
+  try {
+    const updatedUser = await userService.uploadProfilePicture(selectedFile.value)
+    currentUser.value = updatedUser
+    localStorage.setItem('user', JSON.stringify(updatedUser))
+    window.dispatchEvent(new Event('user-profile-updated'))
+    notify.success('Profile photo updated successfully!')
+    cancelPhotoSelection()
+  } catch (err) {
+    photoError.value = err.response?.data?.message || 'Failed to upload photo. Please ensure it is under 2MB.'
+  } finally {
+    isUploadingPhoto.value = false
+  }
+}
+
+const removeProfilePhoto = async () => {
+  const confirmed = await notify.confirm({
+    title: 'Remove Profile Picture',
+    message: 'Are you sure you want to remove your profile picture?',
+    confirmText: 'Remove Photo',
+    type: 'danger'
+  })
+  if (!confirmed) return
+
+  isUploadingPhoto.value = true
+  photoError.value = ''
+  try {
+    const updatedUser = await userService.removeProfilePicture()
+    currentUser.value = updatedUser
+    localStorage.setItem('user', JSON.stringify(updatedUser))
+    window.dispatchEvent(new Event('user-profile-updated'))
+    notify.success('Profile photo removed.')
+  } catch (err) {
+    notify.error('Failed to remove profile photo.')
+  } finally {
+    isUploadingPhoto.value = false
+  }
+}
 
 const security = ref({
   currentPassword: '',
@@ -232,6 +440,7 @@ const navigationItems = [
 const loadUserProfile = () => {
   const user = authService.getUser()
   if (user) {
+    currentUser.value = user
     settings.value.profile.name = user.name || ''
     settings.value.profile.email = user.email || ''
     settings.value.profile.role = user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Admin'
@@ -258,13 +467,15 @@ const toggleMaintenanceMode = async () => {
 
 const saveSettings = () => {
   // Update local storage user profile if changed
-  const currentUser = authService.getUser() || {}
+  const current = authService.getUser() || {}
   const updatedUser = {
-    ...currentUser,
+    ...current,
     name: settings.value.profile.name,
     email: settings.value.profile.email,
   }
+  currentUser.value = updatedUser
   localStorage.setItem('user', JSON.stringify(updatedUser))
+  window.dispatchEvent(new Event('user-profile-updated'))
 
   notify.success('Preferences and settings saved successfully.')
 }
@@ -314,5 +525,13 @@ const changePassword = () => {
 
 onMounted(() => {
   loadUserProfile()
+  window.addEventListener('user-profile-updated', loadUserProfile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('user-profile-updated', loadUserProfile)
+  if (avatarPreview.value && avatarPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(avatarPreview.value)
+  }
 })
 </script>

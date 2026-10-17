@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CourseMaterialStorageService
 {
-    public const MAX_FILE_SIZE = 52428800; // 50MB in bytes
+    public const MAX_FILE_SIZE = 10485760; // 10MB in bytes
 
     private const PDF_MAGIC_BYTES = '%PDF';
     private const PPT_MAGIC_BYTES = "\xD0\xCF\x11\xE0";
