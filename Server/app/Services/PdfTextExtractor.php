@@ -64,10 +64,28 @@ class PdfTextExtractor
                 return $this->extractPptxText($fullPath);
             }
 
-            // Parse the PDF
+            // Parse the PDF page-by-page
             $pdf = $this->parser->parseFile($fullPath);
-            $text = $pdf->getText();
-            $text = $this->cleanText($text);
+            $pages = $pdf->getPages();
+
+            $pageTexts = [];
+            if (!empty($pages)) {
+                foreach ($pages as $index => $page) {
+                    $pageNum = $index + 1;
+                    $pageRaw = $page->getText();
+                    $pageClean = $this->cleanText($pageRaw);
+                    if (!empty(trim($pageClean))) {
+                        $pageTexts[] = "--- [PAGE {$pageNum}] ---\n" . $pageClean;
+                    }
+                }
+            }
+
+            if (!empty($pageTexts)) {
+                $text = implode("\n\n", $pageTexts);
+            } else {
+                // Fallback to global getText if page-by-page returned empty
+                $text = $this->cleanText($pdf->getText());
+            }
 
             if (empty(trim($text))) {
                 throw new Exception('No text could be extracted from the PDF');
@@ -85,7 +103,7 @@ class PdfTextExtractor
     }
 
     /**
-     * Extract slide text from a PowerPoint presentation (PPTX format).
+     * Extract slide text from a PowerPoint presentation (PPTX format) sequentially.
      */
     private function extractPptxText(string $fullPath): string
     {
@@ -94,29 +112,34 @@ class PdfTextExtractor
             throw new Exception('Could not open presentation file for text extraction.');
         }
 
-        $allText = [];
+        // Collect and naturally sort slides numerically (Slide 1, Slide 2, ..., Slide N)
+        $slideFiles = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
-            if (preg_match('#^ppt/slides/slide\d+\.xml$#i', $name)) {
-                $xmlContent = $zip->getFromIndex($i);
-                if ($xmlContent && preg_match_all('#<a:t[^>]*>(.*?)</a:t>#is', $xmlContent, $matches)) {
-                    $slideText = implode(' ', $matches[1]);
-                    if (!empty(trim($slideText))) {
-                        $allText[] = html_entity_decode(trim($slideText));
-                    }
+            if (preg_match('#^ppt/slides/slide(\d+)\.xml$#i', $name, $matches)) {
+                $slideFiles[(int) $matches[1]] = $name;
+            }
+        }
+        ksort($slideFiles);
+
+        $allText = [];
+        foreach ($slideFiles as $slideNum => $slideName) {
+            $xmlContent = $zip->getFromName($slideName);
+            if ($xmlContent && preg_match_all('#<a:t[^>]*>(.*?)</a:t>#is', $xmlContent, $matches)) {
+                $slideText = implode(' ', $matches[1]);
+                $cleanSlide = $this->cleanText(html_entity_decode(trim($slideText)));
+                if (!empty($cleanSlide)) {
+                    $allText[] = "--- [SLIDE {$slideNum}] ---\n" . $cleanSlide;
                 }
             }
         }
         $zip->close();
 
-        $text = implode("\n\n", $allText);
-        $clean = $this->cleanText($text);
-
-        if (empty($clean)) {
+        if (empty($allText)) {
             throw new Exception('No readable text could be extracted from the presentation slides');
         }
 
-        return $clean;
+        return implode("\n\n", $allText);
     }
 
     /**

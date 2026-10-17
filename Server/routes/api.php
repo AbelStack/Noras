@@ -135,6 +135,8 @@ Route::prefix('v1')->group(function () {
             Route::post('materials/{id}/publish', [AdminCourseMaterialController::class, 'publish']);
             Route::post('materials/{id}/unpublish', [AdminCourseMaterialController::class, 'unpublish']);
             Route::post('materials/{id}/replace', [AdminCourseMaterialController::class, 'replace']);
+            Route::post('materials/{id}/generate-note', [AdminCourseMaterialController::class, 'generateNote']);
+            Route::post('materials/{id}/generate-quiz', [AdminCourseMaterialController::class, 'generateQuiz']);
         });
     });
 });

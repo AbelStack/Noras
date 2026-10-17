@@ -92,9 +92,22 @@
 
             <div class="flex items-center gap-2 self-start sm:self-center ml-10 sm:ml-0 flex-shrink-0">
               <button
+                type="button"
+                @click="retakeQuiz"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                title="Reset answers and retake this quiz"
+              >
+                <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Retake Quiz</span>
+              </button>
+
+              <button
+                v-if="isAdmin"
                 @click="confirmDelete"
                 :disabled="isDeleting"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 text-xs sm:text-sm font-medium transition-colors disabled:opacity-50"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -158,7 +171,7 @@
           <!-- Options -->
           <div class="space-y-3">
             <button
-              v-for="option in currentQuestion.options"
+              v-for="(option, optIndex) in currentQuestion.options"
               :key="option.id"
               @click="selectAnswer(option.id)"
               :class="[
@@ -194,7 +207,7 @@
                   </div>
                 </div>
                 <div class="ml-3 flex-1">
-                  <p class="text-sm sm:text-base text-gray-900 font-medium">{{ option.option_text }}</p>
+                  <p class="text-sm sm:text-base text-gray-900 font-medium">{{ formatOptionText(option.option_text, optIndex) }}</p>
                   <div v-if="showAnswers && option.is_correct" class="mt-1 text-xs text-emerald-700 font-semibold">
                     ✓ Correct Answer
                   </div>
@@ -208,7 +221,7 @@
 
           <!-- Explanation (shown after answer selection) -->
           <div v-if="showAnswers && currentQuestion.explanation && userAnswers[currentQuestion.id]" class="mt-6 p-4 bg-primary-50/50 border border-primary-200/80 rounded-xl">
-            <p class="text-xs font-bold text-primary-900 mb-1">Explanation:</p>
+            <p class="text-xs font-bold text-primary-900 mb-1">Explanation & Source Citation:</p>
             <p class="text-xs sm:text-sm text-primary-800 leading-relaxed">{{ currentQuestion.explanation }}</p>
           </div>
 
@@ -216,7 +229,7 @@
           <div class="mt-6 pt-4 border-t border-gray-100 flex flex-wrap justify-between items-center gap-3">
             <button
               @click="showAnswers = !showAnswers"
-              class="px-4 py-2 text-xs sm:text-sm font-medium border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-gray-700"
+              class="px-4 py-2 text-xs sm:text-sm font-medium border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-gray-700 cursor-pointer"
             >
               {{ showAnswers ? 'Hide' : 'Show' }} Correct Answers
             </button>
@@ -234,8 +247,14 @@
           </p>
           <div class="flex flex-wrap gap-3">
             <button
+              @click="retakeQuiz"
+              class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-semibold text-sm shadow-sm transition-colors cursor-pointer"
+            >
+              Retake Quiz
+            </button>
+            <button
               @click="goToQuestion(0)"
-              class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium text-sm shadow-sm transition-colors"
+              class="px-5 py-2.5 border border-emerald-300 bg-white rounded-xl hover:bg-emerald-50 text-emerald-800 font-medium text-sm shadow-sm transition-colors cursor-pointer"
             >
               Review from Start
             </button>
@@ -265,6 +284,9 @@ import { useNotification } from '../composables/useNotification'
 const router = useRouter()
 const route = useRoute()
 const notify = useNotification()
+
+const currentUser = authService.getUser()
+const isAdmin = computed(() => currentUser?.role === 'admin')
 
 const quiz = ref(null)
 const material = ref(null)
@@ -320,6 +342,23 @@ const loadQuiz = async () => {
 
 const selectAnswer = (optionId) => {
   userAnswers.value[currentQuestion.value.id] = optionId
+}
+
+const retakeQuiz = () => {
+  userAnswers.value = {}
+  currentQuestionIndex.value = 0
+  showAnswers.value = false
+  notify.info('Quiz reset. Good luck!')
+}
+
+const formatOptionText = (optionText, index) => {
+  if (!optionText) return ''
+  const trimmed = optionText.trim()
+  if (/^[A-D]\.\s*/i.test(trimmed)) {
+    return trimmed
+  }
+  const prefix = String.fromCharCode(65 + index)
+  return `${prefix}. ${trimmed}`
 }
 
 const nextQuestion = () => {

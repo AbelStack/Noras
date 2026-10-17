@@ -18,7 +18,12 @@ class CourseMaterialController extends Controller
 
     public function index(Request $request)
     {
-        $query = CourseMaterial::with(['courseOffering.course', 'courseOffering.department.university'])
+        $query = CourseMaterial::with([
+            'courseOffering.course',
+            'courseOffering.department.university',
+            'masterNote:id,course_material_id,notes_char_count,created_at',
+            'masterQuiz:id,course_material_id,question_count,created_at'
+        ])
             ->where('status', 'published');
 
         if ($request->has('course_offering_id')) {
@@ -52,7 +57,12 @@ class CourseMaterialController extends Controller
 
     public function show($id)
     {
-        $material = CourseMaterial::with(['courseOffering.course', 'courseOffering.department.university'])
+        $material = CourseMaterial::with([
+            'courseOffering.course',
+            'courseOffering.department.university',
+            'masterNote',
+            'masterQuiz.questions.options'
+        ])
             ->where('status', 'published')
             ->findOrFail($id);
 

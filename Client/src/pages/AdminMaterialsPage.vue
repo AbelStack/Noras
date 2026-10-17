@@ -199,6 +199,7 @@
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Document</th>
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Target Curriculum</th>
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type & Size</th>
+                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">AI Content</th>
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                   <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Uploaded</th>
                   <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
@@ -260,6 +261,66 @@
                     </div>
                   </td>
 
+                  <!-- AI Content (Note & Quiz badges) -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex flex-col gap-1.5 items-start">
+                      <!-- Note Badge -->
+                      <button
+                        v-if="material.master_note"
+                        type="button"
+                        @click="viewNoteDetails(material)"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-all cursor-pointer"
+                        title="Click to view full master study note"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Note Ready</span>
+                        <span class="text-[10px] text-emerald-600 font-normal">({{ Math.round((material.master_note.notes_char_count || material.master_note.content?.length || 0) / 100) / 10 }}k)</span>
+                      </button>
+                      <button
+                        v-else
+                        type="button"
+                        @click="generateNote(material)"
+                        :disabled="isGeneratingNoteId === material.id"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium text-gray-500 hover:text-emerald-700 bg-gray-50 hover:bg-emerald-50 rounded-lg border border-gray-200 hover:border-emerald-200 transition-all cursor-pointer"
+                        title="Click to generate master study note"
+                      >
+                        <svg v-if="isGeneratingNoteId === material.id" class="animate-spin w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span v-else class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                        <span>{{ isGeneratingNoteId === material.id ? 'Generating...' : '+ Gen Note' }}</span>
+                      </button>
+
+                      <!-- Quiz Badge -->
+                      <button
+                        v-if="material.master_quiz"
+                        type="button"
+                        @click="viewQuizDetails(material)"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition-all cursor-pointer"
+                        title="Click to preview master quiz questions"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                        <span>Quiz Ready ({{ material.master_quiz.question_count || material.master_quiz.questions?.length || 20 }} Qs)</span>
+                      </button>
+                      <button
+                        v-else
+                        type="button"
+                        @click="openQuizGenModal(material)"
+                        :disabled="isGeneratingQuizId === material.id"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium text-gray-500 hover:text-indigo-700 bg-gray-50 hover:bg-indigo-50 rounded-lg border border-gray-200 hover:border-indigo-200 transition-all cursor-pointer"
+                        title="Click to generate master quiz"
+                      >
+                        <svg v-if="isGeneratingQuizId === material.id" class="animate-spin w-3 h-3 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span v-else class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                        <span>{{ isGeneratingQuizId === material.id ? 'Generating...' : '+ Gen Quiz' }}</span>
+                      </button>
+                    </div>
+                  </td>
+
                   <!-- Status -->
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span 
@@ -294,8 +355,62 @@
                         v-if="activeActionMenuId === material.id"
                         @click.stop
                         v-click-outside="() => activeActionMenuId = null"
-                        class="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
+                        class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
                       >
+                        <!-- AI Generation / View Group -->
+                        <div class="py-1">
+                          <button 
+                            type="button"
+                            @click="generateNote(material); activeActionMenuId = null" 
+                            :disabled="isGeneratingNoteId === material.id"
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>{{ material.master_note ? 'Regenerate Study Note' : 'Generate Study Note' }}</span>
+                          </button>
+
+                          <button 
+                            type="button"
+                            @click="openQuizGenModal(material); activeActionMenuId = null" 
+                            :disabled="isGeneratingQuizId === material.id"
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{{ material.master_quiz ? 'Regenerate Quiz (15-30)' : 'Generate Quiz (15-30)' }}</span>
+                          </button>
+
+                          <button 
+                            v-if="material.master_note"
+                            type="button"
+                            @click="viewNoteDetails(material); activeActionMenuId = null" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-emerald-700 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <span>View Master Note</span>
+                          </button>
+
+                          <button 
+                            v-if="material.master_quiz"
+                            type="button"
+                            @click="viewQuizDetails(material); activeActionMenuId = null" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-700 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <span>View Quiz Questions</span>
+                          </button>
+                        </div>
+
+                        <!-- Standard File Actions Group -->
                         <div class="py-1">
                           <button 
                             type="button"
@@ -572,11 +687,49 @@
                   id="material-publish"
                   v-model="uploadForm.is_published"
                   type="checkbox"
-                  class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                  class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500 cursor-pointer"
                 />
                 <label for="material-publish" class="text-xs font-medium text-gray-700 select-none cursor-pointer">
                   Publish immediately (students can access and download this material right away)
                 </label>
+              </div>
+
+              <!-- Auto-Generate Note & Quiz Checkbox -->
+              <div class="p-3.5 bg-indigo-50/70 rounded-xl border border-indigo-200/80 space-y-2.5">
+                <div class="flex items-start gap-2.5">
+                  <input 
+                    id="auto-generate"
+                    v-model="uploadForm.auto_generate"
+                    type="checkbox"
+                    class="w-4 h-4 mt-0.5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <div>
+                    <label for="auto-generate" class="text-xs font-bold text-indigo-950 select-none cursor-pointer flex items-center gap-1.5">
+                      <span>⚡ Auto-generate official study note and quiz upon upload</span>
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-200/80 text-indigo-900">Page-by-page</span>
+                    </label>
+                    <p class="text-[11px] text-indigo-800/90 mt-0.5 leading-relaxed">
+                      AI strictly reads every page/slide sequentially to generate the official comprehensive study note and practice quiz for all students in this curriculum.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Question Count Selector (visible when auto-generate is checked) -->
+                <div v-if="uploadForm.auto_generate" class="flex items-center gap-3 pt-1 pl-6">
+                  <label class="text-xs font-semibold text-indigo-950">Quiz Questions (Min 15, Max 30):</label>
+                  <div class="flex items-center gap-1.5">
+                    <button 
+                      v-for="count in [15, 20, 25, 30]" 
+                      :key="count"
+                      type="button"
+                      @click="uploadForm.quiz_question_count = count"
+                      :class="uploadForm.quiz_question_count === count ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'bg-white text-indigo-800 border border-indigo-200 hover:bg-indigo-100/50'"
+                      class="px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer"
+                    >
+                      {{ count }} Qs
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- Modal Actions -->
@@ -746,6 +899,167 @@
         </div>
       </div>
     </transition>
+
+    <!-- Quiz Generation Config Modal -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showQuizGenModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeQuizGenModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-gray-100" @click.stop>
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-indigo-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                  ⚡
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-gray-900">Generate Master Quiz</h3>
+                  <p class="text-xs text-gray-500 truncate max-w-xs">{{ quizGenMaterial?.title }}</p>
+                </div>
+              </div>
+              <button @click="closeQuizGenModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div class="p-6 space-y-4">
+              <p class="text-xs text-gray-600 leading-relaxed">
+                The AI will read the material page-by-page from beginning to end and create a balanced set of multiple choice and True/False questions (min 15, max 30) with source page citations.
+              </p>
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">Question Count (15 to 30)</label>
+                <div class="grid grid-cols-4 gap-2">
+                  <button
+                    v-for="count in [15, 20, 25, 30]"
+                    :key="count"
+                    type="button"
+                    @click="quizGenCount = count"
+                    :class="quizGenCount === count ? 'bg-indigo-600 text-white font-bold ring-2 ring-indigo-400' : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'"
+                    class="py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center"
+                  >
+                    {{ count }} Qs
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
+              <button type="button" @click="closeQuizGenModal" class="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer">Cancel</button>
+              <button type="button" @click="submitQuizGen" class="px-5 py-2 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-colors cursor-pointer">Start Generation</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Note Preview Modal -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showNoteModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeNoteModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100" @click.stop>
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-emerald-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                  📝
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-gray-900">Official Master Study Note</h3>
+                  <p class="text-xs text-gray-500 truncate max-w-md">{{ notePreviewMaterial?.title }} &bull; {{ Math.round((notePreviewMaterial?.master_note?.notes_char_count || notePreviewMaterial?.master_note?.content?.length || 0) / 100) / 10 }}k characters</p>
+                </div>
+              </div>
+              <button @click="closeNoteModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div class="p-6 max-h-[65vh] overflow-y-auto text-gray-800 leading-relaxed font-sans whitespace-pre-wrap select-text text-sm bg-gray-50/40 rounded-xl m-4 border border-gray-150">
+              {{ notePreviewMaterial?.master_note?.content }}
+            </div>
+            <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+              <button type="button" @click="copyNoteContent" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl border border-emerald-200 transition-colors cursor-pointer">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <span>Copy Note Text</span>
+              </button>
+              <button type="button" @click="closeNoteModal" class="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Quiz Preview Modal -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showQuizModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeQuizModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100" @click.stop>
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-indigo-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                  🎯
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-gray-900">Official Master Quiz ({{ quizPreviewMaterial?.master_quiz?.questions?.length || quizPreviewMaterial?.master_quiz?.question_count || 0 }} Questions)</h3>
+                  <p class="text-xs text-gray-500 truncate max-w-md">{{ quizPreviewMaterial?.title }}</p>
+                </div>
+              </div>
+              <button @click="closeQuizModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div class="p-6 max-h-[65vh] overflow-y-auto space-y-4">
+              <div
+                v-for="(question, qIndex) in quizPreviewMaterial?.master_quiz?.questions || []"
+                :key="question.id || qIndex"
+                class="p-4 bg-gray-50/70 rounded-xl border border-gray-200/80 space-y-2.5"
+              >
+                <div class="flex items-start gap-2.5">
+                  <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 flex-shrink-0 mt-0.5">Q{{ qIndex + 1 }}</span>
+                  <p class="text-sm font-bold text-gray-900 leading-snug">{{ question.question_text }}</p>
+                </div>
+                <div class="space-y-1.5 pl-8">
+                  <div
+                    v-for="(opt, optIndex) in question.options || []"
+                    :key="opt.id || optIndex"
+                    :class="opt.is_correct ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold' : 'bg-white text-gray-700 border-gray-200'"
+                    class="p-2.5 rounded-lg border text-xs flex items-center justify-between"
+                  >
+                    <span>{{ formatOptionLabel(opt.option_text, optIndex) }}</span>
+                    <span v-if="opt.is_correct" class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded">✓ Correct</span>
+                  </div>
+                </div>
+                <div v-if="question.explanation" class="pl-8 pt-1">
+                  <p class="text-xs text-indigo-900 font-medium bg-indigo-50/60 p-2.5 rounded-lg border border-indigo-100 leading-relaxed">
+                    <span class="font-bold">Citation & Explanation:</span> {{ question.explanation }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
+              <button type="button" @click="closeQuizModal" class="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </DashboardLayout>
 </template>
 
@@ -778,6 +1092,114 @@ const viewCurriculumDetails = (material) => {
 const closeCurriculumModal = () => {
   showCurriculumModal.value = false
   curriculumMaterial.value = null
+}
+
+// AI Note & Quiz Actions & Modals
+const isGeneratingNoteId = ref(null)
+const isGeneratingQuizId = ref(null)
+
+const showQuizGenModal = ref(false)
+const quizGenMaterial = ref(null)
+const quizGenCount = ref(20)
+
+const openQuizGenModal = (material) => {
+  quizGenMaterial.value = material
+  quizGenCount.value = 20
+  showQuizGenModal.value = true
+}
+
+const closeQuizGenModal = () => {
+  showQuizGenModal.value = false
+  quizGenMaterial.value = null
+}
+
+const submitQuizGen = async () => {
+  if (!quizGenMaterial.value) return
+  const mat = quizGenMaterial.value
+  const matId = mat.id
+  const count = quizGenCount.value
+  closeQuizGenModal()
+  isGeneratingQuizId.value = matId
+  notify.info(`Generating official ${count}-question quiz with page citations for "${mat.title}"...`)
+
+  try {
+    const res = await api.post(`/admin/materials/${matId}/generate-quiz`, {
+      question_count: count,
+      options_per_question: 4
+    })
+    if (res.data.status === 'success') {
+      notify.success(`Official ${count}-question quiz generated successfully!`)
+      await fetchMaterials()
+    }
+  } catch (err) {
+    console.error('Quiz generation error:', err)
+    notify.error(err.response?.data?.message || 'Failed to generate quiz')
+  } finally {
+    isGeneratingQuizId.value = null
+  }
+}
+
+const generateNote = async (material) => {
+  isGeneratingNoteId.value = material.id
+  notify.info(`Generating official study note for "${material.title}" page-by-page...`)
+  try {
+    const res = await api.post(`/admin/materials/${material.id}/generate-note`, { regenerate: true })
+    if (res.data.status === 'success') {
+      notify.success('Study note generated successfully!')
+      await fetchMaterials()
+    }
+  } catch (err) {
+    console.error('Note generation error:', err)
+    notify.error(err.response?.data?.message || 'Failed to generate study note')
+  } finally {
+    isGeneratingNoteId.value = null
+  }
+}
+
+const showNoteModal = ref(false)
+const notePreviewMaterial = ref(null)
+
+const viewNoteDetails = (material) => {
+  notePreviewMaterial.value = material
+  showNoteModal.value = true
+}
+
+const closeNoteModal = () => {
+  showNoteModal.value = false
+  notePreviewMaterial.value = null
+}
+
+const copyNoteContent = async () => {
+  if (!notePreviewMaterial.value?.master_note?.content) return
+  try {
+    await navigator.clipboard.writeText(notePreviewMaterial.value.master_note.content)
+    notify.success('Study note text copied to clipboard!')
+  } catch (err) {
+    console.error('Copy failed:', err)
+  }
+}
+
+const showQuizModal = ref(false)
+const quizPreviewMaterial = ref(null)
+
+const viewQuizDetails = (material) => {
+  quizPreviewMaterial.value = material
+  showQuizModal.value = true
+}
+
+const closeQuizModal = () => {
+  showQuizModal.value = false
+  quizPreviewMaterial.value = null
+}
+
+const formatOptionLabel = (optionText, index) => {
+  if (!optionText) return ''
+  const trimmed = optionText.trim()
+  if (/^[A-D]\.\s*/i.test(trimmed)) {
+    return trimmed
+  }
+  const prefix = String.fromCharCode(65 + index)
+  return `${prefix}. ${trimmed}`
 }
 
 const isUploading = ref(false)
@@ -827,6 +1249,8 @@ const uploadForm = ref({
   semester: '1',
   course_id: '',
   is_published: true,
+  auto_generate: true,
+  quiz_question_count: 20,
 })
 
 const navigationItems = [
@@ -1013,6 +1437,8 @@ const openUploadModal = () => {
     semester: '1',
     course_id: defaultCourse,
     is_published: true,
+    auto_generate: true,
+    quiz_question_count: 20,
   }
 
   showUploadModal.value = true
@@ -1099,6 +1525,10 @@ const submitUpload = async () => {
     formData.append('study_year', uploadForm.value.study_year)
     formData.append('semester', uploadForm.value.semester)
     formData.append('status', uploadForm.value.is_published ? 'published' : 'draft')
+    if (uploadForm.value.auto_generate) {
+      formData.append('auto_generate', '1')
+      formData.append('quiz_question_count', String(uploadForm.value.quiz_question_count))
+    }
 
     await api.post('/admin/materials', formData, {
       headers: {
@@ -1106,7 +1536,11 @@ const submitUpload = async () => {
       },
     })
 
-    notify.success(`Material "${uploadForm.value.title}" uploaded successfully to Cloudflare!`)
+    notify.success(
+      uploadForm.value.auto_generate
+        ? `Material "${uploadForm.value.title}" uploaded & official note + quiz generated!`
+        : `Material "${uploadForm.value.title}" uploaded successfully to Cloudflare!`
+    )
     closeUploadModal()
     await fetchMaterials()
   } catch (err) {

@@ -65,6 +65,26 @@ class CourseMaterial extends Model
         return $this->morphMany(Bookmark::class, 'bookmarkable');
     }
 
+    public function masterNote()
+    {
+        return $this->hasOne(GeneratedNote::class)->latestOfMany();
+    }
+
+    public function masterQuiz()
+    {
+        return $this->hasOne(GeneratedQuiz::class)->latestOfMany();
+    }
+
+    public function generatedNotes()
+    {
+        return $this->hasMany(GeneratedNote::class);
+    }
+
+    public function generatedQuizzes()
+    {
+        return $this->hasMany(GeneratedQuiz::class);
+    }
+
     public function isPublished(): bool
     {
         return $this->status === 'published';

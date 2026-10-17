@@ -42,16 +42,16 @@ class QuizGenerationService
         return $provider;
     }
 
-    public function generateQuiz(CourseMaterial $material, User $user, int $questionCount = 5, int $optionsPerQuestion = 4): GeneratedQuiz
+    public function generateQuiz(CourseMaterial $material, User $user, int $questionCount = 15, int $optionsPerQuestion = 4): GeneratedQuiz
     {
-        // Validate inputs
-        $questionCount = max(1, min($questionCount, 20)); // Clamp between 1 and 20
-        $optionsPerQuestion = max(2, min($optionsPerQuestion, 6)); // Clamp between 2 and 6
+        // Validate inputs: min 1 (for testing flexibility), max 30
+        $questionCount = max(1, min($questionCount, 30));
+        $optionsPerQuestion = max(2, min($optionsPerQuestion, 6));
 
         $startTime = microtime(true);
 
         try {
-            Log::info("Extracting text from PDF for quiz generation", [
+            Log::info("Extracting text from document for quiz generation", [
                 'material_id' => $material->id,
                 'question_count' => $questionCount
             ]);
@@ -83,16 +83,32 @@ class QuizGenerationService
                 $sourceCharCount,
                 $generationTimeMs
             ) {
-                $quiz = GeneratedQuiz::create([
-                    'course_material_id' => $material->id,
-                    'material_version' => $material->version,
-                    'generated_by' => $user->id,
-                    'ai_provider' => $this->aiProvider->getProviderName(),
-                    'ai_model' => $this->aiProvider->getModelName(),
-                    'question_count' => $questionCount,
-                    'source_char_count' => $sourceCharCount,
-                    'generation_time_ms' => $generationTimeMs,
-                ]);
+                // If a quiz already exists for this material, update it as the canonical master quiz
+                $existingQuiz = GeneratedQuiz::where('course_material_id', $material->id)->first();
+                if ($existingQuiz) {
+                    $existingQuiz->update([
+                        'material_version' => $material->version,
+                        'generated_by' => $user->id,
+                        'ai_provider' => $this->aiProvider->getProviderName(),
+                        'ai_model' => $this->aiProvider->getModelName(),
+                        'question_count' => count($quizData['questions']),
+                        'source_char_count' => $sourceCharCount,
+                        'generation_time_ms' => $generationTimeMs,
+                    ]);
+                    $existingQuiz->questions()->delete();
+                    $quiz = $existingQuiz;
+                } else {
+                    $quiz = GeneratedQuiz::create([
+                        'course_material_id' => $material->id,
+                        'material_version' => $material->version,
+                        'generated_by' => $user->id,
+                        'ai_provider' => $this->aiProvider->getProviderName(),
+                        'ai_model' => $this->aiProvider->getModelName(),
+                        'question_count' => count($quizData['questions']),
+                        'source_char_count' => $sourceCharCount,
+                        'generation_time_ms' => $generationTimeMs,
+                    ]);
+                }
 
                 foreach ($quizData['questions'] as $index => $questionData) {
                     $question = QuizQuestion::create([
@@ -186,27 +202,53 @@ class QuizGenerationService
 
     public function getUserQuizzes(User $user, int $perPage = 20)
     {
-        return GeneratedQuiz::where('generated_by', $user->id)
-            ->with(['courseMaterial.courseOffering.course', 'courseMaterial.courseOffering.department'])
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        $query = GeneratedQuiz::with(['courseMaterial.courseOffering.course', 'courseMaterial.courseOffering.department'])
+            ->orderBy('created_at', 'desc');
+
+        if (!$user->isAdmin()) {
+            $query->where(function ($q) use ($user) {
+                $q->where('generated_by', $user->id)
+                  ->orWhere(function ($masterQ) {
+                      $masterQ->whereHas('courseMaterial', function ($mq) {
+                          $mq->where('status', 'published');
+                      })->whereHas('generatedBy', function ($uq) {
+                          $uq->where('role', 'admin');
+                      });
+                  });
+            });
+        }
+
+        return $query->paginate($perPage);
     }
 
     public function getUserQuiz(int $quizId, User $user): ?GeneratedQuiz
     {
-        return GeneratedQuiz::where('id', $quizId)
-            ->where('generated_by', $user->id)
+        $query = GeneratedQuiz::where('id', $quizId)
             ->with([
                 'courseMaterial.courseOffering.course',
                 'courseMaterial.courseOffering.department',
                 'questions.options'
-            ])
-            ->first();
+            ]);
+
+        if (!$user->isAdmin()) {
+            $query->where(function ($q) use ($user) {
+                $q->where('generated_by', $user->id)
+                  ->orWhere(function ($masterQ) {
+                      $masterQ->whereHas('courseMaterial', function ($mq) {
+                          $mq->where('status', 'published');
+                      })->whereHas('generatedBy', function ($uq) {
+                          $uq->where('role', 'admin');
+                      });
+                  });
+            });
+        }
+
+        return $query->first();
     }
 
     public function deleteQuiz(GeneratedQuiz $quiz, User $user): bool
     {
-        if ($quiz->generated_by !== $user->id) {
+        if (!$user->isAdmin() && $quiz->generated_by !== $user->id) {
             throw new Exception('Unauthorized to delete this quiz');
         }
 

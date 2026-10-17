@@ -6,16 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\CourseMaterial;
 use App\Models\CourseOffering;
 use App\Services\CourseMaterialStorageService;
+use App\Services\NoteGenerationService;
+use App\Services\QuizGenerationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CourseMaterialController extends Controller
 {
     protected CourseMaterialStorageService $storageService;
+    protected NoteGenerationService $noteService;
+    protected QuizGenerationService $quizService;
 
-    public function __construct(CourseMaterialStorageService $storageService)
-    {
+    public function __construct(
+        CourseMaterialStorageService $storageService,
+        NoteGenerationService $noteService,
+        QuizGenerationService $quizService
+    ) {
         $this->storageService = $storageService;
+        $this->noteService = $noteService;
+        $this->quizService = $quizService;
     }
 
     public function index(Request $request)
@@ -23,7 +33,9 @@ class CourseMaterialController extends Controller
         $query = CourseMaterial::with([
             'courseOffering.course',
             'courseOffering.department.university',
-            'uploader:id,name,email'
+            'uploader:id,name,email',
+            'masterNote',
+            'masterQuiz.questions.options',
         ]);
 
         if ($request->filled('course_offering_id')) {
@@ -125,6 +137,8 @@ class CourseMaterialController extends Controller
             'study_year' => ['required_without:course_offering_id', 'nullable', 'integer', 'min:1', 'max:8'],
             'semester' => ['required_without:course_offering_id', 'nullable', 'in:1,2,both'],
             'academic_year' => ['nullable', 'integer', 'min:2020', 'max:2035'],
+            'auto_generate' => ['nullable', 'boolean'],
+            'quiz_question_count' => ['nullable', 'integer', 'min:15', 'max:30'],
         ]);
 
         $file = $request->file('file');
@@ -192,13 +206,32 @@ class CourseMaterialController extends Controller
                 'version' => 1,
             ]);
 
+            DB::commit();
+
+            if ($request->boolean('auto_generate')) {
+                $qCount = (int) $request->input('quiz_question_count', 20);
+                $qCount = max(15, min(30, $qCount));
+
+                try {
+                    $this->noteService->generateNotes($material, auth()->user(), true);
+                } catch (\Exception $e) {
+                    Log::warning("Auto note generation on upload failed: " . $e->getMessage());
+                }
+
+                try {
+                    $this->quizService->generateQuiz($material, auth()->user(), $qCount, 4);
+                } catch (\Exception $e) {
+                    Log::warning("Auto quiz generation on upload failed: " . $e->getMessage());
+                }
+            }
+
             $material->load([
                 'courseOffering.course',
                 'courseOffering.department.university',
-                'uploader:id,name,email'
+                'uploader:id,name,email',
+                'masterNote',
+                'masterQuiz.questions.options',
             ]);
-
-            DB::commit();
 
             return response()->json([
                 'status' => 'success',
@@ -225,6 +258,8 @@ class CourseMaterialController extends Controller
             'courseOffering.course',
             'courseOffering.department.university',
             'uploader:id,name,email',
+            'masterNote',
+            'masterQuiz.questions.options',
             'replaces'
         ])->findOrFail($id);
 
@@ -232,6 +267,59 @@ class CourseMaterialController extends Controller
             'status' => 'success',
             'data' => ['material' => $material],
         ]);
+    }
+
+    public function generateNote(Request $request, $id)
+    {
+        $material = CourseMaterial::findOrFail($id);
+
+        try {
+            $regenerate = $request->boolean('regenerate', true);
+            $note = $this->noteService->generateNotes($material, $request->user(), $regenerate);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Official study note generated successfully',
+                'data' => [
+                    'note' => $note,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to generate note: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    public function generateQuiz(Request $request, $id)
+    {
+        $material = CourseMaterial::findOrFail($id);
+
+        $validated = $request->validate([
+            'question_count' => ['nullable', 'integer', 'min:15', 'max:30'],
+            'options_per_question' => ['nullable', 'integer', 'min:2', 'max:5'],
+        ]);
+
+        $questionCount = $validated['question_count'] ?? 20;
+        $optionsCount = $validated['options_per_question'] ?? 4;
+
+        try {
+            $quiz = $this->quizService->generateQuiz($material, $request->user(), $questionCount, $optionsCount);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Official quiz generated successfully',
+                'data' => [
+                    'quiz' => $quiz,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to generate quiz: ' . $e->getMessage(),
+            ], 422);
+        }
     }
 
     public function download($id)
