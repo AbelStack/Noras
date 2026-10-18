@@ -82,19 +82,12 @@ class QuizGenerationService
 
             try {
                 $quizData = $activeProvider->generateQuiz($pdfText, $material->title, $questionCount, $optionsPerQuestion);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $msg = $e->getMessage();
-                $isRateOrTokenLimit = stripos($msg, 'rate limit') !== false ||
-                    stripos($msg, 'tokens per minute') !== false ||
-                    stripos($msg, 'tpm') !== false ||
-                    stripos($msg, 'request too large') !== false ||
-                    stripos($msg, '429') !== false ||
-                    stripos($msg, 'quota') !== false;
-
-                $fallback = $isRateOrTokenLimit ? $this->resolveFallbackProvider($activeProvider->getProviderName()) : null;
+                $fallback = $this->resolveFallbackProvider($activeProvider->getProviderName());
 
                 if ($fallback) {
-                    Log::warning("Primary AI provider [{$activeProvider->getProviderName()}] hit rate/token limit: {$msg}. Automatically falling back to [{$fallback->getProviderName()}].");
+                    Log::warning("Primary AI provider [{$activeProvider->getProviderName()}] failed ({$msg}). Automatically falling back to [{$fallback->getProviderName()}].");
                     $activeProvider = $fallback;
                     $quizData = $activeProvider->generateQuiz($pdfText, $material->title, $questionCount, $optionsPerQuestion);
                 } else {

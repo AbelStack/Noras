@@ -15,8 +15,8 @@ class GeminiProvider implements AIProviderInterface
     public function __construct()
     {
         $this->apiKey = config('services.ai.gemini.api_key') ?? '';
-        $this->model = config('services.ai.gemini.model') ?? 'gemini-2.0-flash-exp';
-        $this->timeout = config('services.ai.gemini.timeout') ?? 60;
+        $this->model = config('services.ai.gemini.model') ?? 'gemini-3.5-flash';
+        $this->timeout = config('services.ai.gemini.timeout') ?? 30;
         $this->maxChars = config('services.ai.gemini.max_chars') ?? 800000;
     }
 

@@ -15,8 +15,8 @@ class GroqProvider implements AIProviderInterface
     public function __construct()
     {
         $this->apiKey = config('services.ai.groq.api_key') ?? '';
-        $this->model = config('services.ai.groq.model') ?? 'llama-3.3-70b-versatile';
-        $this->timeout = config('services.ai.groq.timeout') ?? 60;
+        $this->model = config('services.ai.groq.model') ?? 'openai/gpt-oss-20b';
+        $this->timeout = config('services.ai.groq.timeout') ?? 30;
         $this->maxChars = config('services.ai.groq.max_chars') ?? 24000;
     }
 
