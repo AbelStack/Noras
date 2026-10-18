@@ -89,7 +89,7 @@
             <router-link
               v-for="yr in yearCards"
               :key="yr.year"
-              :to="`/departments/${myDepartment?.id || user?.department_id}/courses?year=${yr.year}`"
+              :to="`/departments/${targetDepartmentId}/courses?year=${yr.year}`"
               class="bg-white rounded-2xl border border-gray-200 hover:border-primary-400 hover:ring-2 hover:ring-primary-100 p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between cursor-pointer"
             >
               <div>
@@ -150,8 +150,17 @@ const isLoading = ref(true)
 const errorMessage = ref('')
 
 const myDepartment = computed(() => {
-  if (!user.value?.department_id) return user.value?.department || null
-  return departments.value.find(d => d.id === user.value.department_id) || user.value.department || null
+  const deptId = user.value?.department_id || user.value?.department?.id
+  if (deptId) {
+    const found = departments.value.find(d => d.id === deptId)
+    if (found) return found
+    if (user.value?.department) return user.value.department
+  }
+  return departments.value.length > 0 ? departments.value[0] : null
+})
+
+const targetDepartmentId = computed(() => {
+  return myDepartment.value?.id || user.value?.department_id || (departments.value.length > 0 ? departments.value[0].id : 1)
 })
 
 const departmentDuration = computed(() => {
@@ -175,18 +184,23 @@ const yearCards = computed(() => {
   return years
 })
 
-onMounted(() => {
-  loadDepartments()
+onMounted(async () => {
+  await loadDepartments()
 })
 
 const loadDepartments = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
+    try {
+      await authService.me()
+    } catch (e) {
+      console.warn('Could not refresh user profile in DepartmentsPage:', e)
+    }
     departments.value = await catalogService.getDepartments()
   } catch (error) {
     console.error('Failed to load departments:', error)
-    errorMessage.value = error.response?.data?.message || 'Failed to load departments. Please try again.'
+    errorMessage.value = error.response?.data?.message || 'Failed to load curriculum years. Please try again.'
   } finally {
     isLoading.value = false
   }

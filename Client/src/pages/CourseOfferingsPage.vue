@@ -269,9 +269,9 @@ const offerings = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
 
-const user = authService.getUser()
+const user = computed(() => authService.getUser())
 const isMyDepartment = computed(() => {
-  return user?.department_id && String(user.department_id) === String(route.params.departmentId)
+  return user.value?.department_id && String(user.value.department_id) === String(route.params.departmentId)
 })
 
 // Initialize selectedYear from query param or default to 2
@@ -350,7 +350,36 @@ const loadCourses = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    const departmentId = route.params.departmentId
+    let departmentId = route.params.departmentId
+    
+    // Guard against literal string 'undefined', 'null', or empty
+    if (!departmentId || departmentId === 'undefined' || departmentId === 'null') {
+      try {
+        const freshUser = await authService.me()
+        departmentId = freshUser?.department_id || freshUser?.department?.id
+      } catch (e) {
+        departmentId = user.value?.department_id || user.value?.department?.id
+      }
+
+      if (!departmentId || departmentId === 'undefined' || departmentId === 'null') {
+        const allDepts = await catalogService.getDepartments()
+        if (allDepts && allDepts.length > 0) {
+          departmentId = allDepts[0].id
+        }
+      }
+
+      if (departmentId && departmentId !== 'undefined' && departmentId !== 'null') {
+        router.replace({
+          params: { departmentId: String(departmentId) },
+          query: route.query,
+        })
+      }
+    }
+
+    if (!departmentId || departmentId === 'undefined' || departmentId === 'null') {
+      throw new Error('Please select an enrolled department.')
+    }
+
     department.value = await catalogService.getDepartment(departmentId)
     offerings.value = await catalogService.getCourseOfferings({ department_id: departmentId })
     
@@ -362,7 +391,7 @@ const loadCourses = async () => {
     }
   } catch (error) {
     console.error('Failed to load courses:', error)
-    errorMessage.value = error.response?.data?.message || 'Failed to load courses. Please try again.'
+    errorMessage.value = error.response?.data?.message || error.message || 'Failed to load courses. Please try again.'
   } finally {
     isLoading.value = false
   }
