@@ -98,11 +98,36 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-2 self-start sm:self-center ml-10 sm:ml-0 flex-shrink-0">
+            <div class="flex flex-wrap items-center gap-2 self-start sm:self-center ml-10 sm:ml-0 flex-shrink-0">
+              <!-- Download Note (.md) Button -->
               <button
+                @click="downloadNote"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 text-xs sm:text-sm font-semibold transition-colors shadow-2xs cursor-pointer"
+                title="Download notes as Markdown file"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download Note</span>
+              </button>
+
+              <!-- Print Button -->
+              <button
+                @click="printNote"
+                class="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 text-xs sm:text-sm font-medium transition-colors cursor-pointer"
+                title="Print notes or save as PDF"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                <span>Print</span>
+              </button>
+
+              <button
+                v-if="canDelete"
                 @click="confirmDelete"
                 :disabled="isDeleting"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 text-xs sm:text-sm font-medium transition-colors disabled:opacity-50"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -160,6 +185,11 @@ const material = ref(null)
 const isLoading = ref(true)
 const isDeleting = ref(false)
 const errorMessage = ref('')
+
+const user = computed(() => authService.getUser())
+const canDelete = computed(() => {
+  return authService.isAdmin() || (note.value?.generated_by && user.value?.id && note.value.generated_by === user.value.id)
+})
 
 const noteId = computed(() => parseInt(route.params.id))
 
@@ -244,6 +274,17 @@ const handleDelete = async () => {
   } finally {
     isDeleting.value = false
   }
+}
+
+const downloadNote = () => {
+  if (!note.value?.content) return
+  const cleanTitle = (material.value?.title || 'Study_Notes').replace(/[^a-zA-Z0-9_-]/g, '_')
+  notesService.downloadNoteContent(note.value.content, `${cleanTitle}_Study_Notes.md`)
+  notify.success('Notes downloaded successfully!')
+}
+
+const printNote = () => {
+  window.print()
 }
 
 const formatDate = (dateString) => {

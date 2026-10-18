@@ -16,8 +16,12 @@
           Back to Dashboard
         </button>
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Academic Departments</h1>
-          <p class="text-sm text-gray-600 mt-1">Browse courses, curriculum subjects, and academic materials</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+            {{ isEnrolledView ? `${myDepartment?.name || 'Department'} Curriculum Years` : 'Academic Departments' }}
+          </h1>
+          <p class="text-sm text-gray-600 mt-1">
+            {{ isEnrolledView ? `Browse Year 2 to Year ${departmentDuration} courses, lecture notes, and learning materials` : 'Browse courses, curriculum subjects, and academic materials' }}
+          </p>
         </div>
       </div>
 
@@ -39,128 +43,172 @@
         </button>
       </div>
 
-      <!-- Enrolled Department Quick Action Banner -->
-      <div 
-        v-if="user?.department_id && myDepartment"
-        class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-      >
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <div>
-            <span class="text-xs font-semibold text-primary-600 uppercase tracking-wider">Your Enrolled Department</span>
-            <h3 class="text-base sm:text-lg font-bold text-gray-900">{{ myDepartment.name }} ({{ myDepartment.code }})</h3>
-            <p v-if="myDepartment.university" class="text-xs text-gray-500">{{ myDepartment.university.name }}</p>
-          </div>
-        </div>
-
-        <router-link
-          :to="`/departments/${myDepartment.id}/courses`"
-          class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold text-sm shadow-sm transition-colors flex-shrink-0"
+      <!-- Main Content when Loaded -->
+      <div v-else class="space-y-6">
+        <!-- Enrolled Department Quick Info Banner -->
+        <div 
+          v-if="myDepartment"
+          class="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border border-blue-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs"
         >
-          <span>View My Department Courses</span>
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </router-link>
-      </div>
-
-      <!-- Department Filter Tabs -->
-      <div v-if="user?.department_id" class="flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3">
-        <button
-          @click="deptFilter = 'mine'"
-          :class="[
-            'px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all',
-            deptFilter === 'mine'
-              ? 'bg-primary-600 text-white shadow-sm'
-              : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-          ]"
-        >
-          My Department
-        </button>
-        <button
-          v-if="user?.university_id"
-          @click="deptFilter = 'campus'"
-          :class="[
-            'px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all',
-            deptFilter === 'campus'
-              ? 'bg-primary-600 text-white shadow-sm'
-              : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-          ]"
-        >
-          My Campus ({{ user.university?.name || 'Campus' }})
-        </button>
-        <button
-          @click="deptFilter = 'all'"
-          :class="[
-            'px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all',
-            deptFilter === 'all'
-              ? 'bg-primary-600 text-white shadow-sm'
-              : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-          ]"
-        >
-          All Departments
-        </button>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else-if="filteredDepartments.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-        <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4">
-          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-bold text-gray-900 mb-1">No departments found</h3>
-        <p class="text-sm text-gray-500 max-w-sm mx-auto">No academic departments match the selected filter.</p>
-      </div>
-
-      <!-- Departments Grid -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <router-link
-          v-for="department in filteredDepartments"
-          :key="department.id"
-          :to="`/departments/${department.id}/courses`"
-          :class="[
-            'bg-white rounded-2xl border p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between',
-            user?.department_id === department.id ? 'border-primary-400 ring-2 ring-primary-100' : 'border-gray-200 hover:border-primary-300'
-          ]"
-        >
-          <div>
-            <div class="flex items-start justify-between gap-2 mb-3">
-              <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
-                {{ department.name }}
-              </h3>
-              <div class="flex items-center gap-1.5 flex-shrink-0">
-                <span 
-                  v-if="user?.department_id === department.id"
-                  class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800"
-                >
-                  Enrolled
-                </span>
-                <span class="text-xs font-mono font-medium px-2 py-0.5 rounded-md bg-gray-100 text-gray-700">
-                  {{ department.code }}
-                </span>
-              </div>
-            </div>
-            <p v-if="department.university" class="text-xs text-gray-500 flex items-center gap-1.5 mt-2">
-              <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-primary-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
-              <span>{{ department.university.name }}</span>
-            </p>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-primary-700 uppercase tracking-wider">Your Enrolled Department</span>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">Enrolled</span>
+              </div>
+              <h3 class="text-base sm:text-lg font-bold text-gray-900 mt-0.5">
+                {{ myDepartment.name }} ({{ myDepartment.code }})
+              </h3>
+              <p class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                <span v-if="myDepartment.university">{{ myDepartment.university.name }} &bull;</span>
+                <span>{{ departmentDuration }}-Year Academic Program</span>
+              </p>
+            </div>
           </div>
 
-          <div class="flex items-center justify-between text-xs font-medium text-primary-600 pt-4 mt-4 border-t border-gray-100">
-            <span>Explore Courses</span>
-            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
+          <!-- Switch to view all departments or enrolled years -->
+          <div class="flex items-center gap-2">
+            <button
+              v-if="user?.department_id"
+              @click="viewMode = (viewMode === 'years' ? 'all_departments' : 'years')"
+              class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 rounded-xl text-xs font-semibold shadow-2xs hover:bg-gray-50 transition-all cursor-pointer"
+            >
+              <svg v-if="viewMode === 'years'" class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              <svg v-else class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{{ viewMode === 'years' ? 'View All Departments' : 'View My Department Years' }}</span>
+            </button>
           </div>
-        </router-link>
+        </div>
+
+        <!-- YEARS VIEW (Default for enrolled student) -->
+        <div v-if="isEnrolledView" class="space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-gray-900">Academic Years (Year 2 &ndash; Year {{ departmentDuration }})</h2>
+              <p class="text-xs text-gray-500">Select a study year to browse Semester 1 and Semester 2 courses</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600">
+              {{ yearCards.length }} Academic Years
+            </span>
+          </div>
+
+          <!-- Academic Years Grid (Years 2 to Duration) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <router-link
+              v-for="yr in yearCards"
+              :key="yr.year"
+              :to="`/departments/${myDepartment.id}/courses?year=${yr.year}`"
+              class="bg-white rounded-2xl border border-gray-200 hover:border-primary-400 hover:ring-2 hover:ring-primary-100 p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between cursor-pointer"
+            >
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-black text-base border border-primary-100 group-hover:bg-primary-600 group-hover:text-white transition-colors shadow-2xs">
+                      Y{{ yr.year }}
+                    </div>
+                    <div>
+                      <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+                        Year {{ yr.year }}
+                      </h3>
+                      <p class="text-xs text-gray-500 font-medium">
+                        {{ myDepartment.name }}
+                      </p>
+                    </div>
+                  </div>
+                  <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-blue-50 text-primary-700 border border-blue-100">
+                    Year {{ yr.year }} of {{ departmentDuration }}
+                  </span>
+                </div>
+
+                <p class="text-xs text-gray-600 mt-3 line-clamp-2 leading-relaxed">
+                  Curriculum courses, lecture presentations, and AI study notes for Year {{ yr.year }} (Semester 1 &amp; 2).
+                </p>
+
+                <div class="mt-4 flex flex-wrap gap-1.5">
+                  <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">Semester 1</span>
+                  <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">Semester 2</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs font-semibold text-primary-600 pt-4 mt-4 border-t border-gray-100">
+                <span>Explore Courses</span>
+                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- ALL DEPARTMENTS VIEW (Fallback or when toggled) -->
+        <div v-else class="space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-gray-900">All Academic Departments</h2>
+              <p class="text-xs text-gray-500">Explore offerings across other faculties and programs</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600">
+              {{ departments.length }} Departments
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <router-link
+              v-for="department in departments"
+              :key="department.id"
+              :to="`/departments/${department.id}/courses`"
+              :class="[
+                'bg-white rounded-2xl border p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between',
+                user?.department_id === department.id ? 'border-primary-400 ring-2 ring-primary-100' : 'border-gray-200 hover:border-primary-300'
+              ]"
+            >
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                  <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+                    {{ department.name }}
+                  </h3>
+                  <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <span 
+                      v-if="user?.department_id === department.id"
+                      class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800"
+                    >
+                      Enrolled
+                    </span>
+                    <span class="text-xs font-mono font-medium px-2 py-0.5 rounded-md bg-gray-100 text-gray-700">
+                      {{ department.code }}
+                    </span>
+                  </div>
+                </div>
+                <p v-if="department.university" class="text-xs text-gray-500 flex items-center gap-1.5 mt-2">
+                  <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>{{ department.university.name }}</span>
+                </p>
+                <p class="text-xs text-gray-400 mt-1">
+                  {{ department.total_years || 4 }}-Year Degree Program
+                </p>
+              </div>
+
+              <div class="flex items-center justify-between text-xs font-medium text-primary-600 pt-4 mt-4 border-t border-gray-100">
+                <span>Explore Courses</span>
+                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </router-link>
+          </div>
+        </div>
       </div>
     </div>
   </DashboardLayout>
@@ -178,21 +226,37 @@ const user = computed(() => authService.getUser())
 const departments = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
-const deptFilter = ref(user.value?.department_id ? 'mine' : 'all')
+const viewMode = ref('years')
 
 const myDepartment = computed(() => {
   if (!user.value?.department_id) return null
-  return departments.value.find(d => d.id === user.value.department_id) || null
+  return departments.value.find(d => d.id === user.value.department_id) || user.value.department || null
 })
 
-const filteredDepartments = computed(() => {
-  if (deptFilter.value === 'mine' && user.value?.department_id) {
-    return departments.value.filter(d => d.id === user.value.department_id)
+const isEnrolledView = computed(() => {
+  return !!user.value?.department_id && !!myDepartment.value && viewMode.value === 'years'
+})
+
+const departmentDuration = computed(() => {
+  return myDepartment.value?.total_years || 4
+})
+
+const yearCards = computed(() => {
+  if (!myDepartment.value) return []
+  const total = departmentDuration.value
+  const years = []
+  // Show years starting from Year 2 up to total_years (e.g. 2, 3, 4 for IS)
+  for (let y = 2; y <= total; y++) {
+    years.push({
+      year: y,
+      totalYears: total,
+    })
   }
-  if (deptFilter.value === 'campus' && user.value?.university_id) {
-    return departments.value.filter(d => d.university_id === user.value.university_id)
+  // Fallback if department duration is 1
+  if (years.length === 0) {
+    years.push({ year: 1, totalYears: 1 })
   }
-  return departments.value
+  return years
 })
 
 onMounted(() => {

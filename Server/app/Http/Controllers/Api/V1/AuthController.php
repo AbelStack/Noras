@@ -167,6 +167,7 @@ class AuthController extends Controller
                         'id' => $user->department->id,
                         'name' => $user->department->name,
                         'code' => $user->department->code,
+                        'total_years' => $user->department->total_years,
                     ] : null,
                     'avatar_url' => $user->avatar_url,
                     'preferences' => $user->preferences ?? [
@@ -214,6 +215,7 @@ class AuthController extends Controller
                         'id' => $user->department->id,
                         'name' => $user->department->name,
                         'code' => $user->department->code,
+                        'total_years' => $user->department->total_years,
                     ] : null,
                     'approved_at' => $user->approved_at?->toISOString(),
                     'avatar_url' => $user->avatar_url,

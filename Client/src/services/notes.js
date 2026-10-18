@@ -54,4 +54,35 @@ export const notesService = {
   async deleteNote(id) {
     await api.delete(`/notes/${id}`)
   },
+
+  /**
+   * Download a generated note as a Markdown file by ID
+   * 
+   * @param {number} id - Note ID
+   * @param {string} defaultFilename - Target file name
+   */
+  async downloadNote(id, defaultFilename = 'study-notes.md') {
+    const data = await this.getNote(id)
+    const content = data.note?.content || ''
+    this.downloadNoteContent(content, defaultFilename)
+  },
+
+  /**
+   * Trigger browser download for markdown text content
+   * 
+   * @param {string} content - Markdown text content
+   * @param {string} filename - Target filename
+   */
+  downloadNoteContent(content, filename = 'study-notes.md') {
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8;' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', filename.endsWith('.md') ? filename : `${filename}.md`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  },
 }
+
