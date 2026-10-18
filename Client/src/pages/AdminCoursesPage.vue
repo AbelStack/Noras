@@ -117,7 +117,7 @@
 
         <!-- Table -->
         <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto min-h-[340px]">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50/75">
                 <tr>
@@ -184,7 +184,7 @@
                     <div class="relative inline-block text-left" @click.stop>
                       <button 
                         type="button"
-                        @click.stop="toggleActionMenu(course.id)" 
+                        @click.stop="toggleActionMenu(course.id, $event)" 
                         class="p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
                         title="Actions"
                       >
@@ -198,7 +198,10 @@
                         v-if="activeActionMenuId === course.id"
                         @click.stop
                         v-click-outside="() => activeActionMenuId = null"
-                        class="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
+                        :class="[
+                          'absolute right-0 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 divide-y divide-gray-100 transition-all duration-150',
+                          isDropUp ? 'bottom-full mb-1 origin-bottom-right' : 'top-full mt-1 origin-top-right'
+                        ]"
                       >
                         <div class="py-1">
                           <button 
@@ -759,8 +762,23 @@ const fetchDepartments = async () => {
   }
 }
 
-const toggleActionMenu = (courseId) => {
-  activeActionMenuId.value = activeActionMenuId.value === courseId ? null : courseId
+const isDropUp = ref(false)
+
+const toggleActionMenu = (courseId, event) => {
+  if (activeActionMenuId.value === courseId) {
+    activeActionMenuId.value = null
+    return
+  }
+  activeActionMenuId.value = courseId
+  if (event && event.currentTarget) {
+    const btnRect = event.currentTarget.getBoundingClientRect()
+    const spaceBelowViewport = window.innerHeight - btnRect.bottom
+    const scrollParent = event.currentTarget.closest('.overflow-x-auto')
+    const spaceBelowContainer = scrollParent ? (scrollParent.getBoundingClientRect().bottom - btnRect.bottom) : 999
+    isDropUp.value = (spaceBelowViewport < 260 || spaceBelowContainer < 240) && btnRect.top > 200
+  } else {
+    isDropUp.value = false
+  }
 }
 
 const viewCurriculumDetails = (course) => {
