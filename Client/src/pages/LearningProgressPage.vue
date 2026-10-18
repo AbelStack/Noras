@@ -27,7 +27,7 @@
       </div>
 
       <div v-else-if="progress" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <!-- Notes Generated -->
+        <!-- Notes Generated / Available -->
         <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Study Notes</span>
@@ -37,30 +37,30 @@
               </svg>
             </span>
           </div>
-          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.notes_generated }}</p>
-          <p class="mt-0.5 text-xs text-gray-500">Generated notes</p>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.notes_available ?? progress.notes_generated ?? 0 }}</p>
+          <p class="mt-0.5 text-xs text-gray-500">Available notes</p>
         </div>
 
-        <!-- Quizzes Generated -->
+        <!-- Quizzes Available -->
         <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Quizzes</span>
-            <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                 <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
               </svg>
             </span>
           </div>
-          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.quizzes_generated }}</p>
-          <p class="mt-0.5 text-xs text-gray-500">Generated quizzes</p>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ progress.quizzes_available ?? progress.quizzes_generated ?? 0 }}</p>
+          <p class="mt-0.5 text-xs text-gray-500">Available quizzes</p>
         </div>
 
         <!-- Active Tasks -->
         <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Active Tasks</span>
-            <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -74,7 +74,7 @@
         <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Completed</span>
-            <span class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
               </svg>
@@ -88,7 +88,7 @@
         <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow col-span-2 sm:col-span-1">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Bookmarks</span>
-            <span class="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center">
+            <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path>
               </svg>
