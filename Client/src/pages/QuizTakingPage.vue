@@ -294,11 +294,12 @@
         <!-- Brand Theme: Royal Blue, Yellow Accent, White -->
         <!-- ========================================== -->
         <template v-else-if="isSubmitted && submissionResult">
-          <!-- Hero Score Banner (Royal Blue Gradient with Yellow Accent) -->
-          <div class="bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+          <!-- Hero Score Banner (Solid Brand Blue for the whole container, no white fade) -->
+          <div class="bg-primary-600 text-white rounded-2xl p-6 sm:p-8 shadow-md">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div class="space-y-2">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-white text-xs font-semibold backdrop-blur-xs border border-white/20">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-700/70 text-white text-xs font-semibold border border-primary-500/40">
+                  <span class="w-2 h-2 rounded-full bg-accent-500"></span>
                   <span>Quiz Completed</span>
                   <span>&bull;</span>
                   <span>{{ formatDate(submissionResult.created_at) }}</span>
@@ -320,40 +321,40 @@
                 </p>
               </div>
 
-              <!-- Action buttons (Yellow accent for Retake, White outline for Back) -->
+              <!-- Action buttons (High contrast Retake Quiz in yellow, Back to Library in solid white) -->
               <div class="flex flex-wrap sm:flex-col gap-2.5 self-start md:self-center flex-shrink-0">
                 <button
                   @click="retakeQuiz"
-                  class="px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-gray-900 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
+                  class="px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-gray-900 rounded-xl font-bold text-xs sm:text-sm shadow-sm transition-colors cursor-pointer text-center"
                 >
                   Retake Quiz
                 </button>
                 <router-link
                   to="/quizzes"
-                  class="px-5 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl font-semibold text-xs sm:text-sm border border-white/20 text-center transition-colors"
+                  class="px-5 py-2.5 bg-white text-primary-700 hover:bg-blue-50 rounded-xl font-bold text-xs sm:text-sm shadow-sm text-center transition-colors cursor-pointer"
                 >
                   Back to Library
                 </router-link>
               </div>
             </div>
 
-            <!-- Score Stats Tiles -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/20">
-              <div class="bg-white/10 rounded-xl p-3 text-center border border-white/10">
-                <p class="text-xs text-blue-100 font-medium">Total Questions</p>
-                <p class="text-xl sm:text-2xl font-bold text-white mt-0.5">{{ submissionResult.total_questions }}</p>
+            <!-- Score Stats Tiles (All 4 tiles have identical, solid contrast) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-primary-500/50">
+              <div class="bg-primary-700/80 rounded-xl p-3.5 text-center border border-primary-500/50 shadow-2xs">
+                <p class="text-xs text-blue-200 font-semibold">Total Questions</p>
+                <p class="text-xl sm:text-2xl font-black text-white mt-1">{{ submissionResult.total_questions }}</p>
               </div>
-              <div class="bg-white/10 rounded-xl p-3 text-center border border-white/10">
-                <p class="text-xs text-blue-100 font-medium">Correct Answers</p>
-                <p class="text-xl sm:text-2xl font-bold text-accent-500 mt-0.5">{{ submissionResult.score }}</p>
+              <div class="bg-primary-700/80 rounded-xl p-3.5 text-center border border-primary-500/50 shadow-2xs">
+                <p class="text-xs text-blue-200 font-semibold">Correct Answers</p>
+                <p class="text-xl sm:text-2xl font-black text-accent-500 mt-1">{{ submissionResult.score }}</p>
               </div>
-              <div class="bg-white/10 rounded-xl p-3 text-center border border-white/10">
-                <p class="text-xs text-blue-100 font-medium">Missed Questions</p>
-                <p class="text-xl sm:text-2xl font-bold text-red-200 mt-0.5">{{ missedCount }}</p>
+              <div class="bg-primary-700/80 rounded-xl p-3.5 text-center border border-primary-500/50 shadow-2xs">
+                <p class="text-xs text-blue-200 font-semibold">Missed Questions</p>
+                <p class="text-xl sm:text-2xl font-black text-red-300 mt-1">{{ missedCount }}</p>
               </div>
-              <div class="bg-white/10 rounded-xl p-3 text-center border border-white/10">
-                <p class="text-xs text-blue-100 font-medium">Final Percentage</p>
-                <p class="text-xl sm:text-2xl font-bold text-white mt-0.5">{{ submissionResult.percentage }}%</p>
+              <div class="bg-primary-700/80 rounded-xl p-3.5 text-center border border-primary-500/50 shadow-2xs">
+                <p class="text-xs text-blue-200 font-semibold">Final Percentage</p>
+                <p class="text-xl sm:text-2xl font-black text-accent-500 mt-1">{{ submissionResult.percentage }}%</p>
               </div>
             </div>
           </div>

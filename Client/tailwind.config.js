@@ -23,6 +23,8 @@ export default {
           500: '#2E5CCC',
           600: '#2548A6',
           700: '#1D3A80',
+          800: '#172E66',
+          900: '#0F1E42',
         },
         accent: {
           DEFAULT: '#FDB022', // Yellow/Orange
