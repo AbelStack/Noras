@@ -69,6 +69,7 @@ class NoteGenerationService
      */
     public function generateNotes(CourseMaterial $material, User $user, bool $regenerate = false): GeneratedNote
     {
+        @set_time_limit(300);
         $startTime = microtime(true);
 
         try {

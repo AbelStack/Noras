@@ -56,6 +56,7 @@ class QuizGenerationService
 
     public function generateQuiz(CourseMaterial $material, User $user, int $questionCount = 15, int $optionsPerQuestion = 4): GeneratedQuiz
     {
+        @set_time_limit(300);
         // Validate inputs: min 1 (for testing flexibility), max 30
         $questionCount = max(1, min($questionCount, 30));
         $optionsPerQuestion = max(2, min($optionsPerQuestion, 6));

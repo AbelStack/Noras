@@ -126,6 +126,7 @@ class CourseMaterialController extends Controller
 
     public function store(Request $request)
     {
+        @set_time_limit(300);
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -214,13 +215,13 @@ class CourseMaterialController extends Controller
 
                 try {
                     $this->noteService->generateNotes($material, auth()->user(), true);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     Log::warning("Auto note generation on upload failed: " . $e->getMessage());
                 }
 
                 try {
                     $this->quizService->generateQuiz($material, auth()->user(), $qCount, 4);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     Log::warning("Auto quiz generation on upload failed: " . $e->getMessage());
                 }
             }
@@ -271,6 +272,7 @@ class CourseMaterialController extends Controller
 
     public function generateNote(Request $request, $id)
     {
+        @set_time_limit(300);
         $material = CourseMaterial::findOrFail($id);
 
         try {
@@ -294,6 +296,7 @@ class CourseMaterialController extends Controller
 
     public function generateQuiz(Request $request, $id)
     {
+        @set_time_limit(300);
         $material = CourseMaterial::findOrFail($id);
 
         $validated = $request->validate([

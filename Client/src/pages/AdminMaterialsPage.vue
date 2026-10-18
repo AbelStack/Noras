@@ -1232,8 +1232,6 @@ const openUploadModal = () => {
     semester: '1',
     course_id: defaultCourse,
     is_published: true,
-    auto_generate: true,
-    quiz_question_count: 20,
   }
 
   showUploadModal.value = true
@@ -1320,10 +1318,6 @@ const submitUpload = async () => {
     formData.append('study_year', uploadForm.value.study_year)
     formData.append('semester', uploadForm.value.semester)
     formData.append('status', uploadForm.value.is_published ? 'published' : 'draft')
-    if (uploadForm.value.auto_generate) {
-      formData.append('auto_generate', '1')
-      formData.append('quiz_question_count', String(uploadForm.value.quiz_question_count))
-    }
 
     await api.post('/admin/materials', formData, {
       headers: {
@@ -1336,7 +1330,7 @@ const submitUpload = async () => {
     await fetchMaterials()
   } catch (err) {
     console.error('Failed to upload material:', err)
-    uploadError.value = err.response?.data?.message || err.response?.data?.errors?.file?.[0] || 'Upload failed. Please check file format and storage connection.'
+    uploadError.value = err.response?.data?.message || err.response?.data?.errors?.file?.[0] || (err.response?.status === 500 ? 'Server error occurred while storing the file. Please try again.' : 'Upload failed. Please check file format and storage connection.')
   } finally {
     isUploading.value = false
   }
