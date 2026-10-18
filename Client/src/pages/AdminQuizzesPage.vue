@@ -1,0 +1,873 @@
+<template>
+  <DashboardLayout 
+    pageTitle="Noras Admin" 
+    :navigationItems="navigationItems"
+  >
+    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+      <!-- Back Button & Page Header -->
+      <div>
+        <button 
+          @click="$router.push('/admin/dashboard')"
+          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+        >
+          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Dashboard
+        </button>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">AI Quizzes</h1>
+            <p class="text-sm text-gray-600 mt-1">
+              Inspect, test, regenerate and manage official practice quizzes organized by curriculum (15 to 30 questions)
+            </p>
+          </div>
+          <button 
+            @click="$router.push('/admin/materials')"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-semibold rounded-xl shadow-2xs transition-colors cursor-pointer"
+          >
+            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Course Materials</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Quizzes</div>
+          <div class="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{{ stats.total_quizzes }}</div>
+          <p class="text-xs text-gray-400 mt-1">Master practice quizzes</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Questions</div>
+          <div class="text-2xl sm:text-3xl font-bold text-indigo-600 mt-2">
+            {{ (stats.total_questions || 0).toLocaleString() }}
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Multiple choice & True/False</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg. Questions / Quiz</div>
+          <div class="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">
+            {{ stats.total_quizzes > 0 ? Math.round(stats.total_questions / stats.total_quizzes) : 0 }}
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Target range: 15–30 questions</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Materials Covered</div>
+          <div class="text-2xl sm:text-3xl font-bold text-purple-600 mt-2">{{ stats.unique_materials }}</div>
+          <p class="text-xs text-gray-400 mt-1">Distinct course files</p>
+        </div>
+      </div>
+
+      <!-- Filters & Search Bar (Curriculum Organization) -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+        <div class="flex flex-col md:flex-row gap-3 items-center justify-between">
+          <div class="relative w-full md:w-80">
+            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input 
+              v-model="filters.search"
+              @input="debounceFetch"
+              type="text" 
+              placeholder="Search by material title, course code or title..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            />
+          </div>
+
+          <div class="w-full md:w-auto flex flex-wrap items-center gap-2">
+            <!-- Campus Filter -->
+            <select 
+              v-model="filters.campusId"
+              @change="onFilterCampusChange"
+              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+            >
+              <option value="">All Campuses</option>
+              <option v-for="c in campuses" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+
+            <!-- Department Filter -->
+            <select 
+              v-model="filters.departmentId"
+              @change="fetchQuizzes"
+              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 max-w-[180px]"
+            >
+              <option value="">All Departments</option>
+              <option v-for="d in filteredDepartments" :key="d.id" :value="d.id">{{ d.name }}</option>
+            </select>
+
+            <!-- Study Year Filter -->
+            <select 
+              v-model="filters.studyYear"
+              @change="fetchQuizzes"
+              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+            >
+              <option value="">All Years</option>
+              <option v-for="yr in [1, 2, 3, 4, 5, 6, 7]" :key="yr" :value="yr">Year {{ yr }}</option>
+            </select>
+
+            <!-- Semester Filter -->
+            <select 
+              v-model="filters.semester"
+              @change="fetchQuizzes"
+              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+            >
+              <option value="">All Semesters</option>
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+            </select>
+
+            <button 
+              v-if="hasActiveFilters"
+              @click="resetFilters"
+              class="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 underline cursor-pointer"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State (Skeleton Table) -->
+      <div v-if="loading" class="py-2">
+        <SkeletonLoader type="table" :rows="6" />
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-red-700 font-medium">{{ error }}</p>
+        </div>
+        <button @click="fetchQuizzes" class="text-sm text-red-700 hover:text-red-800 underline font-medium cursor-pointer">
+          Try again
+        </button>
+      </div>
+
+      <!-- Quizzes Content -->
+      <div v-else>
+        <!-- Empty State -->
+        <div v-if="quizzes.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+          <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center mb-4">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-1">No AI quizzes found</h3>
+          <p class="text-sm text-gray-500 max-w-sm mx-auto mb-6">
+            {{ hasActiveFilters ? 'No quizzes match your active filter settings.' : 'Generate quizzes for course materials to see them listed here.' }}
+          </p>
+          <button 
+            @click="$router.push('/admin/materials')"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors shadow-sm cursor-pointer"
+          >
+            Go to Course Materials
+          </button>
+        </div>
+
+        <!-- Table of Quizzes -->
+        <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50/75">
+                <tr>
+                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Course Material</th>
+                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Target Curriculum</th>
+                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Questions</th>
+                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">AI Model</th>
+                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Generated</th>
+                  <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 bg-white">
+                <tr v-for="quiz in quizzes" :key="quiz.id" class="hover:bg-gray-50/80 transition-colors">
+                  <!-- Course Material Document -->
+                  <td class="px-6 py-4">
+                    <div class="flex items-start gap-3">
+                      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs shadow-2xs bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <span>🎯</span>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-sm font-bold text-gray-900 truncate max-w-xs sm:max-w-md" :title="quiz.course_material?.title">
+                          {{ quiz.course_material?.title || 'Course Material' }}
+                        </div>
+                        <div class="text-xs text-gray-400 mt-0.5 truncate max-w-xs">
+                          {{ quiz.course_material?.original_filename || 'Document file' }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Target Curriculum -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <button
+                      type="button"
+                      @click="viewCurriculumDetails(quiz)"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-xl border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
+                      title="View target curriculum details"
+                    >
+                      <svg class="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>
+                        {{ quiz.course_material?.course_offering?.course?.code || 'View Curriculum' }}
+                      </span>
+                    </button>
+                  </td>
+
+                  <!-- Questions Count -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                      <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                      {{ quiz.question_count || quiz.questions?.length || 20 }} Questions
+                    </span>
+                  </td>
+
+                  <!-- AI Model -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-gray-100 text-gray-800 border border-gray-200">
+                      {{ formatAiModel(quiz.ai_model || quiz.ai_provider) }}
+                    </span>
+                  </td>
+
+                  <!-- Generated Date -->
+                  <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                    {{ formatDate(quiz.created_at) }}
+                  </td>
+
+                  <!-- 3-Dots Action Menu -->
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                    <div class="relative inline-block text-left" @click.stop>
+                      <button 
+                        type="button"
+                        @click.stop="toggleActionMenu(quiz.id)" 
+                        class="p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                        title="Actions"
+                      >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                      </button>
+
+                      <!-- Dropdown Menu -->
+                      <div 
+                        v-if="activeActionMenuId === quiz.id"
+                        @click.stop
+                        v-click-outside="() => activeActionMenuId = null"
+                        class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
+                      >
+                        <div class="py-1">
+                          <button 
+                            type="button"
+                            @click="viewQuiz(quiz); activeActionMenuId = null" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <span>View Questions & Keys</span>
+                          </button>
+
+                          <button 
+                            type="button"
+                            @click="openRegenModal(quiz); activeActionMenuId = null" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Regenerate Quiz (15-30)</span>
+                          </button>
+                        </div>
+
+                        <div class="py-1">
+                          <button 
+                            type="button"
+                            @click="deleteQuiz(quiz); activeActionMenuId = null" 
+                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                          >
+                            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span>Delete Quiz</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="pagination.last_page > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+            <span class="text-xs text-gray-500">
+              Showing page {{ pagination.current_page }} of {{ pagination.last_page }} ({{ pagination.total }} quizzes)
+            </span>
+            <div class="flex items-center gap-1.5">
+              <button 
+                :disabled="pagination.current_page <= 1"
+                @click="changePage(pagination.current_page - 1)"
+                class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
+              >
+                Previous
+              </button>
+              <button 
+                :disabled="pagination.current_page >= pagination.last_page"
+                @click="changePage(pagination.current_page + 1)"
+                class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Quiz Questions Modal -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showQuizModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeQuizModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100" @click.stop>
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-indigo-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                  🎯
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-gray-900">
+                    Official Master Quiz ({{ activeQuiz?.questions?.length || activeQuiz?.question_count || 0 }} Questions)
+                  </h3>
+                  <p class="text-xs text-gray-500 truncate max-w-md">{{ activeQuiz?.course_material?.title }}</p>
+                </div>
+              </div>
+              <button @click="closeQuizModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Questions List -->
+            <div class="p-6 max-h-[65vh] overflow-y-auto space-y-4">
+              <div
+                v-for="(question, qIndex) in activeQuiz?.questions || []"
+                :key="question.id || qIndex"
+                class="p-4 bg-gray-50/70 rounded-xl border border-gray-200/80 space-y-2.5"
+              >
+                <div class="flex items-start gap-2.5">
+                  <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 flex-shrink-0 mt-0.5">
+                    Q{{ qIndex + 1 }}
+                  </span>
+                  <p class="text-sm font-bold text-gray-900 leading-snug">{{ question.question_text }}</p>
+                </div>
+
+                <!-- Choices -->
+                <div class="space-y-1.5 pl-8">
+                  <div
+                    v-for="(opt, optIndex) in question.options || []"
+                    :key="opt.id || optIndex"
+                    :class="opt.is_correct ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold shadow-2xs' : 'bg-white text-gray-700 border-gray-200'"
+                    class="p-2.5 rounded-lg border text-xs flex items-center justify-between transition-colors"
+                  >
+                    <span>{{ formatOptionLabel(opt.option_text, optIndex) }}</span>
+                    <span v-if="opt.is_correct" class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded flex items-center gap-1">
+                      <span>✓</span> Correct Answer
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Explanation & Citations -->
+                <div v-if="question.explanation" class="pl-8 pt-1">
+                  <p class="text-xs text-indigo-900 font-medium bg-indigo-50/60 p-2.5 rounded-lg border border-indigo-100 leading-relaxed">
+                    <span class="font-bold">Citation & Explanation:</span> {{ question.explanation }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
+              <button 
+                type="button" 
+                @click="closeQuizModal" 
+                class="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Regenerate Quiz Modal (Pick Question Count) -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showRegenModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeRegenModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-gray-100" @click.stop>
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-indigo-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                  ⚡
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-gray-900">Regenerate Master Quiz</h3>
+                  <p class="text-xs text-gray-500 truncate max-w-xs">{{ activeQuiz?.course_material?.title }}</p>
+                </div>
+              </div>
+              <button @click="closeRegenModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+              <p class="text-xs text-gray-600 leading-relaxed">
+                The AI will read the course material page-by-page from beginning to end to generate fresh multiple choice and True/False questions with page citations.
+              </p>
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                  Question Count (Min 15, Max 30)
+                </label>
+                <div class="grid grid-cols-4 gap-2">
+                  <button
+                    v-for="count in [15, 20, 25, 30]"
+                    :key="count"
+                    type="button"
+                    @click="regenCount = count"
+                    :class="regenCount === count ? 'bg-indigo-600 text-white font-bold ring-2 ring-indigo-400 shadow-xs' : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'"
+                    class="py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center"
+                  >
+                    {{ count }} Qs
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
+              <button 
+                type="button" 
+                @click="closeRegenModal" 
+                :disabled="isSubmittingRegen"
+                class="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                @click="submitRegeneration" 
+                :disabled="isSubmittingRegen"
+                class="inline-flex items-center gap-2 px-5 py-2 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <svg v-if="isSubmittingRegen" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ isSubmittingRegen ? 'Generating...' : 'Start Generation' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Target Curriculum Details Modal -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showCurriculumModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeCurriculumModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100" @click.stop>
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-sm">
+                  🎯
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-gray-900 truncate max-w-xs sm:max-w-sm">
+                    {{ activeQuiz?.course_material?.title }}
+                  </h3>
+                  <p class="text-xs text-gray-500">Target Curriculum Information</p>
+                </div>
+              </div>
+              <button @click="closeCurriculumModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+              <div class="bg-gray-50/75 rounded-xl border border-gray-200/80 p-4 space-y-3">
+                <!-- Course -->
+                <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-gray-100">
+                  <span class="text-xs font-semibold text-gray-500">Course</span>
+                  <div class="text-right">
+                    <div class="text-xs font-bold text-gray-900">
+                      {{ activeQuiz?.course_material?.course_offering?.course?.code || 'N/A' }}
+                    </div>
+                    <div class="text-xs text-gray-600">
+                      {{ activeQuiz?.course_material?.course_offering?.course?.title || activeQuiz?.course_material?.course_offering?.course?.name || 'General' }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Campus -->
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-gray-100">
+                  <span class="text-xs font-semibold text-gray-500">Campus</span>
+                  <span class="text-xs font-bold text-gray-900">
+                    {{ activeQuiz?.course_material?.course_offering?.department?.university?.name || 'All Campuses' }}
+                  </span>
+                </div>
+
+                <!-- Department -->
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-gray-100">
+                  <span class="text-xs font-semibold text-gray-500">Department</span>
+                  <span class="text-xs font-bold text-primary-700 bg-primary-50 px-2 py-0.5 rounded-md border border-primary-100">
+                    {{ activeQuiz?.course_material?.course_offering?.department?.name || 'General' }}
+                  </span>
+                </div>
+
+                <!-- Cohort Level (Year & Semester) -->
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-gray-100">
+                  <span class="text-xs font-semibold text-gray-500">Cohort Level</span>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                      Year {{ activeQuiz?.course_material?.course_offering?.study_year || 1 }}
+                    </span>
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100">
+                      Semester {{ activeQuiz?.course_material?.course_offering?.semester || 1 }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Academic Year -->
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-semibold text-gray-500">Academic Year</span>
+                  <span class="text-xs font-mono font-medium text-gray-700">
+                    AY {{ activeQuiz?.course_material?.course_offering?.academic_year || 2026 }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
+              <button 
+                type="button" 
+                @click="closeCurriculumModal" 
+                class="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </DashboardLayout>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import DashboardLayout from '../components/DashboardLayout.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
+import api from '../services/api'
+import { useNotification } from '../composables/useNotification'
+import { adminNavigationItems } from '../config/navigation'
+
+const notify = useNotification()
+const navigationItems = adminNavigationItems
+
+const quizzes = ref([])
+const campuses = ref([])
+const departments = ref([])
+const loading = ref(true)
+const error = ref(null)
+
+const stats = ref({
+  total_quizzes: 0,
+  total_questions: 0,
+  unique_materials: 0,
+})
+
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 15,
+  total: 0,
+})
+
+const filters = ref({
+  search: '',
+  campusId: '',
+  departmentId: '',
+  studyYear: '',
+  semester: '',
+})
+
+const activeActionMenuId = ref(null)
+const showQuizModal = ref(false)
+const showRegenModal = ref(false)
+const showCurriculumModal = ref(false)
+const activeQuiz = ref(null)
+const regenCount = ref(20)
+const isSubmittingRegen = ref(false)
+
+let debounceTimer = null
+const debounceFetch = () => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    fetchQuizzes(1)
+  }, 300)
+}
+
+const hasActiveFilters = computed(() => {
+  return Boolean(
+    filters.value.search ||
+    filters.value.campusId ||
+    filters.value.departmentId ||
+    filters.value.studyYear ||
+    filters.value.semester
+  )
+})
+
+const filteredDepartments = computed(() => {
+  if (!filters.value.campusId) return departments.value
+  return departments.value.filter(d => String(d.university_id) === String(filters.value.campusId))
+})
+
+const onFilterCampusChange = () => {
+  filters.value.departmentId = ''
+  fetchQuizzes(1)
+}
+
+const resetFilters = () => {
+  filters.value = {
+    search: '',
+    campusId: '',
+    departmentId: '',
+    studyYear: '',
+    semester: '',
+  }
+  fetchQuizzes(1)
+}
+
+const vClickOutside = {
+  mounted(el, binding) {
+    el._clickOutsideHandler = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value(event)
+      }
+    }
+    setTimeout(() => {
+      document.addEventListener('click', el._clickOutsideHandler)
+    }, 0)
+  },
+  unmounted(el) {
+    if (el._clickOutsideHandler) {
+      document.removeEventListener('click', el._clickOutsideHandler)
+    }
+  }
+}
+
+const toggleActionMenu = (id) => {
+  activeActionMenuId.value = activeActionMenuId.value === id ? null : id
+}
+
+const fetchQuizzes = async (page = 1) => {
+  loading.value = true
+  error.value = null
+  try {
+    const params = {
+      page,
+      search: filters.value.search || undefined,
+      campus_id: filters.value.campusId || undefined,
+      department_id: filters.value.departmentId || undefined,
+      study_year: filters.value.studyYear || undefined,
+      semester: filters.value.semester || undefined,
+    }
+
+    const response = await api.get('/admin/quizzes', { params })
+    if (response.data.status === 'success') {
+      quizzes.value = response.data.data.quizzes || []
+      pagination.value = response.data.data.pagination || pagination.value
+      if (response.data.data.stats) {
+        stats.value = response.data.data.stats
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch quizzes:', err)
+    error.value = err.response?.data?.message || 'Failed to load quizzes'
+  } finally {
+    loading.value = false
+  }
+}
+
+const fetchCampusesAndDepartments = async () => {
+  try {
+    const [campRes, deptRes] = await Promise.all([
+      api.get('/universities').catch(() => ({ data: { data: { universities: [] } } })),
+      api.get('/departments').catch(() => ({ data: { data: { departments: [] } } })),
+    ])
+
+    campuses.value = campRes.data?.data?.universities || campRes.data?.data || []
+    departments.value = deptRes.data?.data?.departments || deptRes.data?.data || []
+  } catch (err) {
+    console.error('Failed to load filter metadata:', err)
+  }
+}
+
+const viewQuiz = async (quiz) => {
+  activeQuiz.value = quiz
+  showQuizModal.value = true
+
+  // Fetch full details with ordered questions & options
+  try {
+    const res = await api.get(`/admin/quizzes/${quiz.id}`)
+    if (res.data.status === 'success' && res.data.data.quiz) {
+      activeQuiz.value = res.data.data.quiz
+    }
+  } catch (err) {
+    console.error('Failed to load quiz details:', err)
+  }
+}
+
+const closeQuizModal = () => {
+  showQuizModal.value = false
+}
+
+const viewCurriculumDetails = (quiz) => {
+  activeQuiz.value = quiz
+  showCurriculumModal.value = true
+}
+
+const closeCurriculumModal = () => {
+  showCurriculumModal.value = false
+}
+
+const openRegenModal = (quiz) => {
+  activeQuiz.value = quiz
+  regenCount.value = quiz.question_count || 20
+  showRegenModal.value = true
+}
+
+const closeRegenModal = () => {
+  showRegenModal.value = false
+}
+
+const submitRegeneration = async () => {
+  if (!activeQuiz.value) return
+  const quiz = activeQuiz.value
+  const materialId = quiz.course_material_id
+  const count = regenCount.value
+
+  isSubmittingRegen.value = true
+  notify.info(`Regenerating official ${count}-question quiz for "${quiz.course_material?.title}" page-by-page...`)
+
+  try {
+    const res = await api.post(`/admin/quizzes/generate/${materialId}`, {
+      question_count: count,
+      options_per_question: 4,
+    })
+
+    if (res.data.status === 'success') {
+      notify.success(`Official ${count}-question quiz generated successfully!`)
+      closeRegenModal()
+      await fetchQuizzes(pagination.value.current_page)
+    }
+  } catch (err) {
+    notify.error(err.response?.data?.message || 'Failed to regenerate quiz')
+  } finally {
+    isSubmittingRegen.value = false
+  }
+}
+
+const deleteQuiz = async (quiz) => {
+  const confirmed = await notify.confirm({
+    title: 'Delete Official Quiz?',
+    message: `Are you sure you want to delete the practice quiz for "${quiz.course_material?.title}"? All questions, options and student answer histories will be deleted.`,
+    confirmText: 'Delete Quiz',
+    type: 'danger',
+  })
+  if (!confirmed) return
+
+  try {
+    const res = await api.delete(`/admin/quizzes/${quiz.id}`)
+    if (res.data.status === 'success') {
+      notify.success('Quiz deleted.')
+      await fetchQuizzes(pagination.value.current_page)
+    }
+  } catch (err) {
+    notify.error(err.response?.data?.message || 'Failed to delete quiz')
+  }
+}
+
+const changePage = (newPage) => {
+  fetchQuizzes(newPage)
+}
+
+const formatOptionLabel = (optionText, index) => {
+  if (!optionText) return ''
+  const trimmed = optionText.trim()
+  if (/^[A-D]\.\s*/i.test(trimmed)) {
+    return trimmed
+  }
+  const prefix = String.fromCharCode(65 + index)
+  return `${prefix}. ${trimmed}`
+}
+
+const formatAiModel = (model) => {
+  if (!model) return 'AI Engine'
+  if (model.includes('gemini')) return 'Gemini 1.5'
+  if (model.includes('groq') || model.includes('llama')) return 'Groq Llama 3'
+  return model
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A'
+  return new Date(dateString).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+onMounted(async () => {
+  await Promise.all([
+    fetchQuizzes(1),
+    fetchCampusesAndDepartments(),
+  ])
+})
+</script>

@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\V1\Admin\DepartmentController as AdminDepartmentCon
 use App\Http\Controllers\Api\V1\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Api\V1\Admin\CourseOfferingController as AdminCourseOfferingController;
 use App\Http\Controllers\Api\V1\Admin\CourseMaterialController as AdminCourseMaterialController;
+use App\Http\Controllers\Api\V1\Admin\NoteController as AdminNoteController;
+use App\Http\Controllers\Api\V1\Admin\QuizController as AdminQuizController;
 use App\Http\Controllers\Api\V1\UniversityController;
 use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\CourseController;
@@ -46,7 +48,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
 
-        // User profile picture (admin and student)
+        // User profile and preferences (admin and student)
+        Route::get('/user/profile', [UserProfileController::class, 'getProfile']);
+        Route::put('/user/profile', [UserProfileController::class, 'updateProfile']);
+        Route::put('/user/password', [UserProfileController::class, 'updatePassword']);
         Route::post('/user/profile-picture', [UserProfileController::class, 'uploadAvatar']);
         Route::delete('/user/profile-picture', [UserProfileController::class, 'removeAvatar']);
 
@@ -137,6 +142,18 @@ Route::prefix('v1')->group(function () {
             Route::post('materials/{id}/replace', [AdminCourseMaterialController::class, 'replace']);
             Route::post('materials/{id}/generate-note', [AdminCourseMaterialController::class, 'generateNote']);
             Route::post('materials/{id}/generate-quiz', [AdminCourseMaterialController::class, 'generateQuiz']);
+
+            // AI Study Notes management
+            Route::get('notes', [AdminNoteController::class, 'index']);
+            Route::get('notes/{id}', [AdminNoteController::class, 'show']);
+            Route::post('notes/generate/{materialId}', [AdminNoteController::class, 'generate']);
+            Route::delete('notes/{id}', [AdminNoteController::class, 'destroy']);
+
+            // AI Quizzes management
+            Route::get('quizzes', [AdminQuizController::class, 'index']);
+            Route::get('quizzes/{id}', [AdminQuizController::class, 'show']);
+            Route::post('quizzes/generate/{materialId}', [AdminQuizController::class, 'generate']);
+            Route::delete('quizzes/{id}', [AdminQuizController::class, 'destroy']);
         });
     });
 });

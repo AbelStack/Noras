@@ -273,9 +273,14 @@
               <button 
                 type="button"
                 @click="changePassword"
-                class="px-4 py-2 bg-primary-600 text-white text-xs font-semibold rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
+                :disabled="isUpdatingPassword"
+                class="px-4 py-2 bg-primary-600 text-white text-xs font-semibold rounded-xl hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
               >
-                Update Password
+                <svg v-if="isUpdatingPassword" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ isUpdatingPassword ? 'Updating...' : 'Update Password' }}</span>
               </button>
             </div>
           </div>
@@ -286,16 +291,22 @@
           <button 
             type="button"
             @click="resetSettings"
-            class="px-5 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors"
+            :disabled="isSavingSettings"
+            class="px-5 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Reset
           </button>
           <button 
             type="button"
             @click="saveSettings"
-            class="px-6 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-colors shadow-sm"
+            :disabled="isSavingSettings"
+            class="px-6 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-colors shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
           >
-            Save Preferences
+            <svg v-if="isSavingSettings" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>{{ isSavingSettings ? 'Saving...' : 'Save Preferences' }}</span>
           </button>
         </div>
       </div>
@@ -309,6 +320,7 @@ import DashboardLayout from '../components/DashboardLayout.vue'
 import { authService } from '../services/auth'
 import { userService } from '../services/userService'
 import { useNotification } from '../composables/useNotification'
+import { adminNavigationItems } from '../config/navigation'
 
 const notify = useNotification()
 
@@ -318,6 +330,11 @@ const selectedFile = ref(null)
 const avatarPreview = ref(null)
 const isUploadingPhoto = ref(false)
 const photoError = ref('')
+const isSavingSettings = ref(false)
+const isUpdatingPassword = ref(false)
+const isLoadingProfile = ref(false)
+
+const navigationItems = adminNavigationItems
 
 const settings = ref({
   profile: {
@@ -426,24 +443,43 @@ const security = ref({
   confirmPassword: '',
 })
 
-const navigationItems = [
-  { path: '/admin/dashboard', label: 'Dashboard', icon: 'DashboardIcon' },
-  { path: '/admin/students', label: 'Student Approvals', icon: 'ApprovalIcon' },
-  { path: '/admin/notifications', label: 'Notifications', icon: 'ReportsIcon' },
-  { path: '/admin/campus', label: 'Campuses', icon: 'ProductsIcon' },
-  { path: '/admin/departments', label: 'Departments', icon: 'InventoryIcon' },
-  { path: '/admin/courses', label: 'Courses', icon: 'BookIcon' },
-  { path: '/admin/materials', label: 'Course Materials', icon: 'SalesIcon' },
-  { path: '/admin/settings', label: 'Settings', icon: 'SettingsIcon' },
-]
+const loadUserProfile = async () => {
+  // 1. Initialise quickly from local storage if present
+  const cached = authService.getUser()
+  if (cached) {
+    currentUser.value = cached
+    settings.value.profile.name = cached.name || ''
+    settings.value.profile.email = cached.email || ''
+    settings.value.profile.role = cached.role ? (cached.role.charAt(0).toUpperCase() + cached.role.slice(1)) : 'Admin'
+    if (cached.preferences) {
+      settings.value.system = {
+        emailNotifications: cached.preferences.emailNotifications !== false,
+        autoApprove: !!cached.preferences.autoApprove,
+        maintenanceMode: !!cached.preferences.maintenanceMode,
+      }
+    }
+  }
 
-const loadUserProfile = () => {
-  const user = authService.getUser()
-  if (user) {
+  // 2. Fetch fresh profile and preferences from server
+  try {
+    isLoadingProfile.value = true
+    const user = await userService.getProfile()
     currentUser.value = user
     settings.value.profile.name = user.name || ''
     settings.value.profile.email = user.email || ''
     settings.value.profile.role = user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Admin'
+    if (user.preferences) {
+      settings.value.system = {
+        emailNotifications: user.preferences.emailNotifications !== false,
+        autoApprove: !!user.preferences.autoApprove,
+        maintenanceMode: !!user.preferences.maintenanceMode,
+      }
+    }
+    localStorage.setItem('user', JSON.stringify(user))
+  } catch (err) {
+    console.error('Failed to load profile from server:', err)
+  } finally {
+    isLoadingProfile.value = false
   }
 }
 
@@ -457,27 +493,43 @@ const toggleMaintenanceMode = async () => {
     })
     if (confirmed) {
       settings.value.system.maintenanceMode = true
-      notify.warning('Maintenance mode is now active.')
+      notify.warning('Maintenance mode is now active. Remember to click "Save Preferences" to commit.')
     }
   } else {
     settings.value.system.maintenanceMode = false
-    notify.success('Maintenance mode disabled. System operating normally.')
+    notify.success('Maintenance mode disabled. Remember to click "Save Preferences" to commit.')
   }
 }
 
-const saveSettings = () => {
-  // Update local storage user profile if changed
-  const current = authService.getUser() || {}
-  const updatedUser = {
-    ...current,
-    name: settings.value.profile.name,
-    email: settings.value.profile.email,
+const saveSettings = async () => {
+  if (!settings.value.profile.name || !settings.value.profile.email) {
+    notify.error('Please provide both name and email.')
+    return
   }
-  currentUser.value = updatedUser
-  localStorage.setItem('user', JSON.stringify(updatedUser))
-  window.dispatchEvent(new Event('user-profile-updated'))
 
-  notify.success('Preferences and settings saved successfully.')
+  isSavingSettings.value = true
+  try {
+    const updatedUser = await userService.updateProfile({
+      name: settings.value.profile.name,
+      email: settings.value.profile.email,
+      preferences: {
+        emailNotifications: settings.value.system.emailNotifications,
+        autoApprove: settings.value.system.autoApprove,
+        maintenanceMode: settings.value.system.maintenanceMode,
+      },
+    })
+
+    currentUser.value = updatedUser
+    localStorage.setItem('user', JSON.stringify(updatedUser))
+    window.dispatchEvent(new Event('user-profile-updated'))
+
+    notify.success('Preferences and profile saved successfully.')
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Failed to save settings.'
+    notify.error(msg)
+  } finally {
+    isSavingSettings.value = false
+  }
 }
 
 const resetSettings = async () => {
@@ -490,16 +542,17 @@ const resetSettings = async () => {
 
   if (!confirmed) return
 
-  loadUserProfile()
   settings.value.system = {
     emailNotifications: true,
     autoApprove: false,
     maintenanceMode: false,
   }
-  notify.info('Preferences reset to default values.')
+
+  await saveSettings()
+  notify.info('Preferences reset to default values and saved.')
 }
 
-const changePassword = () => {
+const changePassword = async () => {
   if (!security.value.currentPassword || !security.value.newPassword || !security.value.confirmPassword) {
     notify.error('Please complete all password fields.')
     return
@@ -515,11 +568,25 @@ const changePassword = () => {
     return
   }
 
-  notify.success('Password updated successfully.')
-  security.value = {
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+  isUpdatingPassword.value = true
+  try {
+    await userService.updatePassword({
+      current_password: security.value.currentPassword,
+      new_password: security.value.newPassword,
+      new_password_confirmation: security.value.confirmPassword,
+    })
+
+    notify.success('Password updated successfully.')
+    security.value = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    }
+  } catch (err) {
+    const msg = err.response?.data?.message || err.response?.data?.errors?.current_password?.[0] || 'Failed to update password.'
+    notify.error(msg)
+  } finally {
+    isUpdatingPassword.value = false
   }
 }
 

@@ -22,6 +22,8 @@ import AdminCampusPage from './pages/AdminCampusPage.vue'
 import AdminDepartmentsPage from './pages/AdminDepartmentsPage.vue'
 import AdminCoursesPage from './pages/AdminCoursesPage.vue'
 import AdminMaterialsPage from './pages/AdminMaterialsPage.vue'
+import AdminNotesPage from './pages/AdminNotesPage.vue'
+import AdminQuizzesPage from './pages/AdminQuizzesPage.vue'
 import AdminNotificationsPage from './pages/AdminNotificationsPage.vue'
 import AdminSettingsPage from './pages/AdminSettingsPage.vue'
 import DepartmentsPage from './pages/DepartmentsPage.vue'
@@ -141,6 +143,16 @@ const routes = [
   { 
     path: '/admin/materials', 
     component: AdminMaterialsPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/notes', 
+    component: AdminNotesPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  { 
+    path: '/admin/quizzes', 
+    component: AdminQuizzesPage,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   { 

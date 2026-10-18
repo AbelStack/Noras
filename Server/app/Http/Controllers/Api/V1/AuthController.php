@@ -162,6 +162,11 @@ class AuthController extends Controller
                         'code' => $user->department->code,
                     ] : null,
                     'avatar_url' => $user->avatar_url,
+                    'preferences' => $user->preferences ?? [
+                        'emailNotifications' => true,
+                        'autoApprove' => false,
+                        'maintenanceMode' => false,
+                    ],
                 ],
             ],
         ]);
@@ -205,6 +210,11 @@ class AuthController extends Controller
                     ] : null,
                     'approved_at' => $user->approved_at?->toISOString(),
                     'avatar_url' => $user->avatar_url,
+                    'preferences' => $user->preferences ?? [
+                        'emailNotifications' => true,
+                        'autoApprove' => false,
+                        'maintenanceMode' => false,
+                    ],
                 ],
             ],
         ]);
