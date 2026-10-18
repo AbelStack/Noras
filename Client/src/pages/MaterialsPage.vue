@@ -113,14 +113,32 @@
               </svg>
               <span>{{ downloadingId === material.id ? 'Downloading...' : (isPpt(material) ? 'Download PPT' : 'Download PDF') }}</span>
             </button>
+
+            <!-- Save / Bookmark Button -->
+            <button
+              @click="toggleBookmark(material)"
+              :disabled="bookmarkingId === material.id"
+              :class="[
+                'inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border transition-colors cursor-pointer',
+                isBookmarked(material.id)
+                  ? 'bg-amber-50 text-accent-600 border-amber-300'
+                  : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+              ]"
+              :title="isBookmarked(material.id) ? 'Remove from Saved Materials' : 'Save Material to Bookmarks'"
+            >
+              <svg class="w-3.5 h-3.5" :fill="isBookmarked(material.id) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              <span>{{ isBookmarked(material.id) ? 'Saved' : 'Save' }}</span>
+            </button>
             
             <!-- Study Notes Link & Download Button -->
             <div v-if="material.master_note" class="flex items-center gap-1.5">
               <router-link
                 :to="`/notes/${material.master_note.id}`"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold rounded-xl hover:bg-emerald-100 transition-colors shadow-2xs cursor-pointer"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary-50 text-primary-700 border border-primary-200 text-xs font-semibold rounded-xl hover:bg-primary-100 transition-colors shadow-2xs cursor-pointer"
               >
-                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span>Study Notes</span>
@@ -128,7 +146,7 @@
               <button
                 @click="downloadNote(material)"
                 :disabled="downloadingNoteId === material.id"
-                class="inline-flex items-center gap-1 px-3 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-xl hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 transition-colors shadow-2xs cursor-pointer"
+                class="inline-flex items-center gap-1 px-3 py-2 bg-primary-600 text-white text-xs font-semibold rounded-xl hover:bg-primary-700 active:bg-primary-800 disabled:opacity-50 transition-colors shadow-2xs cursor-pointer"
                 title="Download Study Notes as Markdown file"
               >
                 <svg v-if="downloadingNoteId === material.id" class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
@@ -213,6 +231,7 @@ import SkeletonLoader from '../components/SkeletonLoader.vue'
 import { catalogService } from '../services/catalog'
 import { notesService } from '../services/notes'
 import { quizzesService } from '../services/quizzes'
+import { bookmarksService } from '../services/bookmarks'
 import { studentNavigationItems } from '../config/navigation'
 import { useNotification } from '../composables/useNotification'
 
@@ -228,6 +247,8 @@ const downloadingId = ref(null)
 const downloadingNoteId = ref(null)
 const generatingId = ref(null)
 const generatingQuizId = ref(null)
+const bookmarkingId = ref(null)
+const userBookmarks = ref({}) // { materialId: bookmarkId }
 
 const courseTitle = computed(() => {
   return offering.value?.course?.title || offering.value?.course?.name || 'Course Materials'
@@ -246,22 +267,59 @@ onMounted(() => {
   loadMaterials()
 })
 
+const isBookmarked = (materialId) => {
+  return !!userBookmarks.value[materialId]
+}
+
+const toggleBookmark = async (material) => {
+  bookmarkingId.value = material.id
+  try {
+    if (isBookmarked(material.id)) {
+      const bookmarkId = userBookmarks.value[material.id]
+      await bookmarksService.deleteBookmark(bookmarkId)
+      delete userBookmarks.value[material.id]
+      notify.success(`"${material.title}" removed from saved materials.`)
+    } else {
+      const response = await bookmarksService.createBookmark(
+        bookmarksService.RESOURCE_TYPES.MATERIAL,
+        material.id
+      )
+      userBookmarks.value[material.id] = response.data?.id || response.id || true
+      notify.success(`"${material.title}" saved to bookmarks!`)
+    }
+  } catch (error) {
+    console.error('Failed to update bookmark:', error)
+    notify.error('Could not update saved status. Please try again.')
+  } finally {
+    bookmarkingId.value = null
+  }
+}
+
 const loadMaterials = async (page = 1) => {
   isLoading.value = true
   errorMessage.value = ''
   try {
     const offeringId = route.params.offeringId
-    const [offeringData, result] = await Promise.all([
+    const [offeringData, result, bookmarksData] = await Promise.all([
       catalogService.getCourseOffering(offeringId).catch(err => {
         console.warn('Could not load course offering details:', err)
         return null
       }),
-      catalogService.getCourseMaterials(offeringId, { page })
+      catalogService.getCourseMaterials(offeringId, { page }),
+      bookmarksService.listBookmarks({ per_page: 100, bookmarkable_type: bookmarksService.RESOURCE_TYPES.MATERIAL }).catch(() => ({ data: [] }))
     ])
 
     offering.value = offeringData || result?.materials?.[0]?.course_offering || null
     materials.value = result?.materials || []
     pagination.value = result?.pagination || null
+
+    const bMap = {}
+    if (bookmarksData?.data && Array.isArray(bookmarksData.data)) {
+      bookmarksData.data.forEach(b => {
+        if (b.bookmarkable_id) bMap[b.bookmarkable_id] = b.id
+      })
+    }
+    userBookmarks.value = bMap
   } catch (error) {
     console.error('Failed to load materials:', error)
     errorMessage.value = error.response?.data?.message || 'Failed to load materials. Please try again.'
