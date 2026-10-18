@@ -72,6 +72,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/courses', [CourseController::class, 'index']);
             Route::get('/courses/{id}', [CourseController::class, 'show']);
             Route::get('/course-offerings', [CourseController::class, 'offerings']);
+            Route::get('/course-offerings/{id}', [CourseController::class, 'showOffering']);
 
             // Student read-only material access
             Route::get('/materials', [CourseMaterialController::class, 'index']);

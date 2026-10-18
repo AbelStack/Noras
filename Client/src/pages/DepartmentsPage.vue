@@ -17,10 +17,10 @@
         </button>
         <div>
           <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-            {{ isEnrolledView ? `${myDepartment?.name || 'Department'} Curriculum Years` : 'Academic Departments' }}
+            {{ myDepartment?.name || 'Department' }} Curriculum Years
           </h1>
           <p class="text-sm text-gray-600 mt-1">
-            {{ isEnrolledView ? `Browse Year 2 to Year ${departmentDuration} courses, lecture notes, and learning materials` : 'Browse courses, curriculum subjects, and academic materials' }}
+            Browse Year 2 to Year {{ departmentDuration }} courses, lecture notes, and learning materials
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@
           </svg>
           <p class="text-sm text-red-700 font-medium">{{ errorMessage }}</p>
         </div>
-        <button @click="loadDepartments" class="text-sm text-red-700 hover:text-red-800 underline font-medium">
+        <button @click="loadDepartments" class="text-sm text-red-700 hover:text-red-800 underline font-medium cursor-pointer">
           Try again
         </button>
       </div>
@@ -70,27 +70,10 @@
               </p>
             </div>
           </div>
-
-          <!-- Switch to view all departments or enrolled years -->
-          <div class="flex items-center gap-2">
-            <button
-              v-if="user?.department_id"
-              @click="viewMode = (viewMode === 'years' ? 'all_departments' : 'years')"
-              class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 rounded-xl text-xs font-semibold shadow-2xs hover:bg-gray-50 transition-all cursor-pointer"
-            >
-              <svg v-if="viewMode === 'years'" class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              <svg v-else class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{{ viewMode === 'years' ? 'View All Departments' : 'View My Department Years' }}</span>
-            </button>
-          </div>
         </div>
 
-        <!-- YEARS VIEW (Default for enrolled student) -->
-        <div v-if="isEnrolledView" class="space-y-4">
+        <!-- Academic Years View -->
+        <div class="space-y-4">
           <div class="flex items-center justify-between border-b border-gray-200 pb-3">
             <div>
               <h2 class="text-base font-bold text-gray-900">Academic Years (Year 2 &ndash; Year {{ departmentDuration }})</h2>
@@ -106,7 +89,7 @@
             <router-link
               v-for="yr in yearCards"
               :key="yr.year"
-              :to="`/departments/${myDepartment.id}/courses?year=${yr.year}`"
+              :to="`/departments/${myDepartment?.id || user?.department_id}/courses?year=${yr.year}`"
               class="bg-white rounded-2xl border border-gray-200 hover:border-primary-400 hover:ring-2 hover:ring-primary-100 p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between cursor-pointer"
             >
               <div>
@@ -120,7 +103,7 @@
                         Year {{ yr.year }}
                       </h3>
                       <p class="text-xs text-gray-500 font-medium">
-                        {{ myDepartment.name }}
+                        {{ myDepartment?.name || 'Department' }}
                       </p>
                     </div>
                   </div>
@@ -148,67 +131,6 @@
             </router-link>
           </div>
         </div>
-
-        <!-- ALL DEPARTMENTS VIEW (Fallback or when toggled) -->
-        <div v-else class="space-y-4">
-          <div class="flex items-center justify-between border-b border-gray-200 pb-3">
-            <div>
-              <h2 class="text-base font-bold text-gray-900">All Academic Departments</h2>
-              <p class="text-xs text-gray-500">Explore offerings across other faculties and programs</p>
-            </div>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600">
-              {{ departments.length }} Departments
-            </span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <router-link
-              v-for="department in departments"
-              :key="department.id"
-              :to="`/departments/${department.id}/courses`"
-              :class="[
-                'bg-white rounded-2xl border p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between',
-                user?.department_id === department.id ? 'border-primary-400 ring-2 ring-primary-100' : 'border-gray-200 hover:border-primary-300'
-              ]"
-            >
-              <div>
-                <div class="flex items-start justify-between gap-2 mb-3">
-                  <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
-                    {{ department.name }}
-                  </h3>
-                  <div class="flex items-center gap-1.5 flex-shrink-0">
-                    <span 
-                      v-if="user?.department_id === department.id"
-                      class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800"
-                    >
-                      Enrolled
-                    </span>
-                    <span class="text-xs font-mono font-medium px-2 py-0.5 rounded-md bg-gray-100 text-gray-700">
-                      {{ department.code }}
-                    </span>
-                  </div>
-                </div>
-                <p v-if="department.university" class="text-xs text-gray-500 flex items-center gap-1.5 mt-2">
-                  <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>{{ department.university.name }}</span>
-                </p>
-                <p class="text-xs text-gray-400 mt-1">
-                  {{ department.total_years || 4 }}-Year Degree Program
-                </p>
-              </div>
-
-              <div class="flex items-center justify-between text-xs font-medium text-primary-600 pt-4 mt-4 border-t border-gray-100">
-                <span>Explore Courses</span>
-                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </router-link>
-          </div>
-        </div>
       </div>
     </div>
   </DashboardLayout>
@@ -226,15 +148,10 @@ const user = computed(() => authService.getUser())
 const departments = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
-const viewMode = ref('years')
 
 const myDepartment = computed(() => {
-  if (!user.value?.department_id) return null
+  if (!user.value?.department_id) return user.value?.department || null
   return departments.value.find(d => d.id === user.value.department_id) || user.value.department || null
-})
-
-const isEnrolledView = computed(() => {
-  return !!user.value?.department_id && !!myDepartment.value && viewMode.value === 'years'
 })
 
 const departmentDuration = computed(() => {
@@ -242,17 +159,16 @@ const departmentDuration = computed(() => {
 })
 
 const yearCards = computed(() => {
-  if (!myDepartment.value) return []
   const total = departmentDuration.value
   const years = []
-  // Show years starting from Year 2 up to total_years (e.g. 2, 3, 4 for IS)
+  // Show years starting from Year 2 up to total_years (e.g. 2, 3, 4 for 4-year degree)
   for (let y = 2; y <= total; y++) {
     years.push({
       year: y,
       totalYears: total,
     })
   }
-  // Fallback if department duration is 1
+  // Fallback if department duration is less than 2
   if (years.length === 0) {
     years.push({ year: 1, totalYears: 1 })
   }

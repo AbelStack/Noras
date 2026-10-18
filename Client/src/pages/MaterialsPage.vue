@@ -251,10 +251,17 @@ const loadMaterials = async (page = 1) => {
   errorMessage.value = ''
   try {
     const offeringId = route.params.offeringId
-    offering.value = await catalogService.getCourseOffering(offeringId)
-    const result = await catalogService.getCourseMaterials(offeringId, { page })
-    materials.value = result.materials
-    pagination.value = result.pagination
+    const [offeringData, result] = await Promise.all([
+      catalogService.getCourseOffering(offeringId).catch(err => {
+        console.warn('Could not load course offering details:', err)
+        return null
+      }),
+      catalogService.getCourseMaterials(offeringId, { page })
+    ])
+
+    offering.value = offeringData || result?.materials?.[0]?.course_offering || null
+    materials.value = result?.materials || []
+    pagination.value = result?.pagination || null
   } catch (error) {
     console.error('Failed to load materials:', error)
     errorMessage.value = error.response?.data?.message || 'Failed to load materials. Please try again.'

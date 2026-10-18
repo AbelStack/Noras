@@ -91,4 +91,17 @@ class CourseController extends Controller
             'data' => ['course_offerings' => $offerings],
         ]);
     }
+
+    public function showOffering($id)
+    {
+        $offering = CourseOffering::where('is_active', true)
+            ->with(['course', 'department.university'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => ['course_offering' => $offering],
+        ]);
+    }
 }
+

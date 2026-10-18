@@ -41,6 +41,11 @@ export const catalogService = {
     return response.data.data.course_offerings
   },
 
+  async getCourseOffering(id) {
+    const response = await api.get(`/course-offerings/${id}`)
+    return response.data.data.course_offering
+  },
+
   // Materials
   async getMaterials(filters = {}, page = 1) {
     const params = { ...filters, page }
