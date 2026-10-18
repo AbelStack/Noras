@@ -23,14 +23,20 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Configure rate limiter for AI note generation
-        // Limit: 10 generations per hour per user
+        // Limit: 10 generations per hour per regular student (unlimited for admin)
         RateLimiter::for('note-generation', function (Request $request) {
+            if ($request->user()?->isAdmin()) {
+                return Limit::none();
+            }
             return Limit::perHour(10)->by($request->user()?->id);
         });
 
         // Configure rate limiter for AI quiz generation
-        // Limit: 10 generations per hour per user
+        // Limit: 10 generations per hour per regular student (unlimited for admin)
         RateLimiter::for('quiz-generation', function (Request $request) {
+            if ($request->user()?->isAdmin()) {
+                return Limit::none();
+            }
             return Limit::perHour(10)->by($request->user()?->id);
         });
     }

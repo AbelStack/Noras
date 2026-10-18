@@ -158,7 +158,7 @@ class QuizGenerationService
                             'question_id' => $question->id,
                             'option_order' => $optionIndex + 1,
                             'option_text' => $optionText,
-                            'is_correct' => $optionIndex === $questionData['correct_index'],
+                            'is_correct' => $optionIndex === (int) $questionData['correct_index'],
                         ]);
                     }
                 }
@@ -221,12 +221,12 @@ class QuizGenerationService
             }
         }
 
-        if (!isset($question['correct_index'])) {
-            throw new Exception("Question {$index} missing correct_index");
+        if (!isset($question['correct_index']) || !is_numeric($question['correct_index'])) {
+            throw new Exception("Question {$index} missing or invalid correct_index");
         }
 
-        $correctIndex = $question['correct_index'];
-        if (!is_int($correctIndex) || $correctIndex < 0 || $correctIndex >= $optionCount) {
+        $correctIndex = (int) $question['correct_index'];
+        if ($correctIndex < 0 || $correctIndex >= $optionCount) {
             throw new Exception("Question {$index} has invalid correct_index: {$correctIndex}");
         }
 

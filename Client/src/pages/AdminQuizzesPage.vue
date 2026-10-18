@@ -176,27 +176,32 @@
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50/75">
                 <tr>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Course Material</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Target Curriculum</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Questions</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">AI Model</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Generated</th>
-                  <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                  <th class="px-3.5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Course Material</th>
+                  <th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Curriculum</th>
+                  <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Questions</th>
+                  <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">AI Model</th>
+                  <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Generated</th>
+                  <th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">View</th>
+                  <th class="px-3.5 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 bg-white">
                 <tr v-for="quiz in quizzes" :key="quiz.id" class="hover:bg-gray-50/80 transition-colors">
                   <!-- Course Material Document -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-start gap-3">
-                      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs shadow-2xs bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  <td class="px-3.5 py-2.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-2xs bg-indigo-50 text-indigo-700 border border-indigo-200">
                         <span>🎯</span>
                       </div>
                       <div class="min-w-0">
-                        <div class="text-sm font-bold text-gray-900 truncate max-w-xs sm:max-w-md" :title="quiz.course_material?.title">
+                        <div 
+                          @click="viewQuiz(quiz)"
+                          class="text-xs sm:text-sm font-bold text-gray-900 truncate max-w-xs sm:max-w-sm hover:text-indigo-600 cursor-pointer transition-colors" 
+                          :title="quiz.course_material?.title"
+                        >
                           {{ quiz.course_material?.title || 'Course Material' }}
                         </div>
-                        <div class="text-xs text-gray-400 mt-0.5 truncate max-w-xs">
+                        <div class="text-[11px] text-gray-400 truncate max-w-xs">
                           {{ quiz.course_material?.original_filename || 'Document file' }}
                         </div>
                       </div>
@@ -204,11 +209,11 @@
                   </td>
 
                   <!-- Target Curriculum -->
-                  <td class="px-6 py-4 whitespace-nowrap">
+                  <td class="px-3 py-2.5 whitespace-nowrap text-center">
                     <button
                       type="button"
                       @click="viewCurriculumDetails(quiz)"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-xl border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
                       title="View target curriculum details"
                     >
                       <svg class="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -216,41 +221,57 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                       <span>
-                        {{ quiz.course_material?.course_offering?.course?.code || 'View Curriculum' }}
+                        {{ quiz.course_material?.course_offering?.course?.code || 'Curriculum' }}
                       </span>
                     </button>
                   </td>
 
                   <!-- Questions Count -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  <td class="px-3 py-2.5 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
                       <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                      {{ quiz.question_count || quiz.questions?.length || 20 }} Questions
+                      {{ quiz.question_count || quiz.questions?.length || 20 }} Qs
                     </span>
                   </td>
 
                   <!-- AI Model -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-gray-100 text-gray-800 border border-gray-200">
+                  <td class="px-3 py-2.5 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-gray-100 text-gray-800 border border-gray-200">
                       {{ formatAiModel(quiz.ai_model || quiz.ai_provider) }}
                     </span>
                   </td>
 
                   <!-- Generated Date -->
-                  <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                  <td class="px-3 py-2.5 whitespace-nowrap text-xs text-gray-500">
                     {{ formatDate(quiz.created_at) }}
                   </td>
 
+                  <!-- Direct View Quiz Button -->
+                  <td class="px-3 py-2.5 whitespace-nowrap text-center">
+                    <button
+                      type="button"
+                      @click="viewQuiz(quiz)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
+                      title="View practice quiz questions and answer keys"
+                    >
+                      <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>View Quiz</span>
+                    </button>
+                  </td>
+
                   <!-- 3-Dots Action Menu -->
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <td class="px-3.5 py-2.5 whitespace-nowrap text-right text-sm">
                     <div class="relative inline-block text-left" @click.stop>
                       <button 
                         type="button"
                         @click.stop="toggleActionMenu(quiz.id)" 
-                        class="p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                        class="p-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
                         title="Actions"
                       >
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                         </svg>
                       </button>
@@ -367,40 +388,49 @@
 
             <!-- Questions List -->
             <div class="p-6 max-h-[65vh] overflow-y-auto space-y-4">
-              <div
-                v-for="(question, qIndex) in activeQuiz?.questions || []"
-                :key="question.id || qIndex"
-                class="p-4 bg-gray-50/70 rounded-xl border border-gray-200/80 space-y-2.5"
-              >
-                <div class="flex items-start gap-2.5">
-                  <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 flex-shrink-0 mt-0.5">
-                    Q{{ qIndex + 1 }}
-                  </span>
-                  <p class="text-sm font-bold text-gray-900 leading-snug">{{ question.question_text }}</p>
-                </div>
-
-                <!-- Choices -->
-                <div class="space-y-1.5 pl-8">
-                  <div
-                    v-for="(opt, optIndex) in question.options || []"
-                    :key="opt.id || optIndex"
-                    :class="opt.is_correct ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold shadow-2xs' : 'bg-white text-gray-700 border-gray-200'"
-                    class="p-2.5 rounded-lg border text-xs flex items-center justify-between transition-colors"
-                  >
-                    <span>{{ formatOptionLabel(opt.option_text, optIndex) }}</span>
-                    <span v-if="opt.is_correct" class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded flex items-center gap-1">
-                      <span>✓</span> Correct Answer
+              <div v-if="loadingQuizDetails" class="flex flex-col items-center justify-center py-12 text-gray-500">
+                <svg class="animate-spin h-8 w-8 text-indigo-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span class="text-sm">Loading quiz questions and citations...</span>
+              </div>
+              <template v-else>
+                <div
+                  v-for="(question, qIndex) in activeQuiz?.questions || []"
+                  :key="question.id || qIndex"
+                  class="p-4 bg-gray-50/70 rounded-xl border border-gray-200/80 space-y-2.5"
+                >
+                  <div class="flex items-start gap-2.5">
+                    <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 flex-shrink-0 mt-0.5">
+                      Q{{ qIndex + 1 }}
                     </span>
+                    <p class="text-sm font-bold text-gray-900 leading-snug">{{ question.question_text }}</p>
+                  </div>
+
+                  <!-- Choices -->
+                  <div class="space-y-1.5 pl-8">
+                    <div
+                      v-for="(opt, optIndex) in question.options || []"
+                      :key="opt.id || optIndex"
+                      :class="opt.is_correct ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold shadow-2xs' : 'bg-white text-gray-700 border-gray-200'"
+                      class="p-2.5 rounded-lg border text-xs flex items-center justify-between transition-colors"
+                    >
+                      <span>{{ formatOptionLabel(opt.option_text, optIndex) }}</span>
+                      <span v-if="opt.is_correct" class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded flex items-center gap-1">
+                        <span>✓</span> Correct Answer
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Explanation & Citations -->
+                  <div v-if="question.explanation" class="pl-8 pt-1">
+                    <p class="text-xs text-indigo-900 font-medium bg-indigo-50/60 p-2.5 rounded-lg border border-indigo-100 leading-relaxed">
+                      <span class="font-bold">Citation & Explanation:</span> {{ question.explanation }}
+                    </p>
                   </div>
                 </div>
-
-                <!-- Explanation & Citations -->
-                <div v-if="question.explanation" class="pl-8 pt-1">
-                  <p class="text-xs text-indigo-900 font-medium bg-indigo-50/60 p-2.5 rounded-lg border border-indigo-100 leading-relaxed">
-                    <span class="font-bold">Citation & Explanation:</span> {{ question.explanation }}
-                  </p>
-                </div>
-              </div>
+              </template>
             </div>
 
             <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
@@ -644,6 +674,7 @@ const showCurriculumModal = ref(false)
 const activeQuiz = ref(null)
 const regenCount = ref(20)
 const isSubmittingRegen = ref(false)
+const loadingQuizDetails = ref(false)
 
 let debounceTimer = null
 const debounceFetch = () => {
@@ -738,8 +769,8 @@ const fetchQuizzes = async (page = 1) => {
 const fetchCampusesAndDepartments = async () => {
   try {
     const [campRes, deptRes] = await Promise.all([
-      api.get('/universities').catch(() => ({ data: { data: { universities: [] } } })),
-      api.get('/departments').catch(() => ({ data: { data: { departments: [] } } })),
+      api.get('/admin/universities').catch(() => ({ data: { data: { universities: [] } } })),
+      api.get('/admin/departments').catch(() => ({ data: { data: { departments: [] } } })),
     ])
 
     campuses.value = campRes.data?.data?.universities || campRes.data?.data || []
@@ -753,14 +784,21 @@ const viewQuiz = async (quiz) => {
   activeQuiz.value = quiz
   showQuizModal.value = true
 
-  // Fetch full details with ordered questions & options
-  try {
-    const res = await api.get(`/admin/quizzes/${quiz.id}`)
-    if (res.data.status === 'success' && res.data.data.quiz) {
-      activeQuiz.value = res.data.data.quiz
+  // Fetch full details with ordered questions & options if not loaded
+  if (!quiz.questions || quiz.questions.length === 0) {
+    loadingQuizDetails.value = true
+    try {
+      const res = await api.get(`/admin/quizzes/${quiz.id}`)
+      if (res.data.status === 'success' && res.data.data.quiz) {
+        activeQuiz.value = res.data.data.quiz
+        quiz.questions = res.data.data.quiz.questions
+      }
+    } catch (err) {
+      console.error('Failed to load quiz details:', err)
+      notify.error('Failed to load quiz questions')
+    } finally {
+      loadingQuizDetails.value = false
     }
-  } catch (err) {
-    console.error('Failed to load quiz details:', err)
   }
 }
 
@@ -864,10 +902,8 @@ const formatDate = (dateString) => {
   })
 }
 
-onMounted(async () => {
-  await Promise.all([
-    fetchQuizzes(1),
-    fetchCampusesAndDepartments(),
-  ])
+onMounted(() => {
+  fetchQuizzes(1)
+  fetchCampusesAndDepartments()
 })
 </script>

@@ -173,30 +173,36 @@
         <!-- Table of Notes -->
         <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="w-full divide-y divide-gray-200 text-left">
               <thead class="bg-gray-50/75">
                 <tr>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Course Material</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Target Curriculum</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">AI Model</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Length</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Generated</th>
-                  <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                  <th class="px-3.5 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-tight">Course Material</th>
+                  <th class="px-3 py-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-tight w-24">Curriculum</th>
+                  <th class="px-3 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-tight w-28">AI Model</th>
+                  <th class="px-3 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-tight w-24">Length</th>
+                  <th class="px-3 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-tight w-24">Generated</th>
+                  <th class="px-3 py-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-tight w-28">Read Note</th>
+                  <th class="px-3.5 py-3 text-right text-[11px] font-bold text-gray-500 uppercase tracking-tight w-14">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 bg-white">
                 <tr v-for="note in notes" :key="note.id" class="hover:bg-gray-50/80 transition-colors">
                   <!-- Course Material Document -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-start gap-3">
-                      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs shadow-2xs bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <td class="px-3.5 py-2.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-[10px] shadow-2xs bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span>📝</span>
                       </div>
                       <div class="min-w-0">
-                        <div class="text-sm font-bold text-gray-900 truncate max-w-xs sm:max-w-md" :title="note.course_material?.title">
+                        <button 
+                          type="button" 
+                          @click="viewNote(note)" 
+                          class="text-xs font-bold text-gray-900 hover:text-emerald-700 transition-colors truncate max-w-[180px] sm:max-w-[260px] lg:max-w-[340px] block text-left cursor-pointer" 
+                          :title="note.course_material?.title"
+                        >
                           {{ note.course_material?.title || 'Course Material' }}
-                        </div>
-                        <div class="text-xs text-gray-400 mt-0.5 truncate max-w-xs">
+                        </button>
+                        <div class="text-[11px] text-gray-400 truncate max-w-[160px] sm:max-w-[220px]" :title="note.course_material?.original_filename">
                           {{ note.course_material?.original_filename || 'Document file' }}
                         </div>
                       </div>
@@ -204,11 +210,11 @@
                   </td>
 
                   <!-- Target Curriculum -->
-                  <td class="px-6 py-4 whitespace-nowrap">
+                  <td class="px-3 py-2.5 whitespace-nowrap text-center">
                     <button
                       type="button"
                       @click="viewCurriculumDetails(note)"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-xl border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
                       title="View target curriculum details"
                     >
                       <svg class="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -216,40 +222,55 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                       <span>
-                        {{ note.course_material?.course_offering?.course?.code || 'View Curriculum' }}
+                        {{ note.course_material?.course_offering?.course?.code || 'Curriculum' }}
                       </span>
                     </button>
                   </td>
 
                   <!-- AI Model -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <td class="px-3 py-2.5 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
                       <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                       {{ formatAiModel(note.ai_model || note.ai_provider) }}
                     </span>
                   </td>
 
                   <!-- Length / Character Count -->
-                  <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-700 font-medium">
-                    <div>{{ (note.notes_char_count || note.content?.length || 0).toLocaleString() }} chars</div>
-                    <div class="text-[11px] text-gray-400 mt-0.5">~{{ Math.round((note.notes_char_count || note.content?.length || 0) / 5).toLocaleString() }} words</div>
+                  <td class="px-3 py-2.5 whitespace-nowrap text-xs text-gray-700 font-medium">
+                    <div class="text-xs font-semibold">{{ (note.notes_char_count || note.content?.length || 0).toLocaleString() }} chars</div>
+                    <div class="text-[10px] text-gray-400">~{{ Math.round((note.notes_char_count || note.content?.length || 0) / 5).toLocaleString() }} words</div>
                   </td>
 
                   <!-- Generated Date -->
-                  <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                  <td class="px-3 py-2.5 whitespace-nowrap text-xs text-gray-500">
                     {{ formatDate(note.created_at) }}
                   </td>
 
+                  <!-- Direct Read Note Button -->
+                  <td class="px-3 py-2.5 whitespace-nowrap text-center">
+                    <button
+                      type="button"
+                      @click="viewNote(note)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
+                      title="Read study note"
+                    >
+                      <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      <span>Read Note</span>
+                    </button>
+                  </td>
+
                   <!-- 3-Dots Action Menu -->
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <td class="px-3.5 py-2.5 whitespace-nowrap text-right text-sm">
                     <div class="relative inline-block text-left" @click.stop>
                       <button 
                         type="button"
                         @click.stop="toggleActionMenu(note.id)" 
-                        class="p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
-                        title="Actions"
+                        class="p-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                        title="More actions"
                       >
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                         </svg>
                       </button>
@@ -258,16 +279,15 @@
                       <div 
                         v-if="activeActionMenuId === note.id"
                         @click.stop
-                        v-click-outside="() => activeActionMenuId = null"
                         class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
                       >
                         <div class="py-1">
                           <button 
                             type="button"
                             @click="viewNote(note); activeActionMenuId = null" 
-                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors text-left cursor-pointer"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors text-left cursor-pointer"
                           >
-                            <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
@@ -278,9 +298,9 @@
                             type="button"
                             @click="regenerateNote(note); activeActionMenuId = null" 
                             :disabled="isRegeneratingId === note.id"
-                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 transition-colors text-left cursor-pointer disabled:opacity-50"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50 transition-colors text-left cursor-pointer disabled:opacity-50"
                           >
-                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                             <span>{{ isRegeneratingId === note.id ? 'Regenerating...' : 'Regenerate Note' }}</span>
@@ -291,9 +311,9 @@
                           <button 
                             type="button"
                             @click="deleteNote(note); activeActionMenuId = null" 
-                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
                           >
-                            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                             <span>Delete Note</span>
@@ -365,7 +385,16 @@
               </button>
             </div>
             <div class="p-6 max-h-[65vh] overflow-y-auto text-gray-800 leading-relaxed font-sans whitespace-pre-wrap select-text text-sm bg-gray-50/40 rounded-xl m-4 border border-gray-150">
-              {{ activeNote?.content }}
+              <div v-if="loadingNoteContent" class="flex flex-col items-center justify-center py-12 text-gray-500">
+                <svg class="animate-spin h-8 w-8 text-emerald-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span class="text-sm">Loading full study note content...</span>
+              </div>
+              <template v-else>
+                {{ activeNote?.content }}
+              </template>
             </div>
             <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
               <button 
@@ -536,6 +565,7 @@ const isRegeneratingId = ref(null)
 const showNoteModal = ref(false)
 const showCurriculumModal = ref(false)
 const activeNote = ref(null)
+const loadingNoteContent = ref(false)
 
 let debounceTimer = null
 const debounceFetch = () => {
@@ -630,8 +660,8 @@ const fetchNotes = async (page = 1) => {
 const fetchCampusesAndDepartments = async () => {
   try {
     const [campRes, deptRes] = await Promise.all([
-      api.get('/universities').catch(() => ({ data: { data: { universities: [] } } })),
-      api.get('/departments').catch(() => ({ data: { data: { departments: [] } } })),
+      api.get('/admin/universities').catch(() => ({ data: { data: { universities: [] } } })),
+      api.get('/admin/departments').catch(() => ({ data: { data: { departments: [] } } })),
     ])
 
     campuses.value = campRes.data?.data?.universities || campRes.data?.data || []
@@ -641,9 +671,25 @@ const fetchCampusesAndDepartments = async () => {
   }
 }
 
-const viewNote = (note) => {
+const viewNote = async (note) => {
   activeNote.value = note
   showNoteModal.value = true
+
+  if (!note.content) {
+    loadingNoteContent.value = true
+    try {
+      const res = await api.get(`/admin/notes/${note.id}`)
+      if (res.data.status === 'success' && res.data.data.note) {
+        activeNote.value = res.data.data.note
+        note.content = res.data.data.note.content
+      }
+    } catch (err) {
+      console.error('Failed to load note content:', err)
+      notify.error('Failed to load study note text')
+    } finally {
+      loadingNoteContent.value = false
+    }
+  }
 }
 
 const closeNoteModal = () => {
@@ -741,10 +787,8 @@ const formatDate = (dateString) => {
   })
 }
 
-onMounted(async () => {
-  await Promise.all([
-    fetchNotes(1),
-    fetchCampusesAndDepartments(),
-  ])
+onMounted(() => {
+  fetchNotes(1)
+  fetchCampusesAndDepartments()
 })
 </script>

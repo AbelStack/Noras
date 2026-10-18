@@ -54,8 +54,8 @@ class GeminiProvider implements AIProviderInterface
                         ]
                     ],
                     'generationConfig' => [
-                        'temperature' => 0.3,
-                        'maxOutputTokens' => 8192,
+                        'temperature' => 0.2,
+                        'maxOutputTokens' => 4096,
                     ],
                     'safetySettings' => [
                         ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_NONE'],
@@ -183,7 +183,8 @@ PROMPT;
                         ]
                     ],
                     'generationConfig' => [
-                        'temperature' => 0.4,
+                        'responseMimeType' => 'application/json',
+                        'temperature' => 0.2,
                         'maxOutputTokens' => 8192,
                     ],
                     'safetySettings' => [
@@ -273,10 +274,12 @@ PROMPT;
     {
         $response = trim($response);
         
-        // Remove markdown code blocks if present
-        $response = preg_replace('/^```json\s*/i', '', $response);
-        $response = preg_replace('/\s*```$/i', '', $response);
-        $response = trim($response);
+        // Robust extraction: strip markdown code blocks or extract outermost JSON object
+        if (preg_match('/```(?:json)?\s*([\s\S]*?)\s*```/i', $response, $matches)) {
+            $response = trim($matches[1]);
+        } elseif (preg_match('/\{[\s\S]*\}/', $response, $matches)) {
+            $response = trim($matches[0]);
+        }
 
         $data = json_decode($response, true);
 

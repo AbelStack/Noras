@@ -22,9 +22,24 @@ class NoteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = GeneratedNote::with([
-            'courseMaterial.courseOffering.course',
-            'courseMaterial.courseOffering.department.university',
+        $query = GeneratedNote::select([
+            'id',
+            'course_material_id',
+            'material_version',
+            'generated_by',
+            'ai_provider',
+            'ai_model',
+            'source_char_count',
+            'notes_char_count',
+            'generation_time_ms',
+            'created_at',
+            'updated_at',
+        ])->with([
+            'courseMaterial:id,course_offering_id,title,original_filename,status',
+            'courseMaterial.courseOffering:id,course_id,department_id,study_year,semester',
+            'courseMaterial.courseOffering.course:id,code,title',
+            'courseMaterial.courseOffering.department:id,university_id,name',
+            'courseMaterial.courseOffering.department.university:id,name',
             'generatedBy:id,name,email',
         ]);
 
@@ -75,11 +90,12 @@ class NoteController extends Controller
         $perPage = min((int) $request->input('per_page', 15), 100);
         $notes = $query->latest()->paginate($perPage);
 
-        // Overall stats for admin dashboard widgets
+        // Overall stats for admin dashboard widgets in a single optimized query
+        $statsRow = GeneratedNote::selectRaw('COUNT(*) as total_notes, COALESCE(SUM(notes_char_count), 0) as total_characters, COUNT(DISTINCT course_material_id) as unique_materials')->first();
         $stats = [
-            'total_notes' => GeneratedNote::count(),
-            'total_characters' => (int) GeneratedNote::sum('notes_char_count'),
-            'unique_materials' => GeneratedNote::distinct('course_material_id')->count('course_material_id'),
+            'total_notes' => (int) ($statsRow->total_notes ?? 0),
+            'total_characters' => (int) ($statsRow->total_characters ?? 0),
+            'unique_materials' => (int) ($statsRow->unique_materials ?? 0),
         ];
 
         return response()->json([

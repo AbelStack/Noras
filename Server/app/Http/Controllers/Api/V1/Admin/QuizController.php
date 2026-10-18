@@ -22,11 +22,25 @@ class QuizController extends Controller
      */
     public function index(Request $request)
     {
-        $query = GeneratedQuiz::with([
-            'courseMaterial.courseOffering.course',
-            'courseMaterial.courseOffering.department.university',
+        $query = GeneratedQuiz::select([
+            'id',
+            'course_material_id',
+            'material_version',
+            'generated_by',
+            'ai_provider',
+            'ai_model',
+            'question_count',
+            'source_char_count',
+            'generation_time_ms',
+            'created_at',
+            'updated_at',
+        ])->with([
+            'courseMaterial:id,course_offering_id,title,original_filename,status',
+            'courseMaterial.courseOffering:id,course_id,department_id,study_year,semester',
+            'courseMaterial.courseOffering.course:id,code,title',
+            'courseMaterial.courseOffering.department:id,university_id,name',
+            'courseMaterial.courseOffering.department.university:id,name',
             'generatedBy:id,name,email',
-            'questions.options',
         ]);
 
         // Filter by course material
@@ -76,11 +90,12 @@ class QuizController extends Controller
         $perPage = min((int) $request->input('per_page', 15), 100);
         $quizzes = $query->latest()->paginate($perPage);
 
-        // Overall stats for admin dashboard widgets
+        // Overall stats for admin dashboard widgets in a single optimized query
+        $statsRow = GeneratedQuiz::selectRaw('COUNT(*) as total_quizzes, COALESCE(SUM(question_count), 0) as total_questions, COUNT(DISTINCT course_material_id) as unique_materials')->first();
         $stats = [
-            'total_quizzes' => GeneratedQuiz::count(),
-            'total_questions' => (int) GeneratedQuiz::sum('question_count'),
-            'unique_materials' => GeneratedQuiz::distinct('course_material_id')->count('course_material_id'),
+            'total_quizzes' => (int) ($statsRow->total_quizzes ?? 0),
+            'total_questions' => (int) ($statsRow->total_questions ?? 0),
+            'unique_materials' => (int) ($statsRow->unique_materials ?? 0),
         ];
 
         return response()->json([
