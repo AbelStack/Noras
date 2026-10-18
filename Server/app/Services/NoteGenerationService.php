@@ -8,12 +8,15 @@ use App\Models\User;
 use App\Services\AI\AIProviderInterface;
 use App\Services\AI\GeminiProvider;
 use App\Services\AI\GroqProvider;
+use App\Services\Concerns\HandlesDocumentChunking;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class NoteGenerationService
 {
+    use HandlesDocumentChunking;
+
     private PdfTextExtractor $pdfExtractor;
     private AIProviderInterface $aiProvider;
 
@@ -59,6 +62,48 @@ class NoteGenerationService
     }
 
     /**
+     * Execute AI provider callback with automatic retry and fallback on temporary provider failures.
+     */
+    private function callProviderWithFallback(AIProviderInterface &$activeProvider, callable $callback)
+    {
+        $primary = $activeProvider;
+        $secondary = $this->resolveFallbackProvider($activeProvider->getProviderName());
+        $providers = array_values(array_filter([$primary, $secondary], fn($p) => $p && $p->isConfigured()));
+
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            foreach ($providers as $key => $provider) {
+                try {
+                    $result = $callback($provider);
+                    $activeProvider = $provider;
+                    return $result;
+                } catch (\Throwable $e) {
+                    $lastException = $e;
+                    $msg = $e->getMessage();
+                    Log::warning("AI provider [{$provider->getProviderName()}] attempt {$attempt} failed: {$msg}");
+
+                    // If daily quota permanently exhausted, remove from further attempts
+                    if (stripos($msg, 'quota') !== false && (stripos($msg, 'exceeded') !== false || stripos($msg, 'retry in') !== false)) {
+                        unset($providers[$key]);
+                        $providers = array_values($providers);
+                        continue;
+                    }
+
+                    // If provider reported specific retry-after window, respect it
+                    $sleepSeconds = 2;
+                    if (preg_match('/try again in (\d+(?:\.\d+)?)s/i', $msg, $m)) {
+                        $sleepSeconds = min(20, (int) ceil((float) $m[1]) + 1);
+                    }
+                    sleep($sleepSeconds);
+                }
+            }
+        }
+
+        throw $lastException ?? new Exception('All configured AI providers failed.');
+    }
+
+    /**
      * Generate notes for a course material for a specific user.
      * 
      * @param CourseMaterial $material
@@ -91,23 +136,46 @@ class NoteGenerationService
 
             Log::info("Extracted {$sourceCharCount} characters from PDF");
 
-            // Generate notes using AI with automatic fallback on rate/token limits
+            // Generate notes using AI with multi-chunk section coverage for 100% full-document coverage
             $activeProvider = $this->resolveAIProvider();
             Log::info("Generating notes using {$activeProvider->getProviderName()} ({$activeProvider->getModelName()})");
 
-            try {
-                $notesContent = $activeProvider->generateNotes($pdfText, $material->title);
-            } catch (\Throwable $e) {
-                $msg = $e->getMessage();
-                $fallback = $this->resolveFallbackProvider($activeProvider->getProviderName());
+            $chunks = $this->getChunkedSections($pdfText, 15);
+            $totalChunks = count($chunks);
 
-                if ($fallback) {
-                    Log::warning("Primary AI provider [{$activeProvider->getProviderName()}] failed ({$msg}). Automatically falling back to [{$fallback->getProviderName()}].");
-                    $activeProvider = $fallback;
-                    $notesContent = $activeProvider->generateNotes($pdfText, $material->title);
-                } else {
-                    throw $e;
+            if ($totalChunks === 1) {
+                $notesContent = $this->callProviderWithFallback(
+                    $activeProvider,
+                    fn($provider) => $provider->generateNotes($pdfText, $material->title)
+                );
+            } else {
+                Log::info("Partitioned document into {$totalChunks} sequential chunks for 100% full-page coverage");
+                $noteParts = [];
+
+                foreach ($chunks as $index => $chunk) {
+                    $partNum = $index + 1;
+                    $partLabel = "Part {$partNum} of {$totalChunks} ({$chunk['type']}s {$chunk['start']}–{$chunk['end']})";
+                    $chunkTitle = "{$material->title} - {$partLabel}";
+
+                    Log::info("Generating study notes for {$partLabel}");
+
+                    $partContent = $this->callProviderWithFallback(
+                        $activeProvider,
+                        fn($provider) => $provider->generateNotes($chunk['text'], $chunkTitle)
+                    );
+
+                    $noteParts[] = $partContent;
                 }
+
+                $firstType = $chunks[0]['type'];
+                $firstNum = $chunks[0]['start'];
+                $lastNum = end($chunks)['end'];
+
+                $combined = "# Comprehensive Study Notes: {$material->title}\n\n";
+                $combined .= "> **Full Document Coverage:** Complete revision notes covering all {$firstType}s from {$firstNum} to {$lastNum} across all {$totalChunks} sections.\n\n---\n\n";
+                $combined .= implode("\n\n---\n\n", $noteParts);
+
+                $notesContent = trim($combined);
             }
 
             $notesCharCount = mb_strlen($notesContent, 'UTF-8');

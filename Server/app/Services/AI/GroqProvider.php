@@ -17,7 +17,7 @@ class GroqProvider implements AIProviderInterface
         $this->apiKey = config('services.ai.groq.api_key') ?? '';
         $this->model = config('services.ai.groq.model') ?? 'openai/gpt-oss-20b';
         $this->timeout = config('services.ai.groq.timeout') ?? 30;
-        $this->maxChars = config('services.ai.groq.max_chars') ?? 24000;
+        $this->maxChars = config('services.ai.groq.max_chars') ?? 400000;
     }
 
     public function generateNotes(string $sourceText, string $materialTitle): string
@@ -59,7 +59,7 @@ class GroqProvider implements AIProviderInterface
                         ]
                     ],
                     'temperature' => 0.3,
-                    'max_tokens' => 4096,
+                    'max_tokens' => 8192,
                 ]);
 
             if (!$response->successful()) {
@@ -180,7 +180,7 @@ PROMPT;
                         ]
                     ],
                     'temperature' => 0.4,
-                    'max_tokens' => 4096,
+                    'max_tokens' => 8192,
                     'response_format' => ['type' => 'json_object'],
                 ]);
 

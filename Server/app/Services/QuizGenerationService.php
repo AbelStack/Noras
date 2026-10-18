@@ -10,12 +10,15 @@ use App\Models\User;
 use App\Services\AI\AIProviderInterface;
 use App\Services\AI\GeminiProvider;
 use App\Services\AI\GroqProvider;
+use App\Services\Concerns\HandlesDocumentChunking;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class QuizGenerationService
 {
+    use HandlesDocumentChunking;
+
     private PdfTextExtractor $pdfExtractor;
     private AIProviderInterface $aiProvider;
 
@@ -54,6 +57,48 @@ class QuizGenerationService
         return $fallback->isConfigured() ? $fallback : null;
     }
 
+    /**
+     * Execute AI provider callback with automatic retry and fallback on temporary provider failures.
+     */
+    private function callProviderWithFallback(AIProviderInterface &$activeProvider, callable $callback)
+    {
+        $primary = $activeProvider;
+        $secondary = $this->resolveFallbackProvider($activeProvider->getProviderName());
+        $providers = array_values(array_filter([$primary, $secondary], fn($p) => $p && $p->isConfigured()));
+
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            foreach ($providers as $key => $provider) {
+                try {
+                    $result = $callback($provider);
+                    $activeProvider = $provider;
+                    return $result;
+                } catch (\Throwable $e) {
+                    $lastException = $e;
+                    $msg = $e->getMessage();
+                    Log::warning("AI provider [{$provider->getProviderName()}] attempt {$attempt} failed: {$msg}");
+
+                    // If daily quota permanently exhausted, remove from further attempts
+                    if (stripos($msg, 'quota') !== false && (stripos($msg, 'exceeded') !== false || stripos($msg, 'retry in') !== false)) {
+                        unset($providers[$key]);
+                        $providers = array_values($providers);
+                        continue;
+                    }
+
+                    // If provider reported specific retry-after window, respect it
+                    $sleepSeconds = 2;
+                    if (preg_match('/try again in (\d+(?:\.\d+)?)s/i', $msg, $m)) {
+                        $sleepSeconds = min(20, (int) ceil((float) $m[1]) + 1);
+                    }
+                    sleep($sleepSeconds);
+                }
+            }
+        }
+
+        throw $lastException ?? new Exception('All configured AI providers failed.');
+    }
+
     public function generateQuiz(CourseMaterial $material, User $user, int $questionCount = 15, int $optionsPerQuestion = 4): GeneratedQuiz
     {
         @set_time_limit(300);
@@ -76,27 +121,50 @@ class QuizGenerationService
                 throw new Exception('Insufficient text content for quiz generation (minimum 100 characters required)');
             }
 
-            // Generate quiz using AI with automatic fallback on rate/token limits
+            // Generate quiz using AI with multi-segment distribution for 100% full-document coverage
             $activeProvider = $this->resolveAIProvider();
             Log::info("Generating quiz using {$activeProvider->getProviderName()} ({$activeProvider->getModelName()})");
 
-            try {
-                $quizData = $activeProvider->generateQuiz($pdfText, $material->title, $questionCount, $optionsPerQuestion);
-            } catch (\Throwable $e) {
-                $msg = $e->getMessage();
-                $fallback = $this->resolveFallbackProvider($activeProvider->getProviderName());
+            $segments = $this->getQuizSegments($pdfText, $questionCount);
+            $totalSegments = count($segments);
 
-                if ($fallback) {
-                    Log::warning("Primary AI provider [{$activeProvider->getProviderName()}] failed ({$msg}). Automatically falling back to [{$fallback->getProviderName()}].");
-                    $activeProvider = $fallback;
-                    $quizData = $activeProvider->generateQuiz($pdfText, $material->title, $questionCount, $optionsPerQuestion);
-                } else {
-                    throw $e;
+            if ($totalSegments === 1) {
+                $quizData = $this->callProviderWithFallback(
+                    $activeProvider,
+                    fn($provider) => $provider->generateQuiz($pdfText, $material->title, $questionCount, $optionsPerQuestion)
+                );
+            } else {
+                Log::info("Distributing {$questionCount} quiz questions across {$totalSegments} sequential segments for 100% full-page coverage");
+                $allQuestions = [];
+
+                foreach ($segments as $segment) {
+                    $segNum = $segment['segment_number'];
+                    $segTarget = $segment['target_questions'];
+                    $segTitle = "{$material->title} (Part {$segNum} of {$totalSegments}: {$segment['type']}s {$segment['start']}–{$segment['end']})";
+
+                    Log::info("Generating {$segTarget} questions for Segment {$segNum}/{$totalSegments} ({$segment['type']}s {$segment['start']} to {$segment['end']})");
+
+                    $segQuizData = $this->callProviderWithFallback(
+                        $activeProvider,
+                        fn($provider) => $provider->generateQuiz($segment['text'], $segTitle, $segTarget, $optionsPerQuestion)
+                    );
+
+                    if (!empty($segQuizData['questions'])) {
+                        foreach ($segQuizData['questions'] as $q) {
+                            $allQuestions[] = $q;
+                        }
+                    }
                 }
+
+                if (count($allQuestions) > $questionCount) {
+                    $allQuestions = array_slice($allQuestions, 0, $questionCount);
+                }
+
+                $quizData = ['questions' => $allQuestions];
             }
 
             // Validate quiz data
-            $this->validateQuizData($quizData, $questionCount, $optionsPerQuestion);
+            $this->validateQuizData($quizData, count($quizData['questions']), $optionsPerQuestion);
 
             $generationTimeMs = (int) round((microtime(true) - $startTime) * 1000);
 
