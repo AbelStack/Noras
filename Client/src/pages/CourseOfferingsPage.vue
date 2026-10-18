@@ -23,7 +23,7 @@
               </h1>
               <span 
                 v-if="isMyDepartment" 
-                class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200"
+                class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-primary-800 border border-blue-200"
               >
                 Your Enrolled Department
               </span>

@@ -44,7 +44,7 @@
 
       <!-- Empty State -->
       <div v-else-if="quizzes.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-        <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-4">
+        <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4 border border-primary-100">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
           </svg>
@@ -64,11 +64,11 @@
         <div
           v-for="quiz in quizzes"
           :key="quiz.id"
-          class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:border-primary-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1.5">
-              <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex-shrink-0">
+              <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 border border-primary-100 flex-shrink-0">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                   <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
@@ -84,7 +84,7 @@
                 {{ quiz.material.course.code }} - {{ quiz.material.course.name }}
               </span>
               <span v-if="quiz.material?.study_year" class="text-gray-300">•</span>
-              <span v-if="quiz.material?.study_year" class="font-semibold text-emerald-700">
+              <span v-if="quiz.material?.study_year" class="font-semibold text-primary-700">
                 Year {{ quiz.material.study_year }}
               </span>
               <span v-if="quiz.material?.semester" class="text-gray-300">•</span>
@@ -98,7 +98,7 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-x-2 text-xs text-gray-400 ml-10">
-              <span class="font-medium text-emerald-600">{{ quiz.question_count }} questions</span>
+              <span class="font-semibold text-primary-600">{{ quiz.question_count }} questions</span>
               <span>•</span>
               <span>Generated {{ formatDate(quiz.created_at) }}</span>
               <template v-if="isAdmin">
@@ -111,7 +111,7 @@
           <div class="flex items-center gap-2 sm:self-center ml-10 sm:ml-0 flex-shrink-0">
             <router-link
               :to="`/quizzes/${quiz.id}`"
-              class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm font-medium shadow-sm"
+              class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors text-sm font-semibold shadow-xs"
             >
               <span>Take Quiz</span>
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

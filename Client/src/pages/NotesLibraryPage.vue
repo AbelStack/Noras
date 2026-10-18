@@ -161,7 +161,7 @@
                   </div>
                   <span 
                     class="text-xs font-semibold px-2.5 py-0.5 rounded-md"
-                    :class="yr.notesCount > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-gray-100 text-gray-600'"
+                    :class="yr.notesCount > 0 ? 'bg-primary-50 text-primary-700 border border-primary-100' : 'bg-gray-100 text-gray-600'"
                   >
                     {{ yr.notesCount }} {{ yr.notesCount === 1 ? 'Note' : 'Notes' }}
                   </span>

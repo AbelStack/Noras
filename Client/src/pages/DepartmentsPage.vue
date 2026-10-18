@@ -59,7 +59,7 @@
             <div>
               <div class="flex items-center gap-2">
                 <span class="text-xs font-semibold text-primary-700 uppercase tracking-wider">Your Enrolled Department</span>
-                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">Enrolled</span>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-primary-800 border border-blue-200">Enrolled</span>
               </div>
               <h3 class="text-base sm:text-lg font-bold text-gray-900 mt-0.5">
                 {{ myDepartment.name }} ({{ myDepartment.code }})
