@@ -91,6 +91,8 @@ Route::prefix('v1')->group(function () {
                 ->middleware('throttle:quiz-generation');
             Route::get('/quizzes', [GeneratedQuizController::class, 'index']);
             Route::get('/quizzes/{id}', [GeneratedQuizController::class, 'show']);
+            Route::post('/quizzes/{id}/submit', [GeneratedQuizController::class, 'submit']);
+            Route::get('/quizzes/{id}/attempts', [GeneratedQuizController::class, 'attempts']);
             Route::delete('/quizzes/{id}', [GeneratedQuizController::class, 'destroy']);
 
             // Phase 8: Learning History & Progress

@@ -124,9 +124,13 @@ class GeneratedNoteController extends Controller
                                 'id' => $note->courseMaterial->id,
                                 'title' => $note->courseMaterial->title,
                                 'version' => $note->courseMaterial->version,
+                                'study_year' => $note->courseMaterial->courseOffering?->study_year,
+                                'semester' => $note->courseMaterial->courseOffering?->semester,
+                                'academic_year' => $note->courseMaterial->courseOffering?->academic_year,
                                 'course' => $note->courseMaterial->courseOffering?->course ? [
                                     'code' => $note->courseMaterial->courseOffering->course->code,
-                                    'name' => $note->courseMaterial->courseOffering->course->name,
+                                    'title' => $note->courseMaterial->courseOffering->course->title ?? $note->courseMaterial->courseOffering->course->name,
+                                    'name' => $note->courseMaterial->courseOffering->course->title ?? $note->courseMaterial->courseOffering->course->name,
                                 ] : null,
                                 'department' => $note->courseMaterial->courseOffering?->department ? [
                                     'code' => $note->courseMaterial->courseOffering->department->code,
@@ -193,9 +197,13 @@ class GeneratedNoteController extends Controller
                         'id' => $note->courseMaterial->id,
                         'title' => $note->courseMaterial->title,
                         'version' => $note->courseMaterial->version,
+                        'study_year' => $note->courseMaterial->courseOffering?->study_year,
+                        'semester' => $note->courseMaterial->courseOffering?->semester,
+                        'academic_year' => $note->courseMaterial->courseOffering?->academic_year,
                         'course' => $note->courseMaterial->courseOffering?->course ? [
                             'code' => $note->courseMaterial->courseOffering->course->code,
-                            'name' => $note->courseMaterial->courseOffering->course->name,
+                            'title' => $note->courseMaterial->courseOffering->course->title ?? $note->courseMaterial->courseOffering->course->name,
+                            'name' => $note->courseMaterial->courseOffering->course->title ?? $note->courseMaterial->courseOffering->course->name,
                         ] : null,
                         'department' => $note->courseMaterial->courseOffering?->department ? [
                             'code' => $note->courseMaterial->courseOffering->department->code,

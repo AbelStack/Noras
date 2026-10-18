@@ -76,12 +76,12 @@
 
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 ml-10">
                 <span>Generated {{ formatDate(note.created_at) }}</span>
-                <span>•</span>
-                <span>{{ Math.round((note.notes_char_count || 0) / 1000) }}k characters</span>
-                <span v-if="note.ai_provider">•</span>
-                <span v-if="note.ai_provider">{{ note.ai_provider }} ({{ note.ai_model }})</span>
-                <span v-if="note.generation_time_ms">•</span>
-                <span v-if="note.generation_time_ms">{{ note.generation_time_ms }}ms</span>
+                <template v-if="isAdmin">
+                  <span v-if="note.ai_provider">•</span>
+                  <span v-if="note.ai_provider">{{ note.ai_provider }} ({{ note.ai_model }})</span>
+                  <span v-if="note.generation_time_ms">•</span>
+                  <span v-if="note.generation_time_ms">{{ note.generation_time_ms }}ms</span>
+                </template>
               </div>
 
               <!-- Version Warning -->
@@ -187,6 +187,7 @@ const isDeleting = ref(false)
 const errorMessage = ref('')
 
 const user = computed(() => authService.getUser())
+const isAdmin = computed(() => authService.isAdmin())
 const canDelete = computed(() => {
   return authService.isAdmin() || (note.value?.generated_by && user.value?.id && note.value.generated_by === user.value.id)
 })

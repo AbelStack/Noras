@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\GeneratedNote;
 use App\Models\GeneratedQuiz;
+use App\Models\QuizAttempt;
 use App\Models\StudyTask;
 use App\Models\Bookmark;
 use Illuminate\Http\JsonResponse;
@@ -123,6 +124,8 @@ class LearningHistoryController extends Controller
 
         $notesGenerated = GeneratedNote::where('generated_by', $userId)->count();
         $quizzesGenerated = GeneratedQuiz::where('generated_by', $userId)->count();
+        $quizzesCompleted = QuizAttempt::where('user_id', $userId)->count();
+        $averageQuizScore = QuizAttempt::where('user_id', $userId)->avg('percentage');
         $bookmarksCount = Bookmark::where('user_id', $userId)->count();
 
         return response()->json([
@@ -130,6 +133,8 @@ class LearningHistoryController extends Controller
             'data' => [
                 'notes_generated' => $notesGenerated,
                 'quizzes_generated' => $quizzesGenerated,
+                'quizzes_completed' => $quizzesCompleted,
+                'average_quiz_score' => $averageQuizScore ? round($averageQuizScore, 1) : 0,
                 'active_tasks' => (int) ($taskCounts->active_tasks ?? 0),
                 'completed_tasks' => (int) ($taskCounts->completed_tasks ?? 0),
                 'bookmarks' => $bookmarksCount,

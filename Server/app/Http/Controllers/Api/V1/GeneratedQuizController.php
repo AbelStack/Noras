@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\CourseMaterial;
 use App\Models\GeneratedQuiz;
+use App\Models\QuizAttempt;
 use App\Services\QuizGenerationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -122,9 +123,13 @@ class GeneratedQuizController extends Controller
                                 'id' => $quiz->courseMaterial->id,
                                 'title' => $quiz->courseMaterial->title,
                                 'version' => $quiz->courseMaterial->version,
+                                'study_year' => $quiz->courseMaterial->courseOffering?->study_year,
+                                'semester' => $quiz->courseMaterial->courseOffering?->semester,
+                                'academic_year' => $quiz->courseMaterial->courseOffering?->academic_year,
                                 'course' => $quiz->courseMaterial->courseOffering?->course ? [
                                     'code' => $quiz->courseMaterial->courseOffering->course->code,
-                                    'name' => $quiz->courseMaterial->courseOffering->course->name,
+                                    'title' => $quiz->courseMaterial->courseOffering->course->title ?? $quiz->courseMaterial->courseOffering->course->name,
+                                    'name' => $quiz->courseMaterial->courseOffering->course->title ?? $quiz->courseMaterial->courseOffering->course->name,
                                 ] : null,
                                 'department' => $quiz->courseMaterial->courseOffering?->department ? [
                                     'code' => $quiz->courseMaterial->courseOffering->department->code,
@@ -185,7 +190,23 @@ class GeneratedQuizController extends Controller
                         'id' => $quiz->courseMaterial->id,
                         'title' => $quiz->courseMaterial->title,
                         'version' => $quiz->courseMaterial->version,
+                        'study_year' => $quiz->courseMaterial->courseOffering?->study_year,
+                        'semester' => $quiz->courseMaterial->courseOffering?->semester,
+                        'academic_year' => $quiz->courseMaterial->courseOffering?->academic_year,
+                        'course' => $quiz->courseMaterial->courseOffering?->course ? [
+                            'code' => $quiz->courseMaterial->courseOffering->course->code,
+                            'title' => $quiz->courseMaterial->courseOffering->course->title ?? $quiz->courseMaterial->courseOffering->course->name,
+                            'name' => $quiz->courseMaterial->courseOffering->course->title ?? $quiz->courseMaterial->courseOffering->course->name,
+                        ] : null,
+                        'department' => $quiz->courseMaterial->courseOffering?->department ? [
+                            'code' => $quiz->courseMaterial->courseOffering->department->code,
+                            'name' => $quiz->courseMaterial->courseOffering->department->name,
+                        ] : null,
                     ] : null,
+                    'latest_attempt' => QuizAttempt::where('user_id', $request->user()->id)
+                        ->where('quiz_id', $quiz->id)
+                        ->latest()
+                        ->first(),
                     'questions' => $quiz->questions->map(function ($question) {
                         return [
                             'id' => $question->id,
@@ -244,4 +265,114 @@ class GeneratedQuizController extends Controller
             ], $e->getMessage() === 'Unauthorized to delete this quiz' ? 403 : 500);
         }
     }
+
+    /**
+     * Submit quiz answers, calculate score, record attempt, and return review.
+     * 
+     * POST /api/v1/quizzes/{id}/submit
+     */
+    public function submit(Request $request, int $id): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'answers' => 'nullable|array',
+            ]);
+
+            $quiz = GeneratedQuiz::with(['questions.options', 'courseMaterial.courseOffering.course'])
+                ->findOrFail($id);
+
+            $userAnswers = $validated['answers'] ?? [];
+            $totalQuestions = $quiz->questions->count();
+            $score = 0;
+            $questionResults = [];
+
+            foreach ($quiz->questions->sortBy('question_order') as $question) {
+                $correctOption = $question->options->firstWhere('is_correct', true);
+                $selectedOptionId = $userAnswers[$question->id] ?? null;
+                $selectedOption = $selectedOptionId ? $question->options->firstWhere('id', (int) $selectedOptionId) : null;
+                $isCorrect = $selectedOption && $correctOption && ($selectedOption->id === $correctOption->id);
+
+                if ($isCorrect) {
+                    $score++;
+                }
+
+                $questionResults[] = [
+                    'question_id' => $question->id,
+                    'question_order' => $question->question_order,
+                    'question_text' => $question->question_text,
+                    'explanation' => $question->explanation,
+                    'selected_option_id' => $selectedOptionId,
+                    'selected_option_text' => $selectedOption?->option_text,
+                    'correct_option_id' => $correctOption?->id,
+                    'correct_option_text' => $correctOption?->option_text,
+                    'is_correct' => (bool) $isCorrect,
+                    'options' => $question->options->map(fn($opt) => [
+                        'id' => $opt->id,
+                        'option_order' => $opt->option_order,
+                        'option_text' => $opt->option_text,
+                        'is_correct' => (bool) $opt->is_correct,
+                    ])->values(),
+                ];
+            }
+
+            $percentage = $totalQuestions > 0 ? round(($score / $totalQuestions) * 100, 2) : 0;
+
+            $attempt = QuizAttempt::create([
+                'user_id' => $request->user()->id,
+                'quiz_id' => $quiz->id,
+                'score' => $score,
+                'total_questions' => $totalQuestions,
+                'percentage' => $percentage,
+                'answers' => $userAnswers,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Quiz submitted successfully',
+                'data' => [
+                    'attempt_id' => $attempt->id,
+                    'score' => $score,
+                    'total_questions' => $totalQuestions,
+                    'percentage' => $percentage,
+                    'created_at' => $attempt->created_at->toISOString(),
+                    'question_results' => $questionResults,
+                ],
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit quiz: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get user's past attempts for this quiz.
+     * 
+     * GET /api/v1/quizzes/{id}/attempts
+     */
+    public function attempts(Request $request, int $id): JsonResponse
+    {
+        try {
+            $attempts = QuizAttempt::where('user_id', $request->user()->id)
+                ->where('quiz_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'attempts' => $attempts,
+                ],
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve quiz attempts: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
+

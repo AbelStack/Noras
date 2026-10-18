@@ -83,8 +83,16 @@
               <span v-if="quiz.material?.course" class="font-medium text-gray-700">
                 {{ quiz.material.course.code }} - {{ quiz.material.course.name }}
               </span>
-              <span v-if="quiz.material?.department" class="text-gray-300">•</span>
-              <span v-if="quiz.material?.department">
+              <span v-if="quiz.material?.study_year" class="text-gray-300">•</span>
+              <span v-if="quiz.material?.study_year" class="font-semibold text-emerald-700">
+                Year {{ quiz.material.study_year }}
+              </span>
+              <span v-if="quiz.material?.semester" class="text-gray-300">•</span>
+              <span v-if="quiz.material?.semester" class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 text-xs font-medium">
+                Semester {{ quiz.material.semester }}
+              </span>
+              <span v-if="quiz.material?.department && !quiz.material?.course" class="text-gray-300">•</span>
+              <span v-if="quiz.material?.department && !quiz.material?.course">
                 {{ quiz.material.department.name }}
               </span>
             </div>
@@ -93,8 +101,10 @@
               <span class="font-medium text-emerald-600">{{ quiz.question_count }} questions</span>
               <span>•</span>
               <span>Generated {{ formatDate(quiz.created_at) }}</span>
-              <span v-if="quiz.ai_provider">•</span>
-              <span v-if="quiz.ai_provider">{{ quiz.ai_provider }} ({{ quiz.ai_model }})</span>
+              <template v-if="isAdmin">
+                <span v-if="quiz.ai_provider">•</span>
+                <span v-if="quiz.ai_provider" class="text-amber-700 font-mono">{{ quiz.ai_provider }} ({{ quiz.ai_model }})</span>
+              </template>
             </div>
           </div>
 
@@ -139,7 +149,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
@@ -148,6 +158,7 @@ import { authService } from '../services/auth'
 import { studentNavigationItems } from '../config/navigation'
 
 const router = useRouter()
+const isAdmin = computed(() => authService.isAdmin())
 
 const quizzes = ref([])
 const pagination = ref({

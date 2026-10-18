@@ -53,8 +53,12 @@
         <!-- Quizzes Taken -->
         <div class="bg-white rounded-lg border border-gray-200 p-6">
           <p class="text-sm text-gray-600 mb-2">Quizzes Completed</p>
-          <p class="text-4xl font-bold text-accent-500 mb-1">{{ stats.quizzes || 0 }}</p>
-          <a href="#" class="text-xs text-accent-500 hover:underline">View scores →</a>
+          <p class="text-4xl font-bold text-emerald-600 mb-1">{{ stats.quizzes || 0 }}</p>
+          <div class="flex items-center justify-between text-xs mt-1">
+            <span v-if="stats.avgScore" class="text-gray-500 font-medium">Avg. {{ stats.avgScore }}%</span>
+            <span v-else class="text-gray-400">Track progress</span>
+            <router-link to="/quizzes" class="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline">Take quiz →</router-link>
+          </div>
         </div>
 
         <!-- Study Progress -->
@@ -163,6 +167,7 @@ const stats = ref({
   materials: 0,
   notes: 0,
   quizzes: 0,
+  avgScore: 0,
   progress: 0,
 })
 
@@ -172,12 +177,13 @@ onMounted(async () => {
   try {
     isLoading.value = true
     const response = await api.get('/learning/progress')
-    if (response.data.status === 'success') {
+    if (response.data.status === 'success' || response.data.success) {
       const data = response.data.data
       stats.value = {
         materials: data.bookmarks || 0,
         notes: data.notes_generated || 0,
-        quizzes: data.quizzes_generated || 0,
+        quizzes: data.quizzes_completed !== undefined ? data.quizzes_completed : (data.quizzes_generated || 0),
+        avgScore: data.average_quiz_score || 0,
         progress: data.progress_percentage || 0,
       }
     }

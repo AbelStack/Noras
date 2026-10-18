@@ -58,4 +58,30 @@ export const quizzesService = {
   async deleteQuiz(id) {
     await api.delete(`/quizzes/${id}`)
   },
+
+  /**
+   * Submit quiz answers and record student attempt
+   * POST /api/v1/quizzes/{id}/submit
+   * 
+   * @param {number} id - Quiz ID
+   * @param {Object} answers - { question_id: option_id }
+   * @returns {Promise<{attempt_id, score, total_questions, percentage, question_results}>}
+   */
+  async submitQuiz(id, answers) {
+    const response = await api.post(`/quizzes/${id}/submit`, { answers })
+    return response.data.data
+  },
+
+  /**
+   * Get past attempts for a quiz
+   * GET /api/v1/quizzes/{id}/attempts
+   * 
+   * @param {number} id - Quiz ID
+   * @returns {Promise<Array>}
+   */
+  async getQuizAttempts(id) {
+    const response = await api.get(`/quizzes/${id}/attempts`)
+    return response.data.data.attempts
+  },
 }
+
