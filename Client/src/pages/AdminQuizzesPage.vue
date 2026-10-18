@@ -190,8 +190,14 @@
                   <!-- Course Material Document -->
                   <td class="px-3.5 py-2.5">
                     <div class="flex items-center gap-2.5">
-                      <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-2xs bg-indigo-50 text-indigo-700 border border-indigo-200">
-                        <span>🎯</span>
+                      <div 
+                        class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-[10px] shadow-2xs"
+                        :class="isPpt(quiz.course_material) ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-red-50 text-red-600 border border-red-200'"
+                      >
+                        <span v-if="isPpt(quiz.course_material)">PPT</span>
+                        <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
                       </div>
                       <div class="min-w-0">
                         <div 
@@ -651,6 +657,13 @@ const stats = ref({
   total_questions: 0,
   unique_materials: 0,
 })
+
+const isPpt = (material) => {
+  if (!material) return false
+  const filename = material.original_filename || material.title || ''
+  const fileType = material.file_type || ''
+  return fileType === 'ppt' || /\.pptx?$/i.test(filename)
+}
 
 const pagination = ref({
   current_page: 1,

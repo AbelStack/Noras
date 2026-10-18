@@ -181,7 +181,7 @@ class AuthTest extends TestCase
         $response->assertStatus(401)
             ->assertJson([
                 'status' => 'error',
-                'message' => 'Invalid credentials',
+                'message' => 'Password is incorrect. Please check your password and try again.',
             ]);
     }
 

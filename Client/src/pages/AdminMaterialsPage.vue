@@ -645,6 +645,39 @@
                 </label>
               </div>
 
+              <!-- Auto-Generate AI Note & Quiz Toggle -->
+              <div class="p-3.5 bg-blue-50/60 rounded-xl border border-blue-100 space-y-2 mt-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <input 
+                      id="material-auto-generate"
+                      v-model="uploadForm.auto_generate"
+                      type="checkbox"
+                      class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500 cursor-pointer"
+                    />
+                    <label for="material-auto-generate" class="text-xs font-semibold text-gray-900 select-none cursor-pointer">
+                      Auto-generate official AI Study Note and Quiz upon upload
+                    </label>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-primary-700">AI Powered</span>
+                </div>
+                <p class="text-[11px] text-gray-500 pl-6.5">
+                  The AI reads through the document page-by-page to automatically generate comprehensive lecture notes and practice quiz questions for students.
+                </p>
+
+                <div v-if="uploadForm.auto_generate" class="pl-6.5 pt-1 flex items-center gap-2.5">
+                  <label class="text-xs font-medium text-gray-700">Quiz Questions:</label>
+                  <input 
+                    v-model.number="uploadForm.quiz_question_count"
+                    type="number"
+                    min="15"
+                    max="30"
+                    class="w-16 px-2 py-1 border border-gray-300 rounded-lg text-xs font-bold text-center focus:ring-2 focus:ring-primary-500 outline-none bg-white"
+                  />
+                  <span class="text-[11px] text-gray-400">(Min: 15, Max: 30 questions)</span>
+                </div>
+              </div>
+
               <!-- Modal Actions -->
               <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
                 <button
@@ -1232,6 +1265,8 @@ const openUploadModal = () => {
     semester: '1',
     course_id: defaultCourse,
     is_published: true,
+    auto_generate: true,
+    quiz_question_count: 20,
   }
 
   showUploadModal.value = true
@@ -1318,6 +1353,10 @@ const submitUpload = async () => {
     formData.append('study_year', uploadForm.value.study_year)
     formData.append('semester', uploadForm.value.semester)
     formData.append('status', uploadForm.value.is_published ? 'published' : 'draft')
+    if (uploadForm.value.auto_generate) {
+      formData.append('auto_generate', '1')
+      formData.append('quiz_question_count', String(uploadForm.value.quiz_question_count || 20))
+    }
 
     await api.post('/admin/materials', formData, {
       headers: {
@@ -1325,7 +1364,10 @@ const submitUpload = async () => {
       },
     })
 
-    notify.success(`Material "${uploadForm.value.title}" uploaded successfully to Cloudflare!`)
+    const successMsg = uploadForm.value.auto_generate
+      ? `Material "${uploadForm.value.title}" uploaded & official AI Study Note + Quiz generated successfully!`
+      : `Material "${uploadForm.value.title}" uploaded successfully to Cloudflare!`
+    notify.success(successMsg)
     closeUploadModal()
     await fetchMaterials()
   } catch (err) {

@@ -42,23 +42,19 @@
           <p class="text-[11px] text-gray-400 mt-0.5">Master study notes</p>
         </div>
         <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
-          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Total Characters</div>
-          <div class="text-xl font-bold text-emerald-600 mt-1">
-            {{ formatCharCount(stats.total_characters) }}
-          </div>
-          <p class="text-[11px] text-gray-400 mt-0.5">Knowledge content</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
-          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Est. Word Count</div>
-          <div class="text-xl font-bold text-blue-600 mt-1">
-            ~{{ Math.round((stats.total_characters || 0) / 5).toLocaleString() }}
-          </div>
-          <p class="text-[11px] text-gray-400 mt-0.5">Comprehensive lecture notes</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
           <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Materials Covered</div>
-          <div class="text-xl font-bold text-purple-600 mt-1">{{ stats.unique_materials }}</div>
-          <p class="text-[11px] text-gray-400 mt-0.5">Distinct course files</p>
+          <div class="text-xl font-bold text-emerald-600 mt-1">{{ stats.unique_materials }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Files with generated notes</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
+          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Pending Materials</div>
+          <div class="text-xl font-bold text-amber-600 mt-1">{{ stats.pending_materials ?? 0 }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Awaiting note generation</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
+          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Departments Covered</div>
+          <div class="text-xl font-bold text-purple-600 mt-1">{{ stats.departments_covered ?? 0 }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Active academic departments</p>
         </div>
       </div>
 
@@ -190,8 +186,14 @@
                   <!-- Course Material Document -->
                   <td class="px-3.5 py-2.5">
                     <div class="flex items-center gap-2.5">
-                      <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-[10px] shadow-2xs bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <span>📝</span>
+                      <div 
+                        class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-[10px] shadow-2xs"
+                        :class="isPpt(note.course_material) ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-red-50 text-red-600 border border-red-200'"
+                      >
+                        <span v-if="isPpt(note.course_material)">PPT</span>
+                        <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
                       </div>
                       <div class="min-w-0">
                         <button 
@@ -541,9 +543,17 @@ const error = ref(null)
 
 const stats = ref({
   total_notes: 0,
-  total_characters: 0,
   unique_materials: 0,
+  pending_materials: 0,
+  departments_covered: 0,
 })
+
+const isPpt = (material) => {
+  if (!material) return false
+  const filename = material.original_filename || material.title || ''
+  const fileType = material.file_type || ''
+  return fileType === 'ppt' || /\.pptx?$/i.test(filename)
+}
 
 const pagination = ref({
   current_page: 1,

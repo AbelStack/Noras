@@ -289,7 +289,7 @@ class CourseMaterialController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to generate note: ' . $e->getMessage(),
+                'message' => $this->formatAiErrorMessage($e, 'study notes'),
             ], 422);
         }
     }
@@ -320,7 +320,7 @@ class CourseMaterialController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to generate quiz: ' . $e->getMessage(),
+                'message' => $this->formatAiErrorMessage($e, 'quiz'),
             ], 422);
         }
     }

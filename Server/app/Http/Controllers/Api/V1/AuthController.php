@@ -115,10 +115,17 @@ class AuthController extends Controller
     {
         $user = User::with(['university', 'department'])->where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Invalid credentials',
+                'message' => 'No account found with this email address. Please check your email or register.',
+            ], 401);
+        }
+
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Password is incorrect. Please check your password and try again.',
             ], 401);
         }
 

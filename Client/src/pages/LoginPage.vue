@@ -188,7 +188,7 @@ const handleLogin = async () => {
       router.push('/dashboard')
     }
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || error.message || 'Login failed. Please check your credentials.'
+    errorMessage.value = error.response?.data?.message || 'Login failed. Please check your email and password.'
   } finally {
     isLoading.value = false
   }

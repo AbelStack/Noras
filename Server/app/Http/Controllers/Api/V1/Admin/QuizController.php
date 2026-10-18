@@ -173,7 +173,7 @@ class QuizController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to generate quiz: ' . $e->getMessage(),
+                'message' => $this->formatAiErrorMessage($e, 'quiz'),
             ], 422);
         }
     }

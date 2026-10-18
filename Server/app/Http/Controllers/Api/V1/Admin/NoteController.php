@@ -92,10 +92,20 @@ class NoteController extends Controller
 
         // Overall stats for admin dashboard widgets in a single optimized query
         $statsRow = GeneratedNote::selectRaw('COUNT(*) as total_notes, COALESCE(SUM(notes_char_count), 0) as total_characters, COUNT(DISTINCT course_material_id) as unique_materials')->first();
+        $totalMaterials = CourseMaterial::count();
+        $uniqueMaterials = (int) ($statsRow->unique_materials ?? 0);
+        $pendingMaterials = max(0, $totalMaterials - $uniqueMaterials);
+        $departmentsCovered = CourseMaterial::whereHas('masterNote')
+            ->join('course_offerings', 'course_materials.course_offering_id', '=', 'course_offerings.id')
+            ->distinct('course_offerings.department_id')
+            ->count('course_offerings.department_id');
+
         $stats = [
             'total_notes' => (int) ($statsRow->total_notes ?? 0),
+            'unique_materials' => $uniqueMaterials,
+            'pending_materials' => $pendingMaterials,
+            'departments_covered' => (int) $departmentsCovered,
             'total_characters' => (int) ($statsRow->total_characters ?? 0),
-            'unique_materials' => (int) ($statsRow->unique_materials ?? 0),
         ];
 
         return response()->json([
@@ -159,7 +169,7 @@ class NoteController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to generate note: ' . $e->getMessage(),
+                'message' => $this->formatAiErrorMessage($e, 'study notes'),
             ], 422);
         }
     }
