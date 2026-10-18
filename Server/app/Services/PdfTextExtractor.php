@@ -103,13 +103,13 @@ class PdfTextExtractor
     }
 
     /**
-     * Extract slide text from a PowerPoint presentation (PPTX format) sequentially.
+     * Extract slide text from a PowerPoint presentation (PPTX format or legacy binary PPT) sequentially.
      */
     private function extractPptxText(string $fullPath): string
     {
         $zip = new ZipArchive();
         if ($zip->open($fullPath) !== true) {
-            throw new Exception('Could not open presentation file for text extraction.');
+            return $this->extractBinaryPptText($fullPath);
         }
 
         // Collect and naturally sort slides numerically (Slide 1, Slide 2, ..., Slide N)
@@ -140,6 +140,55 @@ class PdfTextExtractor
         }
 
         return implode("\n\n", $allText);
+    }
+
+    /**
+     * Extract text from legacy binary PowerPoint (.ppt) presentation files.
+     */
+    private function extractBinaryPptText(string $fullPath): string
+    {
+        $content = @file_get_contents($fullPath);
+        if ($content === false || strlen($content) === 0) {
+            throw new Exception('Could not read presentation file.');
+        }
+
+        $text = '';
+
+        // Extract UTF-16LE printable strings
+        if (preg_match_all('/(?:[\x20-\x7E]\x00){3,}/', $content, $matches)) {
+            $utf16Strings = [];
+            foreach ($matches[0] as $match) {
+                $decoded = mb_convert_encoding($match, 'UTF-8', 'UTF-16LE');
+                $decoded = trim($decoded);
+                if (strlen($decoded) > 2 && preg_match('/[a-zA-Z0-9]/', $decoded)) {
+                    $utf16Strings[] = $decoded;
+                }
+            }
+            if (!empty($utf16Strings)) {
+                $text .= implode("\n", $utf16Strings) . "\n\n";
+            }
+        }
+
+        // Extract ASCII printable strings
+        if (preg_match_all('/[\x20-\x7E\t\r\n]{4,}/', $content, $matches)) {
+            $asciiStrings = [];
+            foreach ($matches[0] as $match) {
+                $m = trim($match);
+                if (strlen($m) > 3 && preg_match('/[a-zA-Z]/', $m) && !str_starts_with($m, 'CompObj') && !str_starts_with($m, 'DocumentSummaryInformation')) {
+                    $asciiStrings[] = $m;
+                }
+            }
+            if (!empty($asciiStrings)) {
+                $text .= implode("\n", array_unique($asciiStrings));
+            }
+        }
+
+        $cleaned = $this->cleanText($text);
+        if (empty($cleaned)) {
+            throw new Exception('No readable text could be extracted from the binary presentation file.');
+        }
+
+        return $cleaned;
     }
 
     /**
