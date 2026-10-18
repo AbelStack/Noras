@@ -36,10 +36,22 @@ class QuizGenerationService
         };
 
         if (!$provider->isConfigured()) {
+            $alternate = $providerName === 'gemini' ? new GroqProvider() : new GeminiProvider();
+            if ($alternate->isConfigured()) {
+                Log::info("Primary AI provider '{$providerName}' not configured. Falling back to '{$alternate->getProviderName()}'.");
+                return $alternate;
+            }
+
             throw new Exception("AI provider '{$providerName}' is not properly configured. Please check your environment variables.");
         }
 
         return $provider;
+    }
+
+    private function resolveFallbackProvider(string $currentProvider): ?AIProviderInterface
+    {
+        $fallback = $currentProvider === 'groq' ? new GeminiProvider() : new GroqProvider();
+        return $fallback->isConfigured() ? $fallback : null;
     }
 
     public function generateQuiz(CourseMaterial $material, User $user, int $questionCount = 15, int $optionsPerQuestion = 4): GeneratedQuiz
@@ -63,9 +75,31 @@ class QuizGenerationService
                 throw new Exception('Insufficient text content for quiz generation (minimum 100 characters required)');
             }
 
-            Log::info("Generating quiz using {$this->aiProvider->getProviderName()} ({$this->aiProvider->getModelName()})");
-            
-            $quizData = $this->aiProvider->generateQuiz($pdfText, $material->title, $questionCount, $optionsPerQuestion);
+            // Generate quiz using AI with automatic fallback on rate/token limits
+            $activeProvider = $this->resolveAIProvider();
+            Log::info("Generating quiz using {$activeProvider->getProviderName()} ({$activeProvider->getModelName()})");
+
+            try {
+                $quizData = $activeProvider->generateQuiz($pdfText, $material->title, $questionCount, $optionsPerQuestion);
+            } catch (\Exception $e) {
+                $msg = $e->getMessage();
+                $isRateOrTokenLimit = stripos($msg, 'rate limit') !== false ||
+                    stripos($msg, 'tokens per minute') !== false ||
+                    stripos($msg, 'tpm') !== false ||
+                    stripos($msg, 'request too large') !== false ||
+                    stripos($msg, '429') !== false ||
+                    stripos($msg, 'quota') !== false;
+
+                $fallback = $isRateOrTokenLimit ? $this->resolveFallbackProvider($activeProvider->getProviderName()) : null;
+
+                if ($fallback) {
+                    Log::warning("Primary AI provider [{$activeProvider->getProviderName()}] hit rate/token limit: {$msg}. Automatically falling back to [{$fallback->getProviderName()}].");
+                    $activeProvider = $fallback;
+                    $quizData = $activeProvider->generateQuiz($pdfText, $material->title, $questionCount, $optionsPerQuestion);
+                } else {
+                    throw $e;
+                }
+            }
 
             // Validate quiz data
             $this->validateQuizData($quizData, $questionCount, $optionsPerQuestion);
@@ -81,7 +115,8 @@ class QuizGenerationService
                 $quizData,
                 $questionCount,
                 $sourceCharCount,
-                $generationTimeMs
+                $generationTimeMs,
+                $activeProvider
             ) {
                 // If a quiz already exists for this material, update it as the canonical master quiz
                 $existingQuiz = GeneratedQuiz::where('course_material_id', $material->id)->first();
@@ -89,8 +124,8 @@ class QuizGenerationService
                     $existingQuiz->update([
                         'material_version' => $material->version,
                         'generated_by' => $user->id,
-                        'ai_provider' => $this->aiProvider->getProviderName(),
-                        'ai_model' => $this->aiProvider->getModelName(),
+                        'ai_provider' => $activeProvider->getProviderName(),
+                        'ai_model' => $activeProvider->getModelName(),
                         'question_count' => count($quizData['questions']),
                         'source_char_count' => $sourceCharCount,
                         'generation_time_ms' => $generationTimeMs,
@@ -102,8 +137,8 @@ class QuizGenerationService
                         'course_material_id' => $material->id,
                         'material_version' => $material->version,
                         'generated_by' => $user->id,
-                        'ai_provider' => $this->aiProvider->getProviderName(),
-                        'ai_model' => $this->aiProvider->getModelName(),
+                        'ai_provider' => $activeProvider->getProviderName(),
+                        'ai_model' => $activeProvider->getModelName(),
                         'question_count' => count($quizData['questions']),
                         'source_char_count' => $sourceCharCount,
                         'generation_time_ms' => $generationTimeMs,

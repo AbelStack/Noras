@@ -40,10 +40,22 @@ class NoteGenerationService
         };
 
         if (!$provider->isConfigured()) {
+            $alternate = $providerName === 'gemini' ? new GroqProvider() : new GeminiProvider();
+            if ($alternate->isConfigured()) {
+                Log::info("Primary AI provider '{$providerName}' not configured. Falling back to '{$alternate->getProviderName()}'.");
+                return $alternate;
+            }
+
             throw new Exception("AI provider '{$providerName}' is not properly configured. Please check your environment variables.");
         }
 
         return $provider;
+    }
+
+    private function resolveFallbackProvider(string $currentProvider): ?AIProviderInterface
+    {
+        $fallback = $currentProvider === 'groq' ? new GeminiProvider() : new GroqProvider();
+        return $fallback->isConfigured() ? $fallback : null;
     }
 
     /**
@@ -78,9 +90,32 @@ class NoteGenerationService
 
             Log::info("Extracted {$sourceCharCount} characters from PDF");
 
-            // Generate notes using AI
-            Log::info("Generating notes using {$this->aiProvider->getProviderName()} ({$this->aiProvider->getModelName()})");
-            $notesContent = $this->aiProvider->generateNotes($pdfText, $material->title);
+            // Generate notes using AI with automatic fallback on rate/token limits
+            $activeProvider = $this->resolveAIProvider();
+            Log::info("Generating notes using {$activeProvider->getProviderName()} ({$activeProvider->getModelName()})");
+
+            try {
+                $notesContent = $activeProvider->generateNotes($pdfText, $material->title);
+            } catch (\Exception $e) {
+                $msg = $e->getMessage();
+                $isRateOrTokenLimit = stripos($msg, 'rate limit') !== false ||
+                    stripos($msg, 'tokens per minute') !== false ||
+                    stripos($msg, 'tpm') !== false ||
+                    stripos($msg, 'request too large') !== false ||
+                    stripos($msg, '429') !== false ||
+                    stripos($msg, 'quota') !== false;
+
+                $fallback = $isRateOrTokenLimit ? $this->resolveFallbackProvider($activeProvider->getProviderName()) : null;
+
+                if ($fallback) {
+                    Log::warning("Primary AI provider [{$activeProvider->getProviderName()}] hit rate/token limit: {$msg}. Automatically falling back to [{$fallback->getProviderName()}].");
+                    $activeProvider = $fallback;
+                    $notesContent = $activeProvider->generateNotes($pdfText, $material->title);
+                } else {
+                    throw $e;
+                }
+            }
+
             $notesCharCount = mb_strlen($notesContent, 'UTF-8');
 
             // Calculate generation time
@@ -96,15 +131,16 @@ class NoteGenerationService
                 $sourceCharCount,
                 $notesCharCount,
                 $generationTimeMs,
-                $existingNote
+                $existingNote,
+                $activeProvider
             ) {
                 $data = [
                     'course_material_id' => $material->id,
                     'material_version' => $material->version,
                     'generated_by' => $user->id,
                     'content' => $notesContent,
-                    'ai_provider' => $this->aiProvider->getProviderName(),
-                    'ai_model' => $this->aiProvider->getModelName(),
+                    'ai_provider' => $activeProvider->getProviderName(),
+                    'ai_model' => $activeProvider->getModelName(),
                     'source_char_count' => $sourceCharCount,
                     'notes_char_count' => $notesCharCount,
                     'generation_time_ms' => $generationTimeMs,

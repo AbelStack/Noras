@@ -36,7 +36,7 @@ return [
     ],
 
     'ai' => [
-        'provider' => env('AI_PROVIDER', 'groq'), // Changed default to Groq (verified working)
+        'provider' => env('AI_PROVIDER', 'gemini'), // Gemini Flash has 1M token context & 1M TPM vs Groq 8k TPM
         
         'gemini' => [
             'api_key' => env('GEMINI_API_KEY'),
@@ -46,8 +46,8 @@ return [
         
         'groq' => [
             'api_key' => env('GROQ_API_KEY'),
-            'model' => env('GROQ_MODEL', 'openai/gpt-oss-20b'), // Updated: Current free tier model (Oct 2026)
-            'max_chars' => env('GROQ_MAX_CHARS', 400000),
+            'model' => env('GROQ_MODEL', 'openai/gpt-oss-20b'),
+            'max_chars' => env('GROQ_MAX_CHARS', 24000), // Safe character budget to avoid Groq 8k TPM limit
         ],
     ],
 

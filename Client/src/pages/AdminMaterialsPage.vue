@@ -193,36 +193,36 @@
         <!-- Table -->
         <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="w-full divide-y divide-gray-200 text-left">
               <thead class="bg-gray-50/75">
                 <tr>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Document</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Target Curriculum</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type & Size</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                  <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Uploaded</th>
-                  <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                  <th class="px-3.5 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-tight">Document</th>
+                  <th class="px-3 py-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-tight w-24">Curriculum</th>
+                  <th class="px-3 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-tight w-24">Type & Size</th>
+                  <th class="px-3 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-tight w-24">Status</th>
+                  <th class="px-3 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-tight w-28">Uploaded</th>
+                  <th class="px-3.5 py-3 text-right text-[11px] font-bold text-gray-500 uppercase tracking-tight w-14">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 bg-white">
                 <tr v-for="material in filteredMaterials" :key="material.id" class="hover:bg-gray-50/80 transition-colors">
                   <!-- Document title and original name -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-start gap-3">
+                  <td class="px-3.5 py-2.5">
+                    <div class="flex items-center gap-2.5">
                       <div 
-                        class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-xs shadow-2xs"
+                        class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-[10px] shadow-2xs"
                         :class="isPpt(material) ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-red-50 text-red-600 border border-red-200'"
                       >
                         <span v-if="isPpt(material)">PPT</span>
-                        <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                       </div>
                       <div class="min-w-0">
-                        <div class="text-sm font-bold text-gray-900 truncate max-w-xs sm:max-w-md" :title="material.title">
+                        <div class="text-xs font-bold text-gray-900 truncate max-w-[180px] sm:max-w-[260px] lg:max-w-[340px]" :title="material.title">
                           {{ material.title }}
                         </div>
-                        <div class="text-xs text-gray-400 mt-0.5 truncate max-w-xs">
+                        <div class="text-[11px] text-gray-400 truncate max-w-[160px] sm:max-w-[220px]" :title="material.original_filename">
                           {{ material.original_filename }}
                         </div>
                       </div>
@@ -230,11 +230,11 @@
                   </td>
 
                   <!-- Target Curriculum -->
-                  <td class="px-6 py-4 whitespace-nowrap">
+                  <td class="px-3 py-2.5 whitespace-nowrap text-center">
                     <button
                       type="button"
                       @click="viewCurriculumDetails(material)"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-xl border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-200 transition-all shadow-2xs cursor-pointer hover:shadow-xs active:scale-95"
                       title="View target curriculum details"
                     >
                       <svg class="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -246,10 +246,10 @@
                   </td>
 
                   <!-- Type & Size -->
-                  <td class="px-6 py-4 whitespace-nowrap">
+                  <td class="px-3 py-2.5 whitespace-nowrap">
                     <div class="flex items-center gap-1.5">
                       <span 
-                        class="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase"
+                        class="px-1.5 py-0.5 text-[9px] font-bold rounded uppercase tracking-wide"
                         :class="isPpt(material) ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'"
                       >
                         {{ isPpt(material) ? 'PPT' : 'PDF' }}
@@ -261,9 +261,9 @@
                   </td>
 
                   <!-- Status -->
-                  <td class="px-6 py-4 whitespace-nowrap">
+                  <td class="px-3 py-2.5 whitespace-nowrap">
                     <span 
-                      class="px-2.5 py-1 text-xs font-semibold rounded-full capitalize"
+                      class="px-2 py-0.5 text-[11px] font-semibold rounded-full capitalize"
                       :class="getStatusBadgeClass(material.status)"
                     >
                       {{ material.status || 'published' }}
@@ -271,20 +271,20 @@
                   </td>
 
                   <!-- Uploaded Date -->
-                  <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                  <td class="px-3 py-2.5 whitespace-nowrap text-xs text-gray-500">
                     {{ formatDate(material.created_at) }}
                   </td>
 
                   <!-- 3-Dots Action Dropdown -->
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <td class="px-3.5 py-2.5 whitespace-nowrap text-right text-sm">
                     <div class="relative inline-block text-left" @click.stop>
                       <button 
                         type="button"
                         @click.stop="toggleActionMenu(material.id)" 
-                        class="p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                        class="p-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
                         title="Actions"
                       >
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                         </svg>
                       </button>
@@ -294,16 +294,52 @@
                         v-if="activeActionMenuId === material.id"
                         @click.stop
                         v-click-outside="() => activeActionMenuId = null"
-                        class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
+                        class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-30 divide-y divide-gray-100 overflow-hidden"
                       >
+                        <!-- AI Generation Group (Only for missing notes/quizzes) -->
+                        <div v-if="!hasNote(material) || !hasQuiz(material)" class="py-1 bg-gray-50/60">
+                          <button 
+                            v-if="!hasNote(material)"
+                            type="button"
+                            @click="generateStudyNote(material)" 
+                            :disabled="generatingNoteId === material.id"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors text-left cursor-pointer disabled:opacity-50"
+                          >
+                            <svg v-if="generatingNoteId === material.id" class="animate-spin w-3.5 h-3.5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <svg v-else class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>{{ generatingNoteId === material.id ? 'Generating...' : 'Generate Note' }}</span>
+                          </button>
+                          <button 
+                            v-if="!hasQuiz(material)"
+                            type="button"
+                            @click="openQuizGenModal(material)" 
+                            :disabled="generatingQuizId === material.id"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors text-left cursor-pointer disabled:opacity-50"
+                          >
+                            <svg v-if="generatingQuizId === material.id" class="animate-spin w-3.5 h-3.5 text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <svg v-else class="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{{ generatingQuizId === material.id ? 'Generating...' : 'Generate Quiz' }}</span>
+                          </button>
+                        </div>
+
                         <!-- Standard File Actions Group -->
                         <div class="py-1">
                           <button 
                             type="button"
                             @click="viewCurriculumDetails(material); activeActionMenuId = null" 
-                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
                           >
-                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
@@ -312,9 +348,9 @@
                           <button 
                             type="button"
                             @click="downloadMaterial(material); activeActionMenuId = null" 
-                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
                           >
-                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                             <span>Download File</span>
@@ -322,22 +358,24 @@
                           <button 
                             type="button"
                             @click="togglePublish(material)" 
-                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors text-left cursor-pointer"
                           >
-                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                             <span>{{ material.status === 'published' ? 'Set as Draft' : 'Publish' }}</span>
                           </button>
                         </div>
+
+                        <!-- Danger Group -->
                         <div class="py-1">
                           <button 
                             type="button"
                             @click="deleteMaterial(material)" 
-                            class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
                           >
-                            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                             <span>Delete Material</span>
@@ -747,6 +785,90 @@
         </div>
       </div>
     </transition>
+
+    <!-- Generate Quiz Modal (Question Count Picker) -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showQuizGenModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeQuizGenModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div 
+            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-gray-100"
+            @click.stop
+          >
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-gray-900">Generate Official Quiz</h3>
+                  <p class="text-xs text-gray-500 truncate max-w-xs">{{ quizTargetMaterial?.title }}</p>
+                </div>
+              </div>
+              <button @click="closeQuizGenModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                  Number of Questions (15 – 30)
+                </label>
+                <div class="grid grid-cols-4 gap-2">
+                  <button
+                    v-for="count in [15, 20, 25, 30]"
+                    :key="count"
+                    type="button"
+                    @click="quizGenCount = count"
+                    class="py-2.5 px-3 rounded-xl text-xs font-bold transition-all border cursor-pointer text-center"
+                    :class="quizGenCount === count ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'"
+                  >
+                    {{ count }} Qs
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                  Includes a balanced mix of Multiple Choice and True/False questions with page citations and answer explanations.
+                </p>
+              </div>
+
+              <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  @click="closeQuizGenModal"
+                  class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  @click="submitGenerateQuiz"
+                  :disabled="generatingQuizId === quizTargetMaterial?.id"
+                  class="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 transition-colors shadow-sm cursor-pointer"
+                >
+                  <svg v-if="generatingQuizId === quizTargetMaterial?.id" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>{{ generatingQuizId === quizTargetMaterial?.id ? 'Generating...' : 'Generate Quiz' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </DashboardLayout>
 </template>
 
@@ -780,6 +902,83 @@ const viewCurriculumDetails = (material) => {
 const closeCurriculumModal = () => {
   showCurriculumModal.value = false
   curriculumMaterial.value = null
+}
+
+const generatingNoteId = ref(null)
+const generatingQuizId = ref(null)
+const showQuizGenModal = ref(false)
+const quizTargetMaterial = ref(null)
+const quizGenCount = ref(20)
+
+const hasNote = (material) => {
+  return Boolean(material?.master_note || material?.masterNote)
+}
+
+const hasQuiz = (material) => {
+  return Boolean(material?.master_quiz || material?.masterQuiz)
+}
+
+const generateStudyNote = async (material) => {
+  activeActionMenuId.value = null
+  generatingNoteId.value = material.id
+  notify.info(`Generating official study note for "${material.title}" page-by-page...`)
+
+  try {
+    const response = await api.post(`/admin/materials/${material.id}/generate-note`, {
+      regenerate: true
+    })
+    if (response.data.status === 'success') {
+      notify.success(`Study note for "${material.title}" generated successfully!`)
+      await fetchMaterials()
+    } else {
+      notify.error(response.data.message || 'Failed to generate note')
+    }
+  } catch (err) {
+    console.error('Failed to generate note:', err)
+    notify.error(err.response?.data?.message || 'Failed to generate note. Please try again.')
+  } finally {
+    generatingNoteId.value = null
+  }
+}
+
+const openQuizGenModal = (material) => {
+  activeActionMenuId.value = null
+  quizTargetMaterial.value = material
+  quizGenCount.value = 20
+  showQuizGenModal.value = true
+}
+
+const closeQuizGenModal = () => {
+  showQuizGenModal.value = false
+  quizTargetMaterial.value = null
+}
+
+const submitGenerateQuiz = async () => {
+  if (!quizTargetMaterial.value) return
+  const mat = quizTargetMaterial.value
+  const count = quizGenCount.value
+  generatingQuizId.value = mat.id
+  showQuizGenModal.value = false
+
+  notify.info(`Generating official quiz for "${mat.title}" (${count} questions)...`)
+
+  try {
+    const response = await api.post(`/admin/materials/${mat.id}/generate-quiz`, {
+      question_count: count,
+      options_per_question: 4
+    })
+    if (response.data.status === 'success') {
+      notify.success(`Official quiz with ${count} questions generated successfully!`)
+      await fetchMaterials()
+    } else {
+      notify.error(response.data.message || 'Failed to generate quiz')
+    }
+  } catch (err) {
+    console.error('Failed to generate quiz:', err)
+    notify.error(err.response?.data?.message || 'Failed to generate quiz. Please try again.')
+  } finally {
+    generatingQuizId.value = null
+  }
 }
 
 const isUploading = ref(false)
