@@ -32,48 +32,48 @@
         </div>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Materials</div>
-          <div class="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{{ stats.total }}</div>
-          <p class="text-xs text-gray-400 mt-1">Uploaded academic files</p>
+      <!-- Stats Cards (Compact) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
+          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Total Materials</div>
+          <div class="text-xl font-bold text-gray-900 mt-1">{{ stats.total }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Uploaded academic files</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
           <div class="flex items-center justify-between">
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">PDF Documents</div>
-            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700">PDF</span>
+            <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">PDF Documents</div>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700">PDF</span>
           </div>
-          <div class="text-2xl sm:text-3xl font-bold text-red-600 mt-2">{{ stats.pdfCount }}</div>
-          <p class="text-xs text-gray-400 mt-1">Reading & reference materials</p>
+          <div class="text-xl font-bold text-red-600 mt-1">{{ stats.pdfCount }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Reading & reference files</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
           <div class="flex items-center justify-between">
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">PPT Slides</div>
-            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">PPT</span>
+            <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">PPT Slides</div>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-700">PPT</span>
           </div>
-          <div class="text-2xl sm:text-3xl font-bold text-amber-600 mt-2">{{ stats.pptCount }}</div>
-          <p class="text-xs text-gray-400 mt-1">Lecture presentations</p>
+          <div class="text-xl font-bold text-amber-600 mt-1">{{ stats.pptCount }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Lecture presentations</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Published</div>
-          <div class="text-2xl sm:text-3xl font-bold text-emerald-600 mt-2">{{ stats.published }}</div>
-          <p class="text-xs text-gray-400 mt-1">Accessible by students</p>
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
+          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Published</div>
+          <div class="text-xl font-bold text-emerald-600 mt-1">{{ stats.published }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Accessible by students</p>
         </div>
       </div>
 
-      <!-- Filters & Search -->
-      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-        <div class="flex flex-col md:flex-row gap-3 items-center justify-between">
-          <div class="relative w-full md:w-80">
-            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Filters & Search (Compact) -->
+      <div class="bg-white p-2.5 sm:px-3.5 rounded-xl border border-gray-200 shadow-2xs">
+        <div class="flex flex-col md:flex-row gap-2.5 items-center justify-between">
+          <div class="relative w-full md:w-72">
+            <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input 
               v-model="filters.search"
               type="text" 
               placeholder="Search by title, course, or department..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+              class="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -82,7 +82,7 @@
             <select 
               v-model="filters.campusId"
               @change="onFilterCampusChange"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
             >
               <option value="">All Campuses</option>
               <option v-for="c in campuses" :key="c.id" :value="c.id">{{ c.name }}</option>
@@ -91,7 +91,7 @@
             <!-- Department Filter -->
             <select 
               v-model="filters.departmentId"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 max-w-[180px]"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 max-w-[160px]"
             >
               <option value="">All Departments</option>
               <option v-for="d in filteredDepartmentsForFilter" :key="d.id" :value="d.id">{{ d.name }}</option>
@@ -100,7 +100,7 @@
             <!-- Study Year Filter -->
             <select 
               v-model="filters.studyYear"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
             >
               <option value="">All Years</option>
               <option v-for="yr in [1, 2, 3, 4, 5, 6, 7]" :key="yr" :value="yr">Year {{ yr }}</option>
@@ -109,7 +109,7 @@
             <!-- Semester Filter -->
             <select 
               v-model="filters.semester"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
             >
               <option value="">All Semesters</option>
               <option value="1">Semester 1</option>
@@ -119,17 +119,17 @@
             <!-- File Type Filter -->
             <select 
               v-model="filters.fileType"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
             >
               <option value="">All Types</option>
-              <option value="pdf">PDF Documents</option>
-              <option value="ppt">PowerPoint (PPT)</option>
+              <option value="pdf">PDF</option>
+              <option value="ppt">PPT</option>
             </select>
 
             <!-- Status Filter -->
             <select 
               v-model="filters.status"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
             >
               <option value="">All Statuses</option>
               <option value="published">Published</option>
@@ -139,7 +139,7 @@
             <button 
               v-if="hasActiveFilters"
               @click="resetFilters"
-              class="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 underline cursor-pointer"
+              class="px-2 py-1 text-xs font-semibold text-gray-500 hover:text-gray-800 underline cursor-pointer"
             >
               Reset
             </button>
@@ -168,7 +168,7 @@
       <!-- Materials List -->
       <div v-else>
         <!-- Empty State -->
-        <div v-if="filteredMaterials.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+        <div v-if="filteredMaterials.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm min-h-[400px] flex flex-col items-center justify-center">
           <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4">
             <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -190,9 +190,9 @@
           </button>
         </div>
 
-        <!-- Table -->
-        <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
+        <!-- Table (Large Box) -->
+        <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[520px] flex flex-col justify-between">
+          <div class="overflow-x-auto flex-1">
             <table class="w-full divide-y divide-gray-200 text-left">
               <thead class="bg-gray-50/75">
                 <tr>

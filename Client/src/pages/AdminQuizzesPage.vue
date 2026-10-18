@@ -34,47 +34,47 @@
         </div>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Quizzes</div>
-          <div class="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{{ stats.total_quizzes }}</div>
-          <p class="text-xs text-gray-400 mt-1">Master practice quizzes</p>
+      <!-- Stats Cards (Compact) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
+          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Total Quizzes</div>
+          <div class="text-xl font-bold text-gray-900 mt-1">{{ stats.total_quizzes }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Master practice quizzes</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Questions</div>
-          <div class="text-2xl sm:text-3xl font-bold text-indigo-600 mt-2">
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
+          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Total Questions</div>
+          <div class="text-xl font-bold text-indigo-600 mt-1">
             {{ (stats.total_questions || 0).toLocaleString() }}
           </div>
-          <p class="text-xs text-gray-400 mt-1">Multiple choice & True/False</p>
+          <p class="text-[11px] text-gray-400 mt-0.5">MCQ & True/False</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg. Questions / Quiz</div>
-          <div class="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
+          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Avg. Questions / Quiz</div>
+          <div class="text-xl font-bold text-blue-600 mt-1">
             {{ stats.total_quizzes > 0 ? Math.round(stats.total_questions / stats.total_quizzes) : 0 }}
           </div>
-          <p class="text-xs text-gray-400 mt-1">Target range: 15–30 questions</p>
+          <p class="text-[11px] text-gray-400 mt-0.5">15–30 questions</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Materials Covered</div>
-          <div class="text-2xl sm:text-3xl font-bold text-purple-600 mt-2">{{ stats.unique_materials }}</div>
-          <p class="text-xs text-gray-400 mt-1">Distinct course files</p>
+        <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
+          <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Materials Covered</div>
+          <div class="text-xl font-bold text-purple-600 mt-1">{{ stats.unique_materials }}</div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Distinct course files</p>
         </div>
       </div>
 
-      <!-- Filters & Search Bar (Curriculum Organization) -->
-      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-        <div class="flex flex-col md:flex-row gap-3 items-center justify-between">
-          <div class="relative w-full md:w-80">
-            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Filters & Search Bar (Compact) -->
+      <div class="bg-white p-2.5 sm:px-3.5 rounded-xl border border-gray-200 shadow-2xs">
+        <div class="flex flex-col md:flex-row gap-2.5 items-center justify-between">
+          <div class="relative w-full md:w-72">
+            <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input 
               v-model="filters.search"
               @input="debounceFetch"
               type="text" 
-              placeholder="Search by material title, course code or title..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+              placeholder="Search by material title, course code..."
+              class="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -83,7 +83,7 @@
             <select 
               v-model="filters.campusId"
               @change="onFilterCampusChange"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
             >
               <option value="">All Campuses</option>
               <option v-for="c in campuses" :key="c.id" :value="c.id">{{ c.name }}</option>
@@ -93,7 +93,7 @@
             <select 
               v-model="filters.departmentId"
               @change="fetchQuizzes"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 max-w-[180px]"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 max-w-[160px]"
             >
               <option value="">All Departments</option>
               <option v-for="d in filteredDepartments" :key="d.id" :value="d.id">{{ d.name }}</option>
@@ -103,7 +103,7 @@
             <select 
               v-model="filters.studyYear"
               @change="fetchQuizzes"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
             >
               <option value="">All Years</option>
               <option v-for="yr in [1, 2, 3, 4, 5, 6, 7]" :key="yr" :value="yr">Year {{ yr }}</option>
@@ -113,7 +113,7 @@
             <select 
               v-model="filters.semester"
               @change="fetchQuizzes"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
             >
               <option value="">All Semesters</option>
               <option value="1">Semester 1</option>
@@ -123,7 +123,7 @@
             <button 
               v-if="hasActiveFilters"
               @click="resetFilters"
-              class="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 underline cursor-pointer"
+              class="px-2 py-1 text-xs font-semibold text-gray-500 hover:text-gray-800 underline cursor-pointer"
             >
               Reset
             </button>
@@ -152,7 +152,7 @@
       <!-- Quizzes Content -->
       <div v-else>
         <!-- Empty State -->
-        <div v-if="quizzes.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+        <div v-if="quizzes.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm min-h-[400px] flex flex-col items-center justify-center">
           <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center mb-4">
             <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -170,9 +170,9 @@
           </button>
         </div>
 
-        <!-- Table of Quizzes -->
-        <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
+        <!-- Table of Quizzes (Large Box) -->
+        <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[500px] flex flex-col justify-between">
+          <div class="overflow-x-auto flex-1">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50/75">
                 <tr>
