@@ -14,6 +14,10 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        if ($user) {
+            AppNotification::checkAndNotifyOverdueTasks($user->id);
+        }
+
         $query = AppNotification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc');
 

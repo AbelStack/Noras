@@ -55,4 +55,49 @@ class AppNotification extends Model
     {
         return $query->whereNotNull('read_at');
     }
+
+    /**
+     * Check for overdue study tasks and create notifications if not already sent.
+     */
+    public static function checkAndNotifyOverdueTasks(?int $userId = null): int
+    {
+        $today = now()->startOfDay();
+
+        $query = StudyTask::where('completed', false)
+            ->whereNotNull('due_date')
+            ->where('due_date', '<', $today);
+
+        if ($userId !== null) {
+            $query->where('user_id', $userId);
+        }
+
+        $overdueTasks = $query->get();
+        $createdCount = 0;
+
+        foreach ($overdueTasks as $task) {
+            $formattedDate = \Carbon\Carbon::parse($task->due_date)->format('M d, Y');
+
+            $alreadyNotified = static::where('user_id', $task->user_id)
+                ->where('type', 'task_overdue')
+                ->where('data->task_id', $task->id)
+                ->exists();
+
+            if (!$alreadyNotified) {
+                static::create([
+                    'user_id' => $task->user_id,
+                    'type' => 'task_overdue',
+                    'title' => 'Study Task Overdue',
+                    'message' => "Your task \"{$task->title}\" passed its due date ({$formattedDate}) before being marked completed.",
+                    'action_url' => '/tasks',
+                    'data' => [
+                        'task_id' => $task->id,
+                        'due_date' => $task->due_date ? (is_string($task->due_date) ? $task->due_date : $task->due_date->toISOString()) : null,
+                    ],
+                ]);
+                $createdCount++;
+            }
+        }
+
+        return $createdCount;
+    }
 }

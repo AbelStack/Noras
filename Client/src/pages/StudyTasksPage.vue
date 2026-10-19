@@ -110,6 +110,34 @@
         </button>
       </div>
 
+      <!-- Overdue Tasks Banner Alert -->
+      <div 
+        v-if="overdueTasksCount > 0 && currentFilter !== true"
+        class="bg-red-50 border border-red-200 rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-2xs"
+      >
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-red-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-red-900">
+              {{ overdueTasksCount }} Study {{ overdueTasksCount === 1 ? 'Task is' : 'Tasks are' }} Overdue!
+            </h4>
+            <p class="text-xs text-red-700 mt-0.5">
+              These tasks passed their due date before being marked complete. Please review and complete or update them.
+            </p>
+          </div>
+        </div>
+        <button
+          @click="currentFilter = false"
+          class="text-xs font-bold text-red-800 bg-red-100 hover:bg-red-200 border border-red-300 px-3 py-1.5 rounded-xl transition-colors hidden sm:inline-flex"
+        >
+          View Active Tasks
+        </button>
+      </div>
+
       <!-- Tasks List -->
       <div v-else class="space-y-4">
         <div
@@ -125,11 +153,14 @@
                   'inline-flex items-center justify-center w-10 h-10 rounded-xl border transition-colors',
                   task.completed 
                     ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
-                    : 'bg-primary-50 border-primary-100 text-primary-600'
+                    : (isOverdue(task) ? 'bg-red-50 border-red-200 text-red-600' : 'bg-primary-50 border-primary-100 text-primary-600')
                 ]"
               >
                 <svg v-if="task.completed" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <svg v-else-if="isOverdue(task)" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -152,13 +183,28 @@
                 <span
                   :class="[
                     'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                    task.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-primary-800'
+                    task.completed 
+                      ? 'bg-emerald-100 text-emerald-800' 
+                      : (isOverdue(task) ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-blue-100 text-primary-800')
                   ]"
                 >
-                  {{ task.completed ? 'Completed' : 'Active' }}
+                  {{ task.completed ? 'Completed' : (isOverdue(task) ? 'Overdue' : 'Active') }}
                 </span>
 
-                <span v-if="task.due_date" :class="getDueDateClass(task)">
+                <!-- Overdue Notice Badge -->
+                <span 
+                  v-if="isOverdue(task)"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-300 shadow-2xs"
+                  title="This task has passed its due date!"
+                >
+                  <svg class="w-3.5 h-3.5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  <span>Overdue Notice &bull; Due {{ formatDueDate(task.due_date) }}</span>
+                </span>
+
+                <!-- Normal / Today Due Date Badge -->
+                <span v-else-if="task.due_date" :class="getDueDateClass(task)">
                   <svg class="inline w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
@@ -582,6 +628,19 @@ const hasLinkedResources = (task) => {
   return task.course_material || task.generated_note || task.generated_quiz ||
          task.course_material_id || task.generated_note_id || task.generated_quiz_id
 }
+
+const isOverdue = (task) => {
+  if (task.completed || !task.due_date) return false
+  const dueDate = new Date(task.due_date)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  dueDate.setHours(0, 0, 0, 0)
+  return dueDate < today
+}
+
+const overdueTasksCount = computed(() => {
+  return tasks.value.filter(t => isOverdue(t)).length
+})
 
 const getDueDateClass = (task) => {
   if (task.completed) return 'text-gray-400 text-xs'

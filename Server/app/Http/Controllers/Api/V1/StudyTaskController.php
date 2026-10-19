@@ -7,6 +7,7 @@ use App\Models\StudyTask;
 use App\Models\CourseMaterial;
 use App\Models\GeneratedNote;
 use App\Models\GeneratedQuiz;
+use App\Models\AppNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +19,11 @@ class StudyTaskController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $userId = auth()->id();
+        if ($userId) {
+            AppNotification::checkAndNotifyOverdueTasks($userId);
+        }
+
         $validated = $request->validate([
             'per_page' => 'sometimes|integer|min:1|max:100',
             'completed' => 'sometimes|in:true,false,1,0',
@@ -239,6 +245,12 @@ class StudyTaskController extends Controller
             ], 403);
         }
 
+        // Clean up any overdue notification for this task
+        AppNotification::where('user_id', auth()->id())
+            ->where('type', 'task_overdue')
+            ->where('data->task_id', $task->id)
+            ->delete();
+
         $task->delete();
 
         Log::info('Study task deleted', [
@@ -284,6 +296,12 @@ class StudyTaskController extends Controller
         $task->completed = true;
         $task->completed_at = now();
         $task->save();
+
+        // Mark any overdue notification for this task as read
+        AppNotification::where('user_id', auth()->id())
+            ->where('type', 'task_overdue')
+            ->where('data->task_id', $task->id)
+            ->update(['read_at' => now()]);
 
         $task->load(['courseMaterial', 'generatedNote', 'generatedQuiz']);
 
