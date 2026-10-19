@@ -175,37 +175,102 @@
                   </button>
                 </div>
 
-                <!-- College Filter Chips (If Department picker and colleges exist) -->
-                <div 
-                  v-if="pickerType === 'department' && availableColleges.length > 1" 
-                  class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar"
-                >
-                  <button
-                    type="button"
-                    @click="selectedCollegeFilter = 'all'"
-                    :class="[
-                      'px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer',
-                      selectedCollegeFilter === 'all'
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'
-                    ]"
-                  >
-                    All Colleges ({{ items.length }})
-                  </button>
-                  <button
-                    v-for="college in availableColleges"
-                    :key="college"
-                    type="button"
-                    @click="selectedCollegeFilter = college"
-                    :class="[
-                      'px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer',
-                      selectedCollegeFilter === college
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'
-                    ]"
-                  >
-                    {{ college }}
-                  </button>
+                <!-- College Filter Bar (with Left/Right Arrow Navigation, Mouse Wheel Scroll, and Quick Select Dropdown) -->
+                <div v-if="pickerType === 'department' && availableColleges.length > 1" class="space-y-1.5 pt-1">
+                  <!-- Header with Quick Dropdown -->
+                  <div class="flex items-center justify-between text-xs text-gray-500 font-medium">
+                    <span class="flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                      </svg>
+                      Filter by College:
+                    </span>
+                    
+                    <!-- Quick Dropdown for 1-Click Jump to Any College -->
+                    <select
+                      v-model="selectedCollegeFilter"
+                      class="text-xs font-semibold bg-white border border-gray-200 rounded-lg px-2 py-0.5 text-gray-700 hover:border-blue-400 focus:ring-2 focus:ring-blue-600 outline-none cursor-pointer max-w-[200px] truncate"
+                    >
+                      <option value="all">All Colleges ({{ items.length }})</option>
+                      <option v-for="c in availableColleges" :key="c" :value="c">{{ c }}</option>
+                    </select>
+                  </div>
+
+                  <!-- Horizontal Scrollable Chips Row with Prev/Next Buttons -->
+                  <div class="relative flex items-center gap-1.5">
+                    <!-- Left Arrow Button (for Desktop & Mobile) -->
+                    <button
+                      type="button"
+                      @click="scrollChips('left')"
+                      :disabled="!canScrollLeft"
+                      :class="[
+                        'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all border shadow-2xs',
+                        canScrollLeft
+                          ? 'bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border-gray-200 hover:border-blue-300 cursor-pointer'
+                          : 'bg-gray-100 text-gray-300 border-gray-100 cursor-not-allowed opacity-40'
+                      ]"
+                      aria-label="Scroll colleges left"
+                      title="Scroll colleges left"
+                    >
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+
+                    <!-- Scrollable Container with Mouse Wheel Support on PC -->
+                    <div 
+                      ref="chipsContainerRef"
+                      @wheel="handleChipsWheel"
+                      @scroll="updateScrollState"
+                      class="flex items-center gap-1.5 overflow-x-auto py-1 text-xs chips-scroll flex-1 scroll-smooth"
+                    >
+                      <button
+                        type="button"
+                        @click="selectedCollegeFilter = 'all'"
+                        :class="[
+                          'px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer flex-shrink-0',
+                          selectedCollegeFilter === 'all'
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'
+                        ]"
+                      >
+                        All Colleges ({{ items.length }})
+                      </button>
+                      <button
+                        v-for="college in availableColleges"
+                        :key="college"
+                        type="button"
+                        @click="selectedCollegeFilter = college"
+                        :class="[
+                          'px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer flex-shrink-0',
+                          selectedCollegeFilter === college
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'
+                        ]"
+                      >
+                        {{ college }}
+                      </button>
+                    </div>
+
+                    <!-- Right Arrow Button (for Desktop & Mobile) -->
+                    <button
+                      type="button"
+                      @click="scrollChips('right')"
+                      :disabled="!canScrollRight"
+                      :class="[
+                        'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all border shadow-2xs',
+                        canScrollRight
+                          ? 'bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border-gray-200 hover:border-blue-300 cursor-pointer'
+                          : 'bg-gray-100 text-gray-300 border-gray-100 cursor-not-allowed opacity-40'
+                      ]"
+                      aria-label="Scroll colleges right"
+                      title="Scroll colleges right"
+                    >
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -288,48 +353,66 @@
                   </div>
                 </template>
 
-                <!-- Department Option Cards -->
+                <!-- Department Option Cards (Grouped by College) -->
                 <template v-else>
-                  <div
-                    v-for="item in filteredItems"
-                    :key="item.id"
-                    @click="selectItem(item)"
-                    :class="[
-                      'p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 min-h-[52px]',
-                      modelValue === item.id
-                        ? 'border-blue-600 bg-blue-50/90 ring-2 ring-blue-600/20 shadow-xs'
-                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 active:bg-blue-50/50'
-                    ]"
+                  <div 
+                    v-for="(group, collegeName) in groupedFilteredDepartments" 
+                    :key="collegeName"
+                    class="space-y-2 mb-4"
                   >
-                    <div class="min-w-0 flex-1">
-                      <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-gray-900 truncate">{{ item.name }}</span>
-                        <span 
-                          v-if="item.code" 
-                          class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 flex-shrink-0"
-                        >
-                          {{ item.code }}
-                        </span>
+                    <!-- Sticky College Section Header -->
+                    <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md py-1.5 px-3 rounded-xl border border-blue-100 flex items-center justify-between shadow-2xs">
+                      <div class="flex items-center gap-2 min-w-0">
+                        <span class="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 ring-2 ring-yellow-400"></span>
+                        <h5 class="text-xs font-bold uppercase tracking-wider text-blue-900 truncate">{{ collegeName }}</h5>
                       </div>
-                      <div class="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
-                        <span class="truncate">{{ item.college || 'General Studies' }}</span>
-                        <span v-if="item.total_years" class="text-gray-400">&bull; {{ item.total_years }} Yrs</span>
-                      </div>
+                      <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 flex-shrink-0">
+                        {{ group.length }} {{ group.length === 1 ? 'Dept' : 'Depts' }}
+                      </span>
                     </div>
 
-                    <!-- Selected Indicator -->
-                    <div class="flex-shrink-0">
-                      <div 
-                        :class="[
-                          'w-6 h-6 rounded-full flex items-center justify-center transition-colors',
-                          modelValue === item.id 
-                            ? 'bg-blue-600 text-white ring-2 ring-yellow-400' 
-                            : 'border-2 border-gray-300'
-                        ]"
-                      >
-                        <svg v-if="modelValue === item.id" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                        </svg>
+                    <!-- Department Cards in this College -->
+                    <div
+                      v-for="item in group"
+                      :key="item.id"
+                      @click="selectItem(item)"
+                      :class="[
+                        'p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 min-h-[52px]',
+                        modelValue === item.id
+                          ? 'border-blue-600 bg-blue-50/90 ring-2 ring-blue-600/20 shadow-xs'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 active:bg-blue-50/50'
+                      ]"
+                    >
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                          <span class="text-sm font-bold text-gray-900 truncate">{{ item.name }}</span>
+                          <span 
+                            v-if="item.code" 
+                            class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 flex-shrink-0"
+                          >
+                            {{ item.code }}
+                          </span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
+                          <span class="truncate">{{ item.college || 'General Studies' }}</span>
+                          <span v-if="item.total_years" class="text-gray-400">&bull; {{ item.total_years }} Yrs</span>
+                        </div>
+                      </div>
+
+                      <!-- Selected Indicator -->
+                      <div class="flex-shrink-0">
+                        <div 
+                          :class="[
+                            'w-6 h-6 rounded-full flex items-center justify-center transition-colors',
+                            modelValue === item.id 
+                              ? 'bg-blue-600 text-white ring-2 ring-yellow-400' 
+                              : 'border-2 border-gray-300'
+                          ]"
+                        >
+                          <svg v-if="modelValue === item.id" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -358,7 +441,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -405,6 +488,9 @@ const isOpen = ref(false)
 const searchQuery = ref('')
 const selectedCollegeFilter = ref('all')
 const searchInputRef = ref(null)
+const chipsContainerRef = ref(null)
+const canScrollLeft = ref(false)
+const canScrollRight = ref(false)
 
 const selectedItem = computed(() => {
   if (!props.modelValue) return null
@@ -428,6 +514,39 @@ const availableColleges = computed(() => {
   return Array.from(set).sort()
 })
 
+const updateScrollState = () => {
+  if (!chipsContainerRef.value) {
+    canScrollLeft.value = false
+    canScrollRight.value = false
+    return
+  }
+  const { scrollLeft, scrollWidth, clientWidth } = chipsContainerRef.value
+  canScrollLeft.value = scrollLeft > 2
+  canScrollRight.value = scrollLeft + clientWidth < scrollWidth - 2
+}
+
+const scrollChips = (direction) => {
+  if (!chipsContainerRef.value) return
+  const offset = direction === 'left' ? -200 : 200
+  chipsContainerRef.value.scrollBy({ left: offset, behavior: 'smooth' })
+  setTimeout(updateScrollState, 350)
+}
+
+const handleChipsWheel = (e) => {
+  if (!chipsContainerRef.value) return
+  if (e.deltaY !== 0) {
+    e.preventDefault()
+    chipsContainerRef.value.scrollLeft += e.deltaY
+    updateScrollState()
+  }
+}
+
+watch([availableColleges, selectedCollegeFilter], () => {
+  nextTick(() => {
+    updateScrollState()
+  })
+})
+
 const filteredItems = computed(() => {
   let list = props.items || []
 
@@ -446,6 +565,18 @@ const filteredItems = computed(() => {
     const collegeMatch = item.college?.toLowerCase().includes(q)
     return nameMatch || codeMatch || collegeMatch
   })
+})
+
+const groupedFilteredDepartments = computed(() => {
+  const groups = {}
+  filteredItems.value.forEach(item => {
+    const college = item.college || 'Other Programs'
+    if (!groups[college]) {
+      groups[college] = []
+    }
+    groups[college].push(item)
+  })
+  return groups
 })
 
 const getCampusDescription = (code) => {
@@ -468,6 +599,7 @@ const openPicker = () => {
   selectedCollegeFilter.value = 'all'
   nextTick(() => {
     searchInputRef.value?.focus()
+    updateScrollState()
   })
 }
 
@@ -484,10 +616,32 @@ const selectItem = (item) => {
 const resetFilters = () => {
   searchQuery.value = ''
   selectedCollegeFilter.value = 'all'
+  nextTick(() => {
+    updateScrollState()
+  })
 }
 </script>
 
 <style scoped>
+.chips-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.chips-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+.chips-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+.chips-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.chips-scroll::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
