@@ -1,5 +1,5 @@
 <template>
-  <div class="relative inline-block text-left" :class="widthClass" ref="dropdownRef">
+  <div class="relative text-left" :class="widthClass" ref="dropdownRef">
     <!-- Trigger Button -->
     <button
       type="button"
@@ -8,15 +8,15 @@
       :class="[
         'w-full flex items-center justify-between text-left transition-all border outline-none bg-white select-none',
         size === 'sm'
-          ? 'px-2.5 py-1.5 text-xs rounded-xl min-h-[34px]'
+          ? 'px-2.5 py-1.5 text-xs rounded-lg min-h-[34px]'
           : 'px-3.5 py-2.5 text-sm rounded-xl min-h-[42px]',
         disabled
           ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
           : isOpen
-            ? 'border-primary-500 ring-2 ring-primary-500/15 text-gray-900 shadow-xs'
-            : hasSelection
-              ? 'border-gray-200 hover:border-gray-300 text-gray-900 shadow-2xs'
-              : 'border-gray-200 hover:border-gray-300 text-gray-400'
+            ? 'border-primary-500 ring-2 ring-primary-500/20 text-gray-900 shadow-xs'
+            : size === 'sm'
+              ? 'border-gray-200 hover:border-gray-300 text-gray-900'
+              : 'border-gray-300 hover:border-gray-400 text-gray-900'
       ]"
       :aria-expanded="isOpen"
     >
@@ -24,7 +24,7 @@
         <span 
           class="truncate block" 
           :class="[
-            hasSelection ? 'text-gray-900 font-medium' : 'text-gray-400',
+            isPlaceholder ? 'text-gray-400' : 'text-gray-800 font-medium',
             size === 'sm' ? 'text-xs' : 'text-sm'
           ]"
         >
@@ -35,7 +35,7 @@
       <div class="flex items-center gap-1 flex-shrink-0">
         <!-- Clear Button -->
         <span
-          v-if="clearable && hasSelection && !disabled"
+          v-if="clearable && hasRealSelection && !disabled"
           @click.stop="clearSelection"
           class="p-0.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           title="Clear"
@@ -64,16 +64,17 @@
     <!-- Dropdown Menu -->
     <transition
       enter-active-class="transition duration-100 ease-out"
-      enter-from-class="transform scale-95 opacity-0 -translate-y-1"
+      :enter-from-class="openUpward ? 'transform scale-95 opacity-0 translate-y-1' : 'transform scale-95 opacity-0 -translate-y-1'"
       enter-to-class="transform scale-100 opacity-100 translate-y-0"
       leave-active-class="transition duration-75 ease-in"
       leave-from-class="transform scale-100 opacity-100 translate-y-0"
-      leave-to-class="transform scale-95 opacity-0 -translate-y-1"
+      :leave-to-class="openUpward ? 'transform scale-95 opacity-0 translate-y-1' : 'transform scale-95 opacity-0 -translate-y-1'"
     >
       <div
         v-if="isOpen"
         :class="[
-          'absolute z-50 mt-1.5 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden text-left',
+          'absolute z-50 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden text-left',
+          openUpward ? 'bottom-full mb-1.5' : 'top-full mt-1.5',
           align === 'right' ? 'right-0' : 'left-0',
           dropdownWidthClass
         ]"
@@ -267,6 +268,7 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const dropdownRef = ref(null)
 const searchInputRef = ref(null)
 const isOpen = ref(false)
+const openUpward = ref(false)
 const searchTerm = ref('')
 
 const getOptionValue = (opt) => {
@@ -315,12 +317,17 @@ const selectedOption = computed(() => {
   return props.options.find(opt => String(getOptionValue(opt)) === String(props.modelValue)) || null
 })
 
-const hasSelection = computed(() => {
-  if (props.modelValue === null || props.modelValue === undefined) return false
-  if (props.allOptionLabel && String(props.modelValue) === String(props.allOptionValue)) {
-    return true
-  }
-  return String(props.modelValue) !== ''
+const hasRealSelection = computed(() => {
+  if (props.modelValue === null || props.modelValue === undefined || props.modelValue === '') return false
+  if (props.allOptionLabel && String(props.modelValue) === String(props.allOptionValue)) return false
+  return true
+})
+
+const isPlaceholder = computed(() => {
+  if (props.disabled && props.disabledPlaceholder) return false
+  if (props.allOptionLabel && String(props.modelValue) === String(props.allOptionValue)) return false
+  if (selectedOption.value) return false
+  return true
 })
 
 const displayText = computed(() => {
@@ -362,6 +369,12 @@ const filteredOptions = computed(() => {
 
 const openDropdown = () => {
   if (props.disabled) return
+  if (dropdownRef.value) {
+    const rect = dropdownRef.value.getBoundingClientRect()
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    openUpward.value = spaceBelow < 260 && spaceAbove > spaceBelow
+  }
   isOpen.value = true
   searchTerm.value = ''
   nextTick(() => {

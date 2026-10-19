@@ -282,7 +282,7 @@
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
           <div 
-            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100"
+            class="relative transform rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100"
             @click.stop
           >
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
@@ -371,7 +371,7 @@
                     <SearchableSelect
                       v-model="modalCampusId"
                       :options="campuses"
-                      allOptionLabel="All Campuses (80+ Depts)"
+                      allOptionLabel="All Campuses"
                       allOptionValue=""
                       placeholder="Filter by Campus"
                       searchPlaceholder="Search campus..."
@@ -388,10 +388,10 @@
                     <SearchableSelect
                       v-model="form.department_id"
                       :options="filteredDepartmentsForModal"
-                      allOptionLabel="-- No Department (General Course) --"
+                      allOptionLabel="-- No Department --"
                       allOptionValue=""
                       placeholder="Select Department"
-                      searchPlaceholder="Search 80+ departments..."
+                      searchPlaceholder="Search departments..."
                       size="md"
                       @change="onDepartmentSelect"
                     />
