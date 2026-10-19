@@ -100,7 +100,7 @@
                 id="email" 
                 v-model="email"
                 class="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
-                placeholder="your.email@university.edu"
+                placeholder="your.email@example.com"
                 required
               />
             </div>
