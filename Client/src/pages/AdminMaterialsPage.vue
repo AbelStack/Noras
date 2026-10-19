@@ -79,23 +79,31 @@
 
           <div class="w-full md:w-auto flex flex-wrap items-center gap-2">
             <!-- Campus Filter -->
-            <select 
+            <SearchableSelect
               v-model="filters.campusId"
+              :options="campuses"
+              allOptionLabel="All Campuses"
+              allOptionValue=""
+              placeholder="All Campuses"
+              searchPlaceholder="Search campus..."
+              size="sm"
+              widthClass="w-36 sm:w-44"
+              dropdownWidthClass="w-56"
               @change="onFilterCampusChange"
-              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
-            >
-              <option value="">All Campuses</option>
-              <option v-for="c in campuses" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
+            />
 
             <!-- Department Filter -->
-            <select 
+            <SearchableSelect
               v-model="filters.departmentId"
-              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 max-w-[160px]"
-            >
-              <option value="">All Departments</option>
-              <option v-for="d in filteredDepartmentsForFilter" :key="d.id" :value="d.id">{{ d.name }}</option>
-            </select>
+              :options="filteredDepartmentsForFilter"
+              allOptionLabel="All Departments"
+              allOptionValue=""
+              placeholder="All Departments"
+              searchPlaceholder="Search departments..."
+              size="sm"
+              widthClass="w-44 sm:w-60"
+              dropdownWidthClass="w-64 sm:w-72"
+            />
 
             <!-- Study Year Filter -->
             <select 
@@ -465,32 +473,29 @@
                   <!-- Campus Selection -->
                   <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Campus <span class="text-red-500">*</span></label>
-                    <select 
+                    <SearchableSelect
                       v-model="uploadForm.campus_id"
+                      :options="campuses"
+                      placeholder="Select Campus"
+                      searchPlaceholder="Search campus..."
+                      size="sm"
                       @change="onModalCampusChange"
-                      required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-primary-500 outline-none"
-                    >
-                      <option value="" disabled>Select Campus</option>
-                      <option v-for="c in campuses" :key="c.id" :value="c.id">{{ c.name }}</option>
-                    </select>
+                    />
                   </div>
 
                   <!-- Department Selection -->
                   <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Department <span class="text-red-500">*</span></label>
-                    <select 
+                    <SearchableSelect
                       v-model="uploadForm.department_id"
-                      @change="onModalDepartmentChange"
-                      required
+                      :options="filteredDepartmentsForModal"
                       :disabled="!uploadForm.campus_id"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-primary-500 outline-none disabled:bg-gray-100 disabled:text-gray-400"
-                    >
-                      <option value="" disabled>{{ !uploadForm.campus_id ? 'Select campus first' : 'Select Department' }}</option>
-                      <option v-for="d in filteredDepartmentsForModal" :key="d.id" :value="d.id">
-                        {{ d.name }} ({{ d.total_years || 4 }} Yrs)
-                      </option>
-                    </select>
+                      disabledPlaceholder="Select campus first"
+                      placeholder="Select Department"
+                      searchPlaceholder="Search departments..."
+                      size="sm"
+                      @change="onModalDepartmentChange"
+                    />
                   </div>
                 </div>
 
@@ -523,16 +528,15 @@
                   <!-- Course Selection -->
                   <div class="col-span-2 sm:col-span-1">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Course <span class="text-red-500">*</span></label>
-                    <select 
+                    <SearchableSelect
                       v-model="uploadForm.course_id"
-                      required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-primary-500 outline-none truncate"
-                    >
-                      <option value="" disabled>Select Course</option>
-                      <option v-for="course in courses" :key="course.id" :value="course.id">
-                        {{ course.code }} - {{ course.title || course.name }}
-                      </option>
-                    </select>
+                      :options="courses"
+                      labelKey="title"
+                      codeKey="code"
+                      placeholder="Select Course"
+                      searchPlaceholder="Search course code or name..."
+                      size="sm"
+                    />
                   </div>
                 </div>
               </div>
@@ -936,6 +940,7 @@
 import { ref, computed, onMounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import SearchableSelect from '../components/SearchableSelect.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 import { adminNavigationItems } from '../config/navigation'

@@ -47,13 +47,17 @@
         </div>
         <div class="w-full sm:w-auto flex items-center gap-2">
           <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Filter Campus:</label>
-          <select 
+          <SearchableSelect
             v-model="filterCampus"
-            class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
-          >
-            <option value="">All Campuses</option>
-            <option v-for="c in campuses" :key="c.id" :value="c.id">{{ c.name }}</option>
-          </select>
+            :options="campuses"
+            allOptionLabel="All Campuses"
+            allOptionValue=""
+            placeholder="All Campuses"
+            searchPlaceholder="Search campus..."
+            size="sm"
+            widthClass="w-44 sm:w-52"
+            dropdownWidthClass="w-56"
+          />
         </div>
       </div>
 
@@ -244,16 +248,13 @@
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
                   Campus <span class="text-red-500">*</span>
                 </label>
-                <select
+                <SearchableSelect
                   v-model="form.university_id"
-                  required
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all"
-                >
-                  <option :value="null" disabled>Select a Campus</option>
-                  <option v-for="c in campuses" :key="c.id" :value="c.id">
-                    {{ c.name }} ({{ c.code }})
-                  </option>
-                </select>
+                  :options="campuses"
+                  placeholder="Select a Campus"
+                  searchPlaceholder="Search campus..."
+                  size="md"
+                />
                 <p v-if="campuses.length === 0" class="text-xs text-amber-600 mt-1">
                   No campuses found. Please create a campus first.
                 </p>
@@ -374,6 +375,7 @@
 import { ref, computed, onMounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import SearchableSelect from '../components/SearchableSelect.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 

@@ -45,24 +45,46 @@
             class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
           />
         </div>
-        <div class="w-full md:w-auto flex flex-wrap items-center gap-3">
-          <div class="flex items-center gap-2">
-            <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Department:</label>
-            <select 
-              v-model="filterDepartment"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 max-w-[220px]"
-            >
-              <option value="all">All Departments</option>
-              <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                {{ dept.name }} {{ dept.university ? `(${dept.university.name})` : '' }}
-              </option>
-            </select>
+        <div class="w-full md:w-auto flex flex-wrap items-center gap-2.5">
+          <!-- Campus Filter -->
+          <div class="flex items-center gap-1.5">
+            <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Campus:</label>
+            <SearchableSelect
+              v-model="filterCampus"
+              :options="campuses"
+              allOptionLabel="All Campuses"
+              allOptionValue="all"
+              placeholder="All Campuses"
+              searchPlaceholder="Search campus..."
+              size="sm"
+              widthClass="w-36 sm:w-44"
+              dropdownWidthClass="w-56"
+              @change="onFilterCampusChange"
+            />
           </div>
-          <div class="flex items-center gap-2">
+
+          <!-- Department Filter -->
+          <div class="flex items-center gap-1.5">
+            <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Department:</label>
+            <SearchableSelect
+              v-model="filterDepartment"
+              :options="filteredDepartmentsForCoursesFilter"
+              allOptionLabel="All Departments"
+              allOptionValue="all"
+              placeholder="All Departments"
+              searchPlaceholder="Search 80+ departments..."
+              size="sm"
+              widthClass="w-44 sm:w-60"
+              dropdownWidthClass="w-64 sm:w-72"
+            />
+          </div>
+
+          <!-- Status Filter -->
+          <div class="flex items-center gap-1.5">
             <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Status:</label>
             <select 
               v-model="filterStatus"
-              class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 min-h-[34px]"
             >
               <option value="all">All Courses</option>
               <option value="active">Active Only</option>
@@ -340,24 +362,44 @@
 
               <!-- Department & Curriculum Assignment -->
               <div class="space-y-3 pt-1">
-                <div>
-                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                    Assign to Department <span class="text-primary-600 font-normal">(Curriculum)</span>
-                  </label>
-                  <select 
-                    v-model="form.department_id"
-                    @change="onDepartmentSelect"
-                    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all bg-white text-gray-900"
-                  >
-                    <option value="">-- No Department (General Course) --</option>
-                    <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                      {{ dept.name }} ({{ dept.total_years || 4 }} Yrs) {{ dept.university ? `[${dept.university.name}]` : '' }}
-                    </option>
-                  </select>
-                  <p class="text-[11px] text-gray-400 mt-1">
-                    Select a department to automatically make this course available in that department's student curriculum.
-                  </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <!-- Campus Filter / Selector -->
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                      Campus <span class="text-gray-400 font-normal">(Filter)</span>
+                    </label>
+                    <SearchableSelect
+                      v-model="modalCampusId"
+                      :options="campuses"
+                      allOptionLabel="All Campuses (80+ Depts)"
+                      allOptionValue=""
+                      placeholder="Filter by Campus"
+                      searchPlaceholder="Search campus..."
+                      size="md"
+                      @change="onModalCampusChange"
+                    />
+                  </div>
+
+                  <!-- Department Assignment -->
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                      Assign to Department <span class="text-primary-600 font-normal">(Curriculum)</span>
+                    </label>
+                    <SearchableSelect
+                      v-model="form.department_id"
+                      :options="filteredDepartmentsForModal"
+                      allOptionLabel="-- No Department (General Course) --"
+                      allOptionValue=""
+                      placeholder="Select Department"
+                      searchPlaceholder="Search 80+ departments..."
+                      size="md"
+                      @change="onDepartmentSelect"
+                    />
+                  </div>
                 </div>
+                <p class="text-[11px] text-gray-400">
+                  Select a department to automatically make this course available in that department's student curriculum.
+                </p>
 
                 <!-- Study Years & Semester (shown when department selected) -->
                 <div v-if="form.department_id" class="p-4 bg-gray-50/90 rounded-2xl border border-gray-200 space-y-3.5">
@@ -634,6 +676,7 @@
 import { ref, computed, onMounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import SearchableSelect from '../components/SearchableSelect.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 
@@ -641,12 +684,15 @@ const notify = useNotification()
 
 const courses = ref([])
 const departments = ref([])
+const campuses = ref([])
 const loading = ref(true)
 const error = ref(null)
 
 const searchQuery = ref('')
 const filterStatus = ref('all')
+const filterCampus = ref('all')
 const filterDepartment = ref('all')
+const modalCampusId = ref('')
 
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -713,6 +759,39 @@ const navigationItems = [
   { path: '/admin/settings', label: 'Settings', icon: 'SettingsIcon' },
 ]
 
+const filteredDepartmentsForCoursesFilter = computed(() => {
+  if (filterCampus.value === 'all') {
+    return departments.value
+  }
+  return departments.value.filter(d => d.university_id === filterCampus.value || d.university?.id === filterCampus.value)
+})
+
+const onFilterCampusChange = () => {
+  if (filterDepartment.value !== 'all') {
+    const belongs = filteredDepartmentsForCoursesFilter.value.some(d => d.id === filterDepartment.value)
+    if (!belongs) {
+      filterDepartment.value = 'all'
+    }
+  }
+}
+
+const filteredDepartmentsForModal = computed(() => {
+  if (!modalCampusId.value) {
+    return departments.value
+  }
+  return departments.value.filter(d => d.university_id === modalCampusId.value || d.university?.id === modalCampusId.value)
+})
+
+const onModalCampusChange = () => {
+  if (form.value.department_id) {
+    const belongs = filteredDepartmentsForModal.value.some(d => d.id === form.value.department_id)
+    if (!belongs) {
+      form.value.department_id = ''
+      onDepartmentSelect()
+    }
+  }
+}
+
 const filteredCourses = computed(() => {
   return courses.value.filter(c => {
     const code = c.code || ''
@@ -725,10 +804,16 @@ const filteredCourses = computed(() => {
       (filterStatus.value === 'active' && c.is_active) ||
       (filterStatus.value === 'inactive' && !c.is_active)
 
+    const matchesCampus = filterCampus.value === 'all' ||
+      (c.offerings && c.offerings.some(o => {
+        const dept = departments.value.find(d => d.id === o.department_id)
+        return (o.department?.university_id === filterCampus.value) || (dept?.university_id === filterCampus.value)
+      }))
+
     const matchesDepartment = filterDepartment.value === 'all' ||
       (c.offerings && c.offerings.some(o => o.department_id === filterDepartment.value))
 
-    return matchesSearch && matchesStatus && matchesDepartment
+    return matchesSearch && matchesStatus && matchesCampus && matchesDepartment
   })
 })
 
@@ -756,6 +841,17 @@ const fetchDepartments = async () => {
     }
   } catch (err) {
     console.error('Failed to fetch departments:', err)
+  }
+}
+
+const fetchCampuses = async () => {
+  try {
+    const response = await api.get('/admin/universities')
+    if (response.data.status === 'success') {
+      campuses.value = response.data.data.universities || []
+    }
+  } catch (err) {
+    console.error('Failed to fetch campuses:', err)
   }
 }
 
@@ -813,6 +909,7 @@ const openAddModal = () => {
   activeActionMenuId.value = null
   isEditing.value = false
   editingId.value = null
+  modalCampusId.value = ''
   form.value = {
     code: '',
     title: '',
@@ -838,13 +935,17 @@ const openEditModal = (course) => {
     ? [...new Set(course.offerings.map(o => o.study_year))].sort((a, b) => a - b)
     : [2]
 
+  const existingDeptId = existingOffering ? existingOffering.department_id : ''
+  const existingDept = departments.value.find(d => d.id === existingDeptId)
+  modalCampusId.value = existingOffering?.department?.university_id || existingDept?.university_id || ''
+
   form.value = {
     code: course.code,
     title: course.title || course.name || '',
     description: course.description || '',
     credit_hours: course.credit_hours ?? course.credits ?? 3,
     is_active: Boolean(course.is_active),
-    department_id: existingOffering ? existingOffering.department_id : '',
+    department_id: existingDeptId,
     study_years: existingYears,
     semester: existingOffering ? existingOffering.semester : '1',
     academic_year: existingOffering?.academic_year || 2026,
@@ -942,5 +1043,6 @@ const deleteCourse = async (course) => {
 onMounted(() => {
   fetchCourses()
   fetchDepartments()
+  fetchCampuses()
 })
 </script>
