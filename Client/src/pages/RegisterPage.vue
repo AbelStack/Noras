@@ -136,48 +136,36 @@
 
             <!-- Campus Selection -->
             <div>
-              <label for="campus" class="block text-sm font-semibold text-gray-900 mb-2">
+              <label class="block text-sm font-semibold text-gray-900 mb-2">
                 Campus <span class="text-red-500">*</span>
               </label>
-              <select 
-                id="campus" 
+              <SearchablePickerModal
+                pickerType="campus"
                 v-model="selectedCampusId"
+                :items="campuses"
+                placeholder="Select your campus..."
+                :loading="isCampusesLoading"
+                loadingPlaceholder="Loading campuses..."
                 @change="onCampusChange"
-                required
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white text-gray-900 text-sm"
-              >
-                <option :value="null" disabled>Select your campus...</option>
-                <option v-for="campus in campuses" :key="campus.id" :value="campus.id">
-                  {{ campus.name }}
-                </option>
-              </select>
+              />
             </div>
 
             <!-- Department Selection -->
             <div>
-              <label for="department" class="block text-sm font-semibold text-gray-900 mb-2">
+              <label class="block text-sm font-semibold text-gray-900 mb-2">
                 Department <span class="text-red-500">*</span>
               </label>
-              <select 
-                id="department" 
+              <SearchablePickerModal
+                pickerType="department"
                 v-model="selectedDepartmentId"
-                :disabled="!selectedCampusId || isDepartmentsLoading"
-                required
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white text-gray-900 text-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-              >
-                <option :value="null" disabled>
-                  {{ !selectedCampusId ? 'Please select a campus first...' : (isDepartmentsLoading ? 'Loading departments...' : 'Select your department...') }}
-                </option>
-                <optgroup 
-                  v-for="(group, collegeName) in groupedDepartments" 
-                  :key="collegeName" 
-                  :label="collegeName"
-                >
-                  <option v-for="dept in group" :key="dept.id" :value="dept.id">
-                    {{ dept.name }} ({{ dept.code }})
-                  </option>
-                </optgroup>
-              </select>
+                :items="departments"
+                :disabled="!selectedCampusId"
+                disabledPlaceholder="Please select a campus first..."
+                placeholder="Select your department..."
+                :loading="isDepartmentsLoading"
+                loadingPlaceholder="Loading departments..."
+                :campusName="selectedCampusName"
+              />
             </div>
 
             <div>
@@ -190,6 +178,7 @@
                 placeholder="Create a strong password"
                 required
               />
+              <PasswordRequirements :password="password" />
             </div>
 
             <div>
@@ -202,6 +191,18 @@
                 placeholder="Confirm your password"
                 required
               />
+              <p v-if="confirmPassword && password !== confirmPassword" class="mt-1.5 text-xs text-rose-600 font-medium flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Passwords do not match
+              </p>
+              <p v-else-if="confirmPassword && password === confirmPassword" class="mt-1.5 text-xs text-emerald-600 font-medium flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Passwords match
+              </p>
             </div>
 
             <div class="pt-2">
@@ -251,6 +252,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Zap, Award, BarChart3, ArrowLeft } from 'lucide-vue-next'
 import { authService } from '../services/auth'
+import SearchablePickerModal from '../components/SearchablePickerModal.vue'
+import PasswordRequirements from '../components/PasswordRequirements.vue'
 
 const router = useRouter()
 const fullName = ref('')
@@ -263,6 +266,11 @@ const departments = ref([])
 const isCampusesLoading = ref(false)
 const isDepartmentsLoading = ref(false)
 const password = ref('')
+
+const selectedCampusName = computed(() => {
+  const found = campuses.value.find(c => c.id === selectedCampusId.value)
+  return found ? found.name : ''
+})
 
 const groupedDepartments = computed(() => {
   const groups = {}
@@ -329,6 +337,21 @@ const handleRegister = async () => {
 
   if (password.value.length < 8) {
     errorMessage.value = 'Password must be at least 8 characters long.'
+    return
+  }
+
+  if (!/[a-zA-Z]/.test(password.value)) {
+    errorMessage.value = 'Password must contain at least one letter.'
+    return
+  }
+
+  if (!/[0-9]/.test(password.value)) {
+    errorMessage.value = 'Password must contain at least one number.'
+    return
+  }
+
+  if (!/[^a-zA-Z0-9]/.test(password.value)) {
+    errorMessage.value = 'Password must contain at least one symbol (e.g. !@#$%^&*).'
     return
   }
 

@@ -250,14 +250,15 @@
                   class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
                 />
               </div>
-              <div>
+              <div class="sm:col-span-2">
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">New Password</label>
                 <input 
                   v-model="security.newPassword"
                   type="password" 
-                  placeholder="Minimum 8 characters"
+                  placeholder="Minimum 8 characters (letters, numbers, symbols)"
                   class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
                 />
+                <PasswordRequirements :password="security.newPassword" />
               </div>
               <div>
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Confirm New Password</label>
@@ -321,6 +322,7 @@ import { authService } from '../services/auth'
 import { userService } from '../services/userService'
 import { useNotification } from '../composables/useNotification'
 import { adminNavigationItems } from '../config/navigation'
+import PasswordRequirements from '../components/PasswordRequirements.vue'
 
 const notify = useNotification()
 
@@ -560,6 +562,21 @@ const changePassword = async () => {
 
   if (security.value.newPassword.length < 8) {
     notify.error('New password must be at least 8 characters long.')
+    return
+  }
+
+  if (!/[a-zA-Z]/.test(security.value.newPassword)) {
+    notify.error('New password must contain at least one letter.')
+    return
+  }
+
+  if (!/[0-9]/.test(security.value.newPassword)) {
+    notify.error('New password must contain at least one number.')
+    return
+  }
+
+  if (!/[^a-zA-Z0-9]/.test(security.value.newPassword)) {
+    notify.error('New password must contain at least one symbol (e.g. !@#$%^&*).')
     return
   }
 

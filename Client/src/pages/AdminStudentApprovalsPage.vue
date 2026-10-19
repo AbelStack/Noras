@@ -96,8 +96,9 @@
           >
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-4 mb-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-primary-700 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-sm">
-                  {{ getInitials(student.name) }}
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-primary-700 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-sm overflow-hidden ring-2 ring-primary-100">
+                  <img v-if="student.avatar_url" :src="student.avatar_url" :alt="student.name" class="w-full h-full object-cover" />
+                  <span v-else>{{ getInitials(student.name) }}</span>
                 </div>
                 <div class="min-w-0">
                   <div class="flex items-center gap-2 flex-wrap">
@@ -111,24 +112,50 @@
               </div>
 
               <!-- Details Grid -->
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-3 border-t border-gray-100 text-xs">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-gray-100 text-xs">
                 <div>
                   <span class="text-gray-400 block font-medium">Student ID</span>
                   <span class="font-mono font-semibold text-gray-800">{{ student.student_id || 'N/A' }}</span>
                 </div>
                 <div>
+                  <span class="text-gray-400 block font-medium">Campus & Department</span>
+                  <span class="font-medium text-gray-800 block truncate" :title="`${student.department?.name || 'No department'} - ${student.university?.name || ''}`">
+                    {{ student.department?.name || 'No department' }}
+                  </span>
+                  <span v-if="student.university" class="text-[10px] text-primary-600 block truncate font-medium">
+                    {{ student.university.name }}
+                  </span>
+                </div>
+                <div>
                   <span class="text-gray-400 block font-medium">Registered Date</span>
                   <span class="font-medium text-gray-800">{{ formatDate(student.created_at) }}</span>
+                  <span v-if="student.updated_at && student.updated_at !== student.created_at" class="text-[10px] text-amber-600 block font-medium">
+                    Profile Updated {{ formatDate(student.updated_at) }}
+                  </span>
                 </div>
-                <div v-if="student.approved_at">
-                  <span class="text-gray-400 block font-medium">Approved Date</span>
-                  <span class="font-medium text-gray-800">{{ formatDate(student.approved_at) }}</span>
+                <div>
+                  <span class="text-gray-400 block font-medium">Status / Approved</span>
+                  <span v-if="student.approved_at" class="font-medium text-gray-800">{{ formatDate(student.approved_at) }}</span>
+                  <span v-else class="text-gray-400 italic">Not approved</span>
                 </div>
               </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex items-center gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-gray-100 flex-shrink-0">
+            <div class="flex flex-wrap items-center gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-gray-100 flex-shrink-0">
+              <button
+                type="button"
+                @click="openProfileModal(student)"
+                class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 text-xs font-semibold rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="View complete student profile"
+              >
+                <svg class="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span>View Profile</span>
+              </button>
+
               <template v-if="student.account_status === 'pending'">
                 <button
                   @click="approveStudent(student)"
@@ -174,6 +201,173 @@
         </div>
       </div>
     </div>
+
+    <!-- Student Full Profile Modal -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="selectedStudent" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeProfileModal"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div 
+            class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-gray-100"
+            @click.stop
+          >
+            <!-- Modal Header Banner -->
+            <div class="relative bg-gradient-to-r from-blue-700 via-primary-600 to-indigo-700 p-6 text-white overflow-hidden">
+              <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+              
+              <div class="flex items-start justify-between relative z-10">
+                <div class="flex items-center gap-4">
+                  <!-- Avatar -->
+                  <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md ring-4 ring-white/30 flex items-center justify-center text-white font-bold text-2xl flex-shrink-0 overflow-hidden shadow-md">
+                    <img v-if="selectedStudent.avatar_url" :src="selectedStudent.avatar_url" :alt="selectedStudent.name" class="w-full h-full object-cover" />
+                    <span v-else>{{ getInitials(selectedStudent.name) }}</span>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h2 class="text-xl font-bold text-white tracking-tight">{{ selectedStudent.name }}</h2>
+                      <span :class="getStatusBadgeClass(selectedStudent.account_status)">
+                        {{ selectedStudent.account_status }}
+                      </span>
+                    </div>
+                    <p class="text-blue-100 text-xs sm:text-sm mt-0.5">{{ selectedStudent.email }}</p>
+                    <p class="text-[11px] text-blue-200 mt-1 font-mono font-medium">ID: {{ selectedStudent.student_id || 'N/A' }}</p>
+                  </div>
+                </div>
+
+                <button 
+                  @click="closeProfileModal" 
+                  class="text-white/80 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-colors"
+                >
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Profile Details Body -->
+            <div class="p-6 space-y-5">
+              <!-- Academic Placement -->
+              <div class="bg-gray-50/80 rounded-2xl p-4 border border-gray-100">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Academic Affiliation</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span class="text-xs text-gray-400 block font-medium">Campus</span>
+                    <span class="font-semibold text-gray-900">{{ selectedStudent.university?.name || 'Not assigned' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-xs text-gray-400 block font-medium">Department</span>
+                    <span class="font-semibold text-gray-900">{{ selectedStudent.department?.name || 'Not assigned' }}</span>
+                    <span v-if="selectedStudent.department?.code" class="text-xs text-primary-600 font-mono ml-1">({{ selectedStudent.department.code }})</span>
+                  </div>
+                  <div v-if="selectedStudent.department?.college">
+                    <span class="text-xs text-gray-400 block font-medium">College / School</span>
+                    <span class="font-semibold text-gray-700">{{ selectedStudent.department.college }}</span>
+                  </div>
+                  <div v-if="selectedStudent.department?.total_years">
+                    <span class="text-xs text-gray-400 block font-medium">Program Length</span>
+                    <span class="font-semibold text-gray-700">{{ selectedStudent.department.total_years }} Years</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Activity & Registration Timeline -->
+              <div class="bg-gray-50/80 rounded-2xl p-4 border border-gray-100">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Account Timeline</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <span class="text-gray-400 block font-medium">Registered</span>
+                    <span class="font-semibold text-gray-800">{{ formatDate(selectedStudent.created_at) }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400 block font-medium">Last Profile Update</span>
+                    <span class="font-semibold" :class="selectedStudent.updated_at && selectedStudent.updated_at !== selectedStudent.created_at ? 'text-amber-700' : 'text-gray-800'">
+                      {{ formatDate(selectedStudent.updated_at) }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400 block font-medium">Approved Date</span>
+                    <span class="font-semibold text-gray-800">{{ formatDate(selectedStudent.approved_at) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Preferences / Bio if available -->
+              <div v-if="selectedStudent.preferences" class="bg-gray-50/80 rounded-2xl p-4 border border-gray-100 text-xs">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Student Preferences</h3>
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="(val, key) in selectedStudent.preferences" 
+                    :key="key"
+                    class="px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-gray-700 font-mono text-[11px]"
+                  >
+                    {{ key }}: {{ val ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+              <div class="text-xs text-gray-500">
+                Current status: <strong class="capitalize text-gray-800">{{ selectedStudent.account_status }}</strong>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <template v-if="selectedStudent.account_status === 'pending'">
+                  <button
+                    @click="approveStudent(selectedStudent); closeProfileModal()"
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-sm"
+                  >
+                    Approve Student
+                  </button>
+                  <button
+                    @click="rejectStudent(selectedStudent); closeProfileModal()"
+                    class="px-4 py-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-semibold rounded-xl transition-colors"
+                  >
+                    Reject
+                  </button>
+                </template>
+
+                <template v-else-if="selectedStudent.account_status === 'approved'">
+                  <button
+                    @click="suspendStudent(selectedStudent); closeProfileModal()"
+                    class="px-4 py-2 bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 text-xs font-semibold rounded-xl transition-colors"
+                  >
+                    Suspend Student
+                  </button>
+                </template>
+
+                <template v-else-if="selectedStudent.account_status === 'suspended' || selectedStudent.account_status === 'rejected'">
+                  <button
+                    @click="reactivateStudent(selectedStudent); closeProfileModal()"
+                    class="px-4 py-2 bg-blue-50 text-primary-700 border border-blue-200 hover:bg-blue-100 text-xs font-semibold rounded-xl transition-colors"
+                  >
+                    Reactivate Account
+                  </button>
+                </template>
+
+                <button
+                  type="button"
+                  @click="closeProfileModal"
+                  class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-xs font-semibold rounded-xl transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </DashboardLayout>
 </template>
 
@@ -192,6 +386,15 @@ const error = ref(null)
 const filterStatus = ref('all')
 const searchQuery = ref('')
 const processingId = ref(null)
+const selectedStudent = ref(null)
+
+const openProfileModal = (student) => {
+  selectedStudent.value = student
+}
+
+const closeProfileModal = () => {
+  selectedStudent.value = null
+}
 
 const statuses = [
   { label: 'All', value: 'all' },

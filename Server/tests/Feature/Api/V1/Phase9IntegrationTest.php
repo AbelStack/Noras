@@ -19,8 +19,8 @@ class Phase9IntegrationTest extends TestCase
         $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'Test Student',
             'email' => 'student@test.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
             'student_id' => 'STU001',
         ]);
 

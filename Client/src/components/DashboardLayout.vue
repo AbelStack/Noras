@@ -405,6 +405,15 @@
                   </svg>
                   <span>Upload Profile Photo</span>
                 </button>
+                <button
+                  @click="openPasswordModal"
+                  class="w-full text-left flex items-center gap-2.5 px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span>Change Password</span>
+                </button>
                 <router-link
                   to="/dashboard"
                   class="flex items-center gap-2.5 px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
@@ -589,6 +598,113 @@
       </div>
     </div>
 
+    <!-- Change Password Modal -->
+    <div 
+      v-if="showPasswordModal" 
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-xs"
+      @click.self="closePasswordModal"
+      @keydown.esc="closePasswordModal"
+    >
+      <div 
+        class="bg-white rounded-3xl shadow-2xl max-w-md w-full border border-gray-100 overflow-hidden transform transition-all"
+        @click.stop
+      >
+        <!-- Modal Header -->
+        <div class="px-6 py-5 bg-gradient-to-r from-blue-700 via-primary-600 to-indigo-700 text-white flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md ring-2 ring-white/30 flex items-center justify-center text-white">
+              <svg class="w-5 h-5 text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white tracking-tight">Change Password</h3>
+              <p class="text-xs text-blue-100">Ensure your account stays secure</p>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            @click="closePasswordModal" 
+            class="text-white/80 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <form @submit.prevent="handleChangePassword" class="p-6 space-y-4">
+          <div v-if="pwdError" class="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+            {{ pwdError }}
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Current Password</label>
+            <input 
+              v-model="pwdForm.currentPassword"
+              type="password"
+              required
+              placeholder="••••••••"
+              class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">New Password</label>
+            <input 
+              v-model="pwdForm.newPassword"
+              type="password"
+              required
+              placeholder="Minimum 8 characters"
+              class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            />
+            <PasswordRequirements :password="pwdForm.newPassword" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Confirm New Password</label>
+            <input 
+              v-model="pwdForm.confirmPassword"
+              type="password"
+              required
+              placeholder="Repeat new password"
+              class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            />
+            <p v-if="pwdForm.confirmPassword && pwdForm.newPassword !== pwdForm.confirmPassword" class="mt-1 text-xs text-rose-600 font-medium">
+              Passwords do not match
+            </p>
+            <p v-else-if="pwdForm.confirmPassword && pwdForm.newPassword === pwdForm.confirmPassword" class="mt-1 text-xs text-emerald-600 font-medium">
+              Passwords match
+            </p>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+            <button 
+              type="button" 
+              @click="closePasswordModal" 
+              :disabled="isSavingPassword"
+              class="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              :disabled="isSavingPassword"
+              class="px-5 py-2 text-xs sm:text-sm font-semibold text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50 inline-flex items-center gap-2 shadow-xs cursor-pointer"
+            >
+              <svg v-if="isSavingPassword" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>{{ isSavingPassword ? 'Updating...' : 'Update Password' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Centralized Toast & Confirmation Modals -->
     <NotificationContainer />
   </div>
@@ -604,6 +720,7 @@ import { useNotification } from '../composables/useNotification'
 import { adminNavigationItems, studentNavigationItems } from '../config/navigation'
 import NorasLogo from './NorasLogo.vue'
 import NotificationContainer from './NotificationContainer.vue'
+import PasswordRequirements from './PasswordRequirements.vue'
 
 // Responsive viewport detection
 const isMobileView = ref(typeof window !== 'undefined' ? window.innerWidth < 1024 : false)
@@ -926,6 +1043,80 @@ const handleRemoveAvatar = async () => {
     avatarError.value = err.response?.data?.message || 'Failed to remove photo.'
   } finally {
     isSavingAvatar.value = false
+  }
+}
+
+// Password Modal State & Handlers
+const showPasswordModal = ref(false)
+const isSavingPassword = ref(false)
+const pwdError = ref('')
+const pwdForm = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+})
+
+const openPasswordModal = () => {
+  showUserMenu.value = false
+  pwdError.value = ''
+  pwdForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' }
+  showPasswordModal.value = true
+}
+
+const closePasswordModal = () => {
+  showPasswordModal.value = false
+  pwdError.value = ''
+  pwdForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' }
+}
+
+const handleChangePassword = async () => {
+  pwdError.value = ''
+
+  if (!pwdForm.value.currentPassword || !pwdForm.value.newPassword || !pwdForm.value.confirmPassword) {
+    pwdError.value = 'Please complete all password fields.'
+    return
+  }
+
+  if (pwdForm.value.newPassword.length < 8) {
+    pwdError.value = 'New password must be at least 8 characters long.'
+    return
+  }
+
+  if (!/[a-zA-Z]/.test(pwdForm.value.newPassword)) {
+    pwdError.value = 'New password must contain at least one letter.'
+    return
+  }
+
+  if (!/[0-9]/.test(pwdForm.value.newPassword)) {
+    pwdError.value = 'New password must contain at least one number.'
+    return
+  }
+
+  if (!/[^a-zA-Z0-9]/.test(pwdForm.value.newPassword)) {
+    pwdError.value = 'New password must contain at least one symbol (e.g. !@#$%^&*).'
+    return
+  }
+
+  if (pwdForm.value.newPassword !== pwdForm.value.confirmPassword) {
+    pwdError.value = 'New password and confirmation do not match.'
+    return
+  }
+
+  isSavingPassword.value = true
+  try {
+    await userService.updatePassword({
+      current_password: pwdForm.value.currentPassword,
+      new_password: pwdForm.value.newPassword,
+      new_password_confirmation: pwdForm.value.confirmPassword,
+    })
+
+    toast.success('Password updated successfully!')
+    window.dispatchEvent(new Event('user-profile-updated'))
+    closePasswordModal()
+  } catch (err) {
+    pwdError.value = err.response?.data?.message || err.response?.data?.errors?.new_password?.[0] || 'Failed to update password.'
+  } finally {
+    isSavingPassword.value = false
   }
 }
 

@@ -15,8 +15,8 @@ class MassAssignmentSecurityTest extends TestCase
         $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'Malicious User',
             'email' => 'hacker@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
             'student_id' => 'HACK001',
             'role' => 'admin',
         ]);
@@ -39,8 +39,8 @@ class MassAssignmentSecurityTest extends TestCase
         $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'Malicious User',
             'email' => 'hacker2@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
             'student_id' => 'HACK002',
             'account_status' => 'approved',
         ]);
@@ -65,8 +65,8 @@ class MassAssignmentSecurityTest extends TestCase
         $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'Malicious User',
             'email' => 'hacker3@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
             'student_id' => 'HACK003',
             'approved_at' => $fakeDate,
         ]);
@@ -84,8 +84,8 @@ class MassAssignmentSecurityTest extends TestCase
         $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'Malicious User',
             'email' => 'hacker4@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
             'student_id' => 'HACK004',
             'approved_by' => $admin->id,
         ]);

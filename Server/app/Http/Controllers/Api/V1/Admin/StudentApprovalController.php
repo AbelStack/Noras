@@ -143,7 +143,7 @@ class StudentApprovalController extends Controller
         $search = $request->query('search');
         $perPage = min((int) $request->query('per_page', 15), 100);
         
-        $query = User::where('role', 'student');
+        $query = User::where('role', 'student')->with(['university', 'department']);
         
         if ($status) {
             $query->where('account_status', $status);
@@ -169,8 +169,23 @@ class StudentApprovalController extends Controller
                         'email' => $student->email,
                         'student_id' => $student->student_id,
                         'account_status' => $student->account_status,
+                        'avatar_url' => $student->avatar_url,
+                        'university' => $student->university ? [
+                            'id' => $student->university->id,
+                            'name' => $student->university->name,
+                            'code' => $student->university->code,
+                        ] : null,
+                        'department' => $student->department ? [
+                            'id' => $student->department->id,
+                            'name' => $student->department->name,
+                            'code' => $student->department->code,
+                            'college' => $student->department->college,
+                            'total_years' => $student->department->total_years,
+                        ] : null,
                         'approved_at' => $student->approved_at?->toISOString(),
                         'created_at' => $student->created_at->toISOString(),
+                        'updated_at' => $student->updated_at?->toISOString(),
+                        'preferences' => $student->preferences,
                     ];
                 }),
                 'pagination' => [
@@ -185,7 +200,9 @@ class StudentApprovalController extends Controller
 
     public function show($id)
     {
-        $student = User::where('role', 'student')->findOrFail($id);
+        $student = User::where('role', 'student')
+            ->with(['university', 'department'])
+            ->findOrFail($id);
 
         return response()->json([
             'status' => 'success',
@@ -197,10 +214,24 @@ class StudentApprovalController extends Controller
                     'student_id' => $student->student_id,
                     'role' => $student->role,
                     'account_status' => $student->account_status,
+                    'avatar_url' => $student->avatar_url,
+                    'university' => $student->university ? [
+                        'id' => $student->university->id,
+                        'name' => $student->university->name,
+                        'code' => $student->university->code,
+                    ] : null,
+                    'department' => $student->department ? [
+                        'id' => $student->department->id,
+                        'name' => $student->department->name,
+                        'code' => $student->department->code,
+                        'college' => $student->department->college,
+                        'total_years' => $student->department->total_years,
+                    ] : null,
                     'approved_at' => $student->approved_at?->toISOString(),
                     'approved_by' => $student->approved_by,
                     'created_at' => $student->created_at->toISOString(),
-                    'updated_at' => $student->updated_at->toISOString(),
+                    'updated_at' => $student->updated_at?->toISOString(),
+                    'preferences' => $student->preferences,
                 ],
             ],
         ]);

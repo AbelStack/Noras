@@ -46,12 +46,11 @@
             v-model="password"
             type="password"
             required
-            minlength="8"
             class="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition text-sm"
-            placeholder="Enter new password (min. 8 characters)"
+            placeholder="Create a strong new password"
             :disabled="loading"
           />
-          <p class="mt-1 text-xs text-gray-500">Minimum 8 characters</p>
+          <PasswordRequirements :password="password" />
         </div>
 
         <div>
@@ -63,11 +62,22 @@
             v-model="passwordConfirmation"
             type="password"
             required
-            minlength="8"
             class="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition text-sm"
             placeholder="Confirm new password"
             :disabled="loading"
           />
+          <p v-if="passwordConfirmation && password !== passwordConfirmation" class="mt-1.5 text-xs text-rose-600 font-medium flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Passwords do not match
+          </p>
+          <p v-else-if="passwordConfirmation && password === passwordConfirmation" class="mt-1.5 text-xs text-emerald-600 font-medium flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Passwords match
+          </p>
         </div>
 
         <button
@@ -99,6 +109,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NorasLogo from '../components/NorasLogo.vue'
+import PasswordRequirements from '../components/PasswordRequirements.vue'
 import api from '../services/api'
 
 const route = useRoute()
@@ -132,7 +143,22 @@ const handleSubmit = async () => {
   }
 
   if (password.value.length < 8) {
-    errorMessage.value = 'Password must be at least 8 characters.'
+    errorMessage.value = 'Password must be at least 8 characters long.'
+    return
+  }
+
+  if (!/[a-zA-Z]/.test(password.value)) {
+    errorMessage.value = 'Password must contain at least one letter.'
+    return
+  }
+
+  if (!/[0-9]/.test(password.value)) {
+    errorMessage.value = 'Password must contain at least one number.'
+    return
+  }
+
+  if (!/[^a-zA-Z0-9]/.test(password.value)) {
+    errorMessage.value = 'Password must contain at least one symbol (e.g. !@#$%^&*).'
     return
   }
 

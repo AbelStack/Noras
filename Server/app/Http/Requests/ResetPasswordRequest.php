@@ -25,7 +25,12 @@ class ResetPasswordRequest extends FormRequest
         return [
             'token' => ['required', 'string'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => [
+                'required',
+                'string',
+                Password::min(8)->letters()->numbers()->symbols(),
+                'confirmed',
+            ],
         ];
     }
 
@@ -42,6 +47,9 @@ class ResetPasswordRequest extends FormRequest
             'email.email' => 'Please provide a valid email address.',
             'password.required' => 'Password is required.',
             'password.min' => 'Password must be at least 8 characters.',
+            'password.letters' => 'Password must contain at least one letter.',
+            'password.numbers' => 'Password must contain at least one number.',
+            'password.symbols' => 'Password must contain at least one symbol (e.g. !@#$%^&*).',
             'password.confirmed' => 'Password confirmation does not match.',
         ];
     }

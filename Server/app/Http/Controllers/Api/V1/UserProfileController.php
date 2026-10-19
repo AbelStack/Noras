@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 
 class UserProfileController extends Controller
 {
@@ -71,10 +72,18 @@ class UserProfileController extends Controller
     {
         $request->validate([
             'current_password' => ['required', 'string'],
-            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+            'new_password' => [
+                'required',
+                'string',
+                Password::min(8)->letters()->numbers()->symbols(),
+                'confirmed',
+            ],
         ], [
             'new_password.confirmed' => 'New password confirmation does not match.',
             'new_password.min' => 'New password must be at least 8 characters long.',
+            'new_password.letters' => 'New password must contain at least one letter.',
+            'new_password.numbers' => 'New password must contain at least one number.',
+            'new_password.symbols' => 'New password must contain at least one symbol (e.g. !@#$%^&*).',
         ]);
 
         $user = $request->user();
