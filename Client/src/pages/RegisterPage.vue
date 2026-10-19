@@ -168,9 +168,15 @@
                 <option :value="null" disabled>
                   {{ !selectedCampusId ? 'Please select a campus first...' : (isDepartmentsLoading ? 'Loading departments...' : 'Select your department...') }}
                 </option>
-                <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                  {{ dept.name }} ({{ dept.code }})
-                </option>
+                <optgroup 
+                  v-for="(group, collegeName) in groupedDepartments" 
+                  :key="collegeName" 
+                  :label="collegeName"
+                >
+                  <option v-for="dept in group" :key="dept.id" :value="dept.id">
+                    {{ dept.name }} ({{ dept.code }})
+                  </option>
+                </optgroup>
               </select>
             </div>
 
@@ -241,7 +247,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Zap, Award, BarChart3, ArrowLeft } from 'lucide-vue-next'
 import { authService } from '../services/auth'
@@ -257,6 +263,18 @@ const departments = ref([])
 const isCampusesLoading = ref(false)
 const isDepartmentsLoading = ref(false)
 const password = ref('')
+
+const groupedDepartments = computed(() => {
+  const groups = {}
+  departments.value.forEach(d => {
+    const college = d.college || 'Other Programs'
+    if (!groups[college]) {
+      groups[college] = []
+    }
+    groups[college].push(d)
+  })
+  return groups
+})
 const confirmPassword = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')

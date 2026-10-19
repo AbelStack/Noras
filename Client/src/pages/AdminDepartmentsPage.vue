@@ -118,6 +118,7 @@
                 <tr v-for="dept in filteredDepartments" :key="dept.id" class="hover:bg-gray-50/80 transition-colors">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-bold text-gray-900">{{ dept.name }}</div>
+                    <div v-if="dept.college" class="text-xs text-primary-600 font-medium mt-0.5">{{ dept.college }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="inline-flex items-center gap-1.5 text-sm text-gray-700">
@@ -256,6 +257,19 @@
                 <p v-if="campuses.length === 0" class="text-xs text-amber-600 mt-1">
                   No campuses found. Please create a campus first.
                 </p>
+              </div>
+
+              <!-- College / School -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                  College / School <span class="text-gray-400 font-normal lowercase">(optional)</span>
+                </label>
+                <input 
+                  v-model.trim="form.college"
+                  type="text" 
+                  placeholder="e.g. College of Agriculture"
+                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                />
               </div>
 
               <!-- Department Name -->
@@ -405,6 +419,7 @@ const toggleActionMenu = (deptId) => {
 
 const form = ref({
   university_id: null,
+  college: '',
   name: '',
   code: '',
   total_years: 4,
@@ -424,10 +439,12 @@ const navigationItems = [
 
 const filteredDepartments = computed(() => {
   return departments.value.filter(d => {
+    const q = searchQuery.value.toLowerCase()
     const matchesSearch = !searchQuery.value ||
-      d.name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      d.code?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      d.university?.name?.toLowerCase().includes(searchQuery.value.toLowerCase())
+      d.name?.toLowerCase().includes(q) ||
+      d.code?.toLowerCase().includes(q) ||
+      d.college?.toLowerCase().includes(q) ||
+      d.university?.name?.toLowerCase().includes(q)
 
     const matchesCampus = !filterCampus.value || d.university_id === parseInt(filterCampus.value)
 
@@ -468,6 +485,7 @@ const openAddModal = () => {
   editingId.value = null
   form.value = {
     university_id: campuses.value.length > 0 ? campuses.value[0].id : null,
+    college: '',
     name: '',
     code: '',
     total_years: 4,
@@ -483,6 +501,7 @@ const openEditModal = (dept) => {
   editingId.value = dept.id
   form.value = {
     university_id: dept.university_id,
+    college: dept.college || '',
     name: dept.name,
     code: dept.code,
     total_years: dept.total_years || 4,
@@ -513,6 +532,7 @@ const saveDepartment = async () => {
   try {
     const payload = {
       university_id: form.value.university_id,
+      college: form.value.college?.trim() || null,
       name: form.value.name.trim(),
       code: form.value.code.trim().toUpperCase(),
       total_years: Number(form.value.total_years) || 4,

@@ -22,7 +22,8 @@ class DepartmentController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $departments = $query->orderBy('name')->paginate(20);
+        $perPage = $request->input('per_page', 100);
+        $departments = $query->orderBy('name')->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
@@ -42,6 +43,7 @@ class DepartmentController extends Controller
     {
         $validated = $request->validate([
             'university_id' => ['required', 'exists:universities,id'],
+            'college' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:20'],
             'total_years' => ['nullable', 'integer', 'min:1', 'max:8'],
@@ -91,6 +93,7 @@ class DepartmentController extends Controller
 
         $validated = $request->validate([
             'university_id' => ['sometimes', 'exists:universities,id'],
+            'college' => ['sometimes', 'nullable', 'string', 'max:255'],
             'name' => ['sometimes', 'string', 'max:255'],
             'code' => ['sometimes', 'string', 'max:20'],
             'total_years' => ['sometimes', 'integer', 'min:1', 'max:8'],

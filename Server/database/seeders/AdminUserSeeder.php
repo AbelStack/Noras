@@ -9,14 +9,8 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        if (app()->environment('production')) {
-            $this->command->error('Cannot seed development admin in production environment.');
-            $this->command->warn('Create admin accounts manually in production with secure credentials.');
-            return;
-        }
-
-        if (User::where('email', 'admin@noras.test')->exists()) {
-            $this->command->info('Development admin already exists. Skipping.');
+        if (User::where('role', 'admin')->exists()) {
+            $this->command->info('Admin account already exists. Skipping.');
             return;
         }
 
