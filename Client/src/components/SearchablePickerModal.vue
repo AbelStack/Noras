@@ -29,13 +29,9 @@
           ]"
         >
           <!-- Campus Icon -->
-          <svg v-if="pickerType === 'campus'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
+          <Building2 v-if="pickerType === 'campus'" class="w-4 h-4" />
           <!-- Department Icon -->
-          <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-          </svg>
+          <GraduationCap v-else class="w-4 h-4" />
         </div>
 
         <!-- Text Display -->
@@ -70,14 +66,9 @@
       <!-- Right Chevron -->
       <div class="flex items-center gap-1.5 flex-shrink-0">
         <span v-if="selectedItem" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <svg 
+        <ChevronDown 
           :class="['w-4 h-4 text-gray-400 transition-transform duration-200', isOpen ? 'rotate-180 text-blue-600' : '']" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
+        />
       </div>
     </button>
 
@@ -117,13 +108,9 @@
                   <div class="flex items-center gap-3">
                     <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md ring-2 ring-white/30 flex items-center justify-center text-white flex-shrink-0">
                       <!-- Campus Icon -->
-                      <svg v-if="pickerType === 'campus'" class="w-6 h-6 text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
+                      <Building2 v-if="pickerType === 'campus'" class="w-6 h-6 text-yellow-300" />
                       <!-- Department Icon -->
-                      <svg v-else class="w-6 h-6 text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-                      </svg>
+                      <GraduationCap v-else class="w-6 h-6 text-yellow-300" />
                     </div>
                     <div>
                       <h3 class="text-lg sm:text-xl font-bold text-white tracking-tight">
@@ -141,20 +128,16 @@
                     class="text-white/80 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
                     title="Close"
                   >
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X class="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              <!-- Search Bar & College Filter Pills (for instant filtering, essential on mobile) -->
+              <!-- Search Bar & College Filter Pills (for instant filtering, essential on mobile & desktop) -->
               <div class="p-3.5 sm:p-4 bg-gray-50/90 border-b border-gray-100 flex-shrink-0 space-y-2.5">
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <Search class="w-4 h-4" />
                   </div>
                   <input
                     ref="searchInputRef"
@@ -167,11 +150,9 @@
                     v-if="searchQuery"
                     type="button"
                     @click="searchQuery = ''"
-                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer"
                   >
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X class="w-4 h-4" />
                   </button>
                 </div>
 
@@ -180,9 +161,7 @@
                   <!-- Header with Quick Dropdown -->
                   <div class="flex items-center justify-between text-xs text-gray-500 font-medium">
                     <span class="flex items-center gap-1.5">
-                      <svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                      </svg>
+                      <Filter class="w-3.5 h-3.5 text-blue-600" />
                       Filter by College:
                     </span>
                     
@@ -212,9 +191,7 @@
                       aria-label="Scroll colleges left"
                       title="Scroll colleges left"
                     >
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                      </svg>
+                      <ChevronLeft class="w-4 h-4" />
                     </button>
 
                     <!-- Scrollable Container with Mouse Wheel Support on PC -->
@@ -266,9 +243,7 @@
                       aria-label="Scroll colleges right"
                       title="Scroll colleges right"
                     >
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                      </svg>
+                      <ChevronRight class="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -279,9 +254,7 @@
                 <!-- Empty State -->
                 <div v-if="filteredItems.length === 0" class="py-12 text-center">
                   <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center mb-3">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Search class="w-6 h-6" />
                   </div>
                   <p class="text-sm font-semibold text-gray-900">No results found</p>
                   <p class="text-xs text-gray-500 mt-1">No matching {{ pickerType }} found for "{{ searchQuery }}"</p>
@@ -289,7 +262,7 @@
                     v-if="searchQuery || selectedCollegeFilter !== 'all'"
                     type="button"
                     @click="resetFilters"
-                    class="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition"
+                    class="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition cursor-pointer"
                   >
                     Clear Search Filters
                   </button>
@@ -345,28 +318,28 @@
                             : 'border-2 border-gray-300'
                         ]"
                       >
-                        <svg v-if="modelValue === item.id" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                        </svg>
+                        <Check v-if="modelValue === item.id" class="w-3.5 h-3.5 text-white" :stroke-width="3" />
                       </div>
                     </div>
                   </div>
                 </template>
 
-                <!-- Department Option Cards (Grouped by College) -->
+                <!-- Department Option Cards (Grouped by College - STATIC NON-STICKY HEADERS) -->
                 <template v-else>
                   <div 
                     v-for="(group, collegeName) in groupedFilteredDepartments" 
                     :key="collegeName"
                     class="space-y-2 mb-4"
                   >
-                    <!-- Sticky College Section Header -->
-                    <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md py-1.5 px-3 rounded-xl border border-blue-100 flex items-center justify-between shadow-2xs">
-                      <div class="flex items-center gap-2 min-w-0">
-                        <span class="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 ring-2 ring-yellow-400"></span>
+                    <!-- Static College Section Header (Natural in-flow, scrolls smoothly without covering items) -->
+                    <div class="py-2 px-3.5 rounded-xl bg-gradient-to-r from-blue-50/90 to-indigo-50/60 border border-blue-100/90 flex items-center justify-between mt-4 mb-2 shadow-2xs">
+                      <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-6 h-6 rounded-lg bg-white shadow-2xs border border-blue-100 flex items-center justify-center flex-shrink-0">
+                          <component :is="getCollegeIcon(collegeName)" class="w-3.5 h-3.5 text-blue-600" />
+                        </div>
                         <h5 class="text-xs font-bold uppercase tracking-wider text-blue-900 truncate">{{ collegeName }}</h5>
                       </div>
-                      <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 flex-shrink-0">
+                      <span class="text-[11px] font-semibold text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200/80 flex-shrink-0 shadow-2xs">
                         {{ group.length }} {{ group.length === 1 ? 'Dept' : 'Depts' }}
                       </span>
                     </div>
@@ -409,9 +382,7 @@
                               : 'border-2 border-gray-300'
                           ]"
                         >
-                          <svg v-if="modelValue === item.id" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                          </svg>
+                          <Check v-if="modelValue === item.id" class="w-3.5 h-3.5 text-white" :stroke-width="3" />
                         </div>
                       </div>
                     </div>
@@ -442,6 +413,24 @@
 
 <script setup>
 import { ref, computed, nextTick, watch } from 'vue'
+import {
+  GraduationCap,
+  Building2,
+  BookOpen,
+  Cpu,
+  Layers,
+  School,
+  Briefcase,
+  HeartPulse,
+  Scale,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  X,
+} from 'lucide-vue-next'
 
 const props = defineProps({
   modelValue: {
@@ -513,6 +502,35 @@ const availableColleges = computed(() => {
   })
   return Array.from(set).sort()
 })
+
+const getCollegeIcon = (collegeName) => {
+  if (!collegeName) return GraduationCap
+  const name = collegeName.toLowerCase()
+
+  if (name.includes('informatic') || name.includes('computer') || name.includes('appfactory') || name.includes('techino')) {
+    return Cpu
+  }
+  if (name.includes('civil') || name.includes('architect') || name.includes('mechanic') || name.includes('chemical') || name.includes('textile') || name.includes('engineer') || name.includes('pre-engineer')) {
+    return Layers
+  }
+  if (name.includes('medicine') || name.includes('health') || name.includes('nursing') || name.includes('pharmacy') || name.includes('laborat') || name.includes('veterinar')) {
+    return HeartPulse
+  }
+  if (name.includes('business') || name.includes('econom') || name.includes('management') || name.includes('account') || name.includes('cooperative')) {
+    return Briefcase
+  }
+  if (name.includes('law')) {
+    return Scale
+  }
+  if (name.includes('agric') || name.includes('natural') || name.includes('plant') || name.includes('animal') || name.includes('forest') || name.includes('rural')) {
+    return BookOpen
+  }
+  if (name.includes('school') || name.includes('social') || name.includes('sport') || name.includes('pedagog')) {
+    return School
+  }
+
+  return GraduationCap
+}
 
 const updateScrollState = () => {
   if (!chipsContainerRef.value) {
