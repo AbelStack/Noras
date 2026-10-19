@@ -3,7 +3,7 @@
     pageTitle="Admin" 
     :navigationItems="navigationItems"
   >
-    <div class="p-8">
+    <div class="p-4 sm:p-8">
       <!-- Loading State (Skeleton) -->
       <div v-if="loading" class="py-4">
         <SkeletonLoader type="dashboard" />
@@ -17,63 +17,71 @@
       <!-- Dashboard Content -->
       <div v-else>
         <!-- Page Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p class="text-gray-600 mt-1">Overview of academic operations</p>
+        <div class="mb-5 sm:mb-8">
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p class="text-xs sm:text-sm text-gray-600 mt-1">Overview of academic operations</p>
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8">
           <!-- Pending Approvals -->
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">Pending Student Approvals</p>
-            <p class="text-4xl font-bold text-gray-900 mb-1">{{ stats.students.pending }}</p>
-            <router-link to="/admin/students" class="text-xs text-primary-500 hover:underline">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 line-clamp-1">Pending Approvals</p>
+              <p class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-1">{{ stats.students.pending }}</p>
+            </div>
+            <router-link to="/admin/students" class="text-[11px] sm:text-xs font-semibold text-primary-600 hover:underline pt-1">
               Review pending →
             </router-link>
           </div>
 
           <!-- Total Students -->
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">Total Students</p>
-            <p class="text-4xl font-bold text-gray-900 mb-1">{{ stats.students.total }}</p>
-            <p class="text-xs text-gray-500">{{ stats.students.approved }} approved</p>
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 line-clamp-1">Total Students</p>
+              <p class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-1">{{ stats.students.total }}</p>
+            </div>
+            <p class="text-[11px] sm:text-xs text-gray-500 font-medium pt-1">{{ stats.students.approved }} approved</p>
           </div>
 
           <!-- Course Materials -->
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">Course Materials</p>
-            <p class="text-4xl font-bold text-accent-500 mb-1">{{ stats.materials.total }}</p>
-            <router-link to="/admin/materials" class="text-xs text-accent-500 hover:underline">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 line-clamp-1">Course Materials</p>
+              <p class="text-2xl sm:text-4xl font-extrabold text-accent-600 tracking-tight mb-1">{{ stats.materials.total }}</p>
+            </div>
+            <router-link to="/admin/materials" class="text-[11px] sm:text-xs font-semibold text-accent-600 hover:underline pt-1">
               View all →
             </router-link>
           </div>
 
           <!-- Active Courses -->
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">Active Course Offerings</p>
-            <p class="text-2xl font-bold text-gray-900 mb-1">{{ stats.catalog.course_offerings }}</p>
-            <p class="text-xs text-gray-500">{{ stats.catalog.courses }} total courses</p>
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 line-clamp-1">Active Offerings</p>
+              <p class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-1">{{ stats.catalog.course_offerings }}</p>
+            </div>
+            <p class="text-[11px] sm:text-xs text-gray-500 font-medium pt-1">{{ stats.catalog.courses }} total courses</p>
           </div>
         </div>
 
         <!-- Additional Stats Row -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">Campuses</p>
-            <p class="text-3xl font-bold text-gray-900">{{ stats.catalog.universities }}</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 line-clamp-1">Campuses</p>
+            <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">{{ stats.catalog.universities }}</p>
           </div>
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">Departments</p>
-            <p class="text-3xl font-bold text-gray-900">{{ stats.catalog.departments }}</p>
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 line-clamp-1">Departments</p>
+            <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">{{ stats.catalog.departments }}</p>
           </div>
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">AI Notes Generated</p>
-            <p class="text-3xl font-bold text-gray-900">{{ stats.ai_generated.notes }}</p>
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 line-clamp-1">AI Notes</p>
+            <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">{{ stats.ai_generated.notes }}</p>
           </div>
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-sm text-gray-600 mb-2">AI Quizzes Generated</p>
-            <p class="text-3xl font-bold text-gray-900">{{ stats.ai_generated.quizzes }}</p>
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 line-clamp-1">AI Quizzes</p>
+            <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">{{ stats.ai_generated.quizzes }}</p>
           </div>
         </div>
 

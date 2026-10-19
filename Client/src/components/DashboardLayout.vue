@@ -179,7 +179,7 @@
               v-if="showNotifications"
               @click.stop
               v-click-outside="() => showNotifications = false"
-              class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+              class="fixed left-3 right-3 top-16 sm:left-auto sm:right-0 sm:top-auto sm:absolute sm:mt-2 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden"
             >
               <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <div class="flex items-center gap-2">

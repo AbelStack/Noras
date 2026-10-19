@@ -104,7 +104,7 @@
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
           <div>
             <h2 class="text-lg font-bold text-gray-900">Learning History</h2>
-            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Recent study notes and quizzes you've generated</p>
+            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Recent study notes and quizzes in your curriculum</p>
           </div>
         </div>
 
@@ -134,15 +134,29 @@
             </svg>
           </div>
           <h3 class="text-base font-bold text-gray-900 mb-1">No activity yet</h3>
-          <p class="text-sm text-gray-500 max-w-sm mx-auto mb-6">
-            Generate notes or quizzes from course materials to start building your learning history.
+          <p class="text-sm text-gray-500 max-w-md mx-auto mb-6">
+            Review course study notes and practice quizzes from your curriculum to build your learning progress.
           </p>
-          <router-link
-            to="/departments"
-            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-colors"
-          >
-            Explore Materials
-          </router-link>
+          <div class="flex items-center justify-center gap-3 flex-wrap">
+            <router-link
+              to="/notes"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm text-white bg-primary-600 hover:bg-primary-700 shadow-xs transition-colors"
+            >
+              Study Notes
+            </router-link>
+            <router-link
+              to="/quizzes"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              Practice Quizzes
+            </router-link>
+            <router-link
+              to="/departments"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              Explore Materials
+            </router-link>
+          </div>
         </div>
 
         <!-- History Timeline -->
