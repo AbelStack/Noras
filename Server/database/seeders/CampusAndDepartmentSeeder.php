@@ -13,11 +13,11 @@ class CampusAndDepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Ensure Campuses exist
+        // 1. Ensure all 3 Campuses exist
         $dessieCampus = University::updateOrCreate(
             ['code' => 'DESSIE'],
             [
-                'name' => 'Dessie Campus',
+                'name' => 'Dessie Main Campus',
                 'is_active' => true,
             ]
         );
@@ -25,12 +25,23 @@ class CampusAndDepartmentSeeder extends Seeder
         $kombolchaCampus = University::updateOrCreate(
             ['code' => 'KOCHA'],
             [
-                'name' => 'Kombolcha Campus',
+                'name' => 'Kombolcha Campus (KIoT)',
                 'is_active' => true,
             ]
         );
 
-        // 2. Dessie Campus Departments
+        $titaCampus = University::updateOrCreate(
+            ['code' => 'TITA'],
+            [
+                'name' => 'Tita Campus (Health Sciences)',
+                'is_active' => true,
+            ]
+        );
+
+        // 2. Clear existing departments to prevent any misplaced legacy associations
+        Department::query()->delete();
+
+        // 3. Dessie Main Campus Departments (41 Departments)
         $dessieDepartments = [
             // College of Agriculture
             ['college' => 'College of Agriculture', 'name' => 'Agricultural Economics', 'code' => 'AGEC', 'total_years' => 4],
@@ -47,11 +58,6 @@ class CampusAndDepartmentSeeder extends Seeder
             ['college' => 'College of Business and Economics', 'name' => 'Management', 'code' => 'MGMT', 'total_years' => 4],
             ['college' => 'College of Business and Economics', 'name' => 'Marketing Management', 'code' => 'MKTM', 'total_years' => 4],
 
-            // College of Medicine and Health Science
-            ['college' => 'College of Medicine and Health Science', 'name' => 'Pharmacy', 'code' => 'PHAR', 'total_years' => 5],
-            ['college' => 'College of Medicine and Health Science', 'name' => 'Environmental Health Sciences', 'code' => 'ENHS', 'total_years' => 4],
-            ['college' => 'College of Medicine and Health Science', 'name' => 'Medical Laboratory Sciences', 'code' => 'MEDL', 'total_years' => 4],
-
             // College of Natural Science
             ['college' => 'College of Natural Science', 'name' => 'Chemistry', 'code' => 'CHEM', 'total_years' => 4],
             ['college' => 'College of Natural Science', 'name' => 'Geology', 'code' => 'GEOL', 'total_years' => 4],
@@ -59,7 +65,7 @@ class CampusAndDepartmentSeeder extends Seeder
             ['college' => 'College of Natural Science', 'name' => 'Physics', 'code' => 'PHYS', 'total_years' => 4],
             ['college' => 'College of Natural Science', 'name' => 'Statistics', 'code' => 'STAT', 'total_years' => 4],
 
-            // Freshman
+            // Freshman Program
             ['college' => 'Freshman Program', 'name' => 'Freshman Program', 'code' => 'FRSH', 'total_years' => 1],
 
             // Institute of Teachers' Education and Behavioural Science
@@ -94,22 +100,6 @@ class CampusAndDepartmentSeeder extends Seeder
             // School of Law
             ['college' => 'School of Law', 'name' => 'School of Law', 'code' => 'LAW', 'total_years' => 5],
 
-            // School of Medicine
-            ['college' => 'School of Medicine', 'name' => 'Anesthesiology', 'code' => 'ANES', 'total_years' => 4],
-            ['college' => 'School of Medicine', 'name' => 'Medicine', 'code' => 'MED', 'total_years' => 7],
-
-            // School of Nursing and Midwifery
-            ['college' => 'School of Nursing and Midwifery', 'name' => 'Adult Health Nursing', 'code' => 'AHN', 'total_years' => 4],
-            ['college' => 'School of Nursing and Midwifery', 'name' => 'Comprehensive Nursing', 'code' => 'COMPN', 'total_years' => 4],
-            ['college' => 'School of Nursing and Midwifery', 'name' => 'Emergency & Critical Care Nursing', 'code' => 'ECCN', 'total_years' => 4],
-            ['college' => 'School of Nursing and Midwifery', 'name' => 'Midwifery', 'code' => 'MIDW', 'total_years' => 4],
-            ['college' => 'School of Nursing and Midwifery', 'name' => 'Pediatrics Nursing', 'code' => 'PEDN', 'total_years' => 4],
-            ['college' => 'School of Nursing and Midwifery', 'name' => 'Psychiatry Nursing', 'code' => 'PSYN', 'total_years' => 4],
-
-            // School of Public Health
-            ['college' => 'School of Public Health', 'name' => 'Health Informatics', 'code' => 'HINF', 'total_years' => 4],
-            ['college' => 'School of Public Health', 'name' => 'Public Health', 'code' => 'PUBH', 'total_years' => 4],
-
             // School of Social Science
             ['college' => 'School of Social Science', 'name' => 'Geography', 'code' => 'GEOG', 'total_years' => 4],
             ['college' => 'School of Social Science', 'name' => 'History', 'code' => 'HIST', 'total_years' => 4],
@@ -126,21 +116,17 @@ class CampusAndDepartmentSeeder extends Seeder
         ];
 
         foreach ($dessieDepartments as $dept) {
-            Department::updateOrCreate(
-                [
-                    'university_id' => $dessieCampus->id,
-                    'code' => $dept['code'],
-                ],
-                [
-                    'college' => $dept['college'],
-                    'name' => $dept['name'],
-                    'total_years' => $dept['total_years'],
-                    'is_active' => true,
-                ]
-            );
+            Department::create([
+                'university_id' => $dessieCampus->id,
+                'college' => $dept['college'],
+                'name' => $dept['name'],
+                'code' => $dept['code'],
+                'total_years' => $dept['total_years'],
+                'is_active' => true,
+            ]);
         }
 
-        // 3. Kombolcha Campus Departments
+        // 4. Kombolcha Campus (KIoT) Departments (22 Departments)
         $kombolchaDepartments = [
             // College of Informatics
             ['college' => 'College of Informatics', 'name' => 'Computer Science', 'code' => 'CS', 'total_years' => 4],
@@ -154,7 +140,7 @@ class CampusAndDepartmentSeeder extends Seeder
             // School of Electrical and Computer Engineering
             ['college' => 'School of Electrical and Computer Engineering', 'name' => 'Electrical and Computer Engineering', 'code' => 'ECE', 'total_years' => 5],
 
-            // School of Chemical and Mechanical
+            // School of Chemical and Mechanical Engineering
             ['college' => 'School of Chemical and Mechanical', 'name' => 'Chemical Engineering', 'code' => 'CHE', 'total_years' => 5],
             ['college' => 'School of Chemical and Mechanical', 'name' => 'Industrial Engineering', 'code' => 'IE', 'total_years' => 5],
             ['college' => 'School of Chemical and Mechanical', 'name' => 'Mechanical Engineering', 'code' => 'ME', 'total_years' => 5],
@@ -180,25 +166,66 @@ class CampusAndDepartmentSeeder extends Seeder
         ];
 
         foreach ($kombolchaDepartments as $dept) {
-            Department::updateOrCreate(
-                [
-                    'university_id' => $kombolchaCampus->id,
-                    'code' => $dept['code'],
-                ],
-                [
-                    'college' => $dept['college'],
-                    'name' => $dept['name'],
-                    'total_years' => $dept['total_years'],
-                    'is_active' => true,
-                ]
-            );
+            Department::create([
+                'university_id' => $kombolchaCampus->id,
+                'college' => $dept['college'],
+                'name' => $dept['name'],
+                'code' => $dept['code'],
+                'total_years' => $dept['total_years'],
+                'is_active' => true,
+            ]);
         }
 
+        // 5. Tita Campus (Health Sciences & Teaching Hospital) Departments (19 Departments)
+        $titaDepartments = [
+            // Clinical & Specialized Medicine
+            ['college' => 'School of Medicine', 'name' => 'Medicine (Doctor of Medicine)', 'code' => 'MED', 'total_years' => 7],
+            ['college' => 'School of Medicine', 'name' => 'Anesthesia', 'code' => 'ANES', 'total_years' => 4],
+            ['college' => 'School of Medicine', 'name' => 'Emergency and Critical Care', 'code' => 'ECC', 'total_years' => 4],
+            ['college' => 'School of Medicine', 'name' => 'Biomedical Sciences', 'code' => 'BIOM', 'total_years' => 4],
+
+            // Nursing Schools & Programs
+            ['college' => 'School of Nursing and Midwifery', 'name' => 'Adult Health Nursing', 'code' => 'AHN', 'total_years' => 4],
+            ['college' => 'School of Nursing and Midwifery', 'name' => 'Comprehensive Nursing', 'code' => 'COMPN', 'total_years' => 4],
+            ['college' => 'School of Nursing and Midwifery', 'name' => 'Pediatrics and Child Health Nursing', 'code' => 'PEDN', 'total_years' => 4],
+            ['college' => 'School of Nursing and Midwifery', 'name' => 'Midwifery', 'code' => 'MIDW', 'total_years' => 4],
+            ['college' => 'School of Nursing and Midwifery', 'name' => 'Emergency & Critical Care Nursing', 'code' => 'ECCN', 'total_years' => 4],
+            ['college' => 'School of Nursing and Midwifery', 'name' => 'Psychiatry Nursing', 'code' => 'PSYN', 'total_years' => 4],
+            ['college' => 'School of Nursing and Midwifery', 'name' => 'Ophthalmic Nursing', 'code' => 'OPHN', 'total_years' => 4],
+
+            // Pharmacy & Laboratory Diagnostics
+            ['college' => 'School of Pharmacy and Diagnostics', 'name' => 'Pharmacy', 'code' => 'PHAR', 'total_years' => 5],
+            ['college' => 'School of Pharmacy and Diagnostics', 'name' => 'Medical Laboratory Sciences', 'code' => 'MEDL', 'total_years' => 4],
+            ['college' => 'School of Pharmacy and Diagnostics', 'name' => 'Radiology Technology', 'code' => 'RADT', 'total_years' => 4],
+            ['college' => 'School of Pharmacy and Diagnostics', 'name' => 'Dental Technology', 'code' => 'DENT', 'total_years' => 4],
+
+            // Public Health
+            ['college' => 'School of Public Health', 'name' => 'Public Health', 'code' => 'PUBH', 'total_years' => 4],
+            ['college' => 'School of Public Health', 'name' => 'Health Informatics', 'code' => 'HINF', 'total_years' => 4],
+            ['college' => 'School of Public Health', 'name' => 'Public Health Nutrition', 'code' => 'PHNUT', 'total_years' => 4],
+
+            // Environmental Health
+            ['college' => 'School of Environmental Health Sciences', 'name' => 'Environmental Health Sciences', 'code' => 'ENHS', 'total_years' => 4],
+        ];
+
+        foreach ($titaDepartments as $dept) {
+            Department::create([
+                'university_id' => $titaCampus->id,
+                'college' => $dept['college'],
+                'name' => $dept['name'],
+                'code' => $dept['code'],
+                'total_years' => $dept['total_years'],
+                'is_active' => true,
+            ]);
+        }
+
+        $totalCount = count($dessieDepartments) + count($kombolchaDepartments) + count($titaDepartments);
         $this->command->info(sprintf(
-            'Successfully seeded campuses and %d departments (%d in Dessie, %d in Kombolcha).',
-            count($dessieDepartments) + count($kombolchaDepartments),
+            'Successfully seeded all 3 campuses and %d departments (%d in Dessie, %d in Kombolcha, %d in Tita).',
+            $totalCount,
             count($dessieDepartments),
-            count($kombolchaDepartments)
+            count($kombolchaDepartments),
+            count($titaDepartments)
         ));
     }
 }
