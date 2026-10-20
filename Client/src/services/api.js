@@ -36,7 +36,7 @@ api.interceptors.response.use(
       if (data?.account_status === 'suspended' || data?.message?.toLowerCase().includes('suspended')) {
         localStorage.removeItem('auth_token')
         localStorage.removeItem('user')
-        if (window.location.pathname !== '/suspended') {
+        if (window.location.pathname !== '/suspended' && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
           window.location.href = '/suspended'
         }
       }

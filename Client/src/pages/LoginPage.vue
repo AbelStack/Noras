@@ -158,83 +158,162 @@
       </div>
     </div>
 
-    <!-- Suspended Account Modal Popup -->
+    <!-- Suspended Account Wide Modal Popup -->
     <transition
       enter-active-class="ease-out duration-300"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
+      enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+      enter-to-class="opacity-100 translate-y-0 sm:scale-100"
       leave-active-class="ease-in duration-200"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
+      leave-from-class="opacity-100 translate-y-0 sm:scale-100"
+      leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
     >
       <div v-if="showSuspendedModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="showSuspendedModal = false"></div>
 
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-6">
           <div 
-            class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-red-100 p-6 sm:p-8"
+            class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl lg:max-w-3xl border border-red-100"
             @click.stop
           >
-            <!-- Close icon -->
-            <button 
-              type="button" 
-              @click="showSuspendedModal = false"
-              class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
-            >
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <!-- Top Gradient Stripe -->
+            <div class="h-2 w-full bg-gradient-to-r from-red-500 via-amber-500 to-rose-600"></div>
 
-            <!-- Alert icon -->
-            <div class="w-16 h-16 rounded-3xl bg-red-50 border-4 border-red-100 text-red-600 mx-auto flex items-center justify-center mb-4">
-              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-              </svg>
+            <!-- Modal Header -->
+            <div class="px-6 py-5 sm:px-8 sm:py-6 border-b border-gray-100 flex items-start justify-between bg-gradient-to-b from-red-50/30 to-transparent">
+              <div class="flex items-start gap-3.5 sm:gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <ShieldAlert class="w-6 h-6" />
+                </div>
+                <div>
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-bold uppercase tracking-wider mb-1.5">
+                    <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                    Account Suspended
+                  </div>
+                  <h3 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                    Your Account is Suspended
+                  </h3>
+                  <p class="text-xs sm:text-sm text-gray-600 mt-0.5">
+                    Access to your student portal features has been temporarily placed on hold.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Close button -->
+              <button 
+                type="button" 
+                @click="showSuspendedModal = false"
+                class="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+                title="Dismiss"
+              >
+                <X class="w-5 h-5" />
+              </button>
             </div>
 
-            <div class="text-center mb-5">
-              <span class="inline-block px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold uppercase tracking-wider mb-2">
-                Account Suspended
-              </span>
-              <h3 class="text-xl font-bold text-gray-900">
-                Your Account is Suspended
-              </h3>
-              <p class="text-xs sm:text-sm text-gray-600 mt-2 leading-relaxed">
-                Your account has been suspended by the university administration. Please contact the admin to reactivate your access.
-              </p>
-              <p v-if="suspendedEmail" class="text-xs font-mono text-gray-600 mt-2.5 bg-gray-50 py-1.5 px-3 rounded-xl border border-gray-100 inline-block">
-                {{ suspendedEmail }}
-              </p>
+            <!-- Modal Body (Spacious 2-column layout on desktop) -->
+            <div class="p-6 sm:p-8 space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                
+                <!-- Left Column: Details & Impact -->
+                <div class="md:col-span-7 space-y-4">
+                  <!-- Account Information Card -->
+                  <div class="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-4 space-y-2.5">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Account Details</h4>
+                    <div class="space-y-2 text-xs sm:text-sm">
+                      <div class="flex items-center justify-between py-1 border-b border-gray-200/60">
+                        <span class="text-gray-500">Registered Email:</span>
+                        <span class="font-mono font-semibold text-gray-900 break-all">{{ suspendedEmail || 'Not specified' }}</span>
+                      </div>
+                      <div class="flex items-center justify-between py-1 border-b border-gray-200/60">
+                        <span class="text-gray-500">Status:</span>
+                        <span class="inline-flex items-center gap-1.5 text-red-600 font-semibold">
+                          <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                          Suspended (Inactive)
+                        </span>
+                      </div>
+                      <div class="flex items-center justify-between py-1">
+                        <span class="text-gray-500">Institution:</span>
+                        <span class="font-medium text-gray-700">Wollo University</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Why did this happen & Impact -->
+                  <div class="rounded-2xl border border-red-100 bg-red-50/40 p-4 space-y-1.5">
+                    <h4 class="text-xs font-bold text-red-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <AlertCircle class="w-4 h-4 text-red-600" />
+                      What Does This Mean?
+                    </h4>
+                    <p class="text-xs text-gray-700 leading-relaxed">
+                      While your account is suspended, access to lecture notes, course materials, AI study aids, and quiz features is paused.
+                    </p>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                      This status may occur due to administrative verification, registrar hold, or policy compliance review.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Right Column: Resolution Steps & Actions -->
+                <div class="md:col-span-5 flex flex-col justify-between space-y-4">
+                  <!-- How to Resolve -->
+                  <div class="bg-gradient-to-br from-amber-50/80 via-white to-red-50/30 border border-amber-200/80 rounded-2xl p-4 space-y-2.5">
+                    <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Info class="w-4 h-4 text-amber-600" />
+                      How to Reactivate
+                    </h4>
+                    <ul class="text-xs text-gray-600 space-y-2">
+                      <li class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">1</span>
+                        <span>Contact the administrator or university registrar.</span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">2</span>
+                        <span>Provide your registered email and student ID.</span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">3</span>
+                        <span>Once verified, access will be reinstated promptly.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="space-y-2.5 pt-1">
+                    <!-- Primary Email Admin Button -->
+                    <a
+                      :href="adminMailtoLink"
+                      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
+                    >
+                      <Mail class="w-4 h-4" />
+                      <span>Email Administrator</span>
+                    </a>
+
+                    <!-- Contact Support via Help Page -->
+                    <router-link
+                      to="/legal/contact"
+                      class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold text-xs sm:text-sm transition-all cursor-pointer"
+                    >
+                      <ExternalLink class="w-3.5 h-3.5 text-gray-500" />
+                      <span>Contact Support Form</span>
+                    </router-link>
+                  </div>
+                </div>
+
+              </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="space-y-2.5">
-              <!-- Direct Email Admin Button -->
-              <a
-                :href="adminMailtoLink"
-                class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
-              >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>Email Administrator (support@noras.edu.et)</span>
-              </a>
-
-              <!-- Redirect to full Suspended Page -->
-              <router-link
-                :to="`/suspended?email=${encodeURIComponent(suspendedEmail)}`"
-                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold text-xs sm:text-sm transition-all cursor-pointer"
-              >
-                <span>View Full Suspension Details</span>
-              </router-link>
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 sm:px-8 border-t border-gray-100 bg-gray-50/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <Building2 class="w-4 h-4 text-gray-400" />
+                <span>Wollo University Support: <strong class="text-gray-700 font-semibold">support@noras.edu.et</strong></span>
+              </div>
 
               <button
                 type="button"
                 @click="showSuspendedModal = false"
-                class="w-full text-center text-xs text-gray-400 hover:text-gray-600 py-1 font-medium transition-colors cursor-pointer"
+                class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-semibold text-xs sm:text-sm transition-colors cursor-pointer shadow-2xs"
               >
-                Dismiss
+                Close &amp; Back to Login
               </button>
             </div>
           </div>
@@ -247,7 +326,19 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { BookOpen, Brain, TrendingUp, ArrowLeft } from 'lucide-vue-next'
+import { 
+  BookOpen, 
+  Brain, 
+  TrendingUp, 
+  ArrowLeft,
+  ShieldAlert,
+  Mail,
+  ExternalLink,
+  X,
+  AlertCircle,
+  Info,
+  Building2
+} from 'lucide-vue-next'
 import { authService } from '../services/auth'
 
 const router = useRouter()
