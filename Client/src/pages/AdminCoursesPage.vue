@@ -152,7 +152,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 bg-white">
-                <tr v-for="course in filteredCourses" :key="course.id" class="hover:bg-gray-50/80 transition-colors">
+                <tr v-for="course in paginatedCourses" :key="course.id" class="hover:bg-gray-50/80 transition-colors">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-blue-50 text-primary-700 border border-blue-100">
                       {{ course.code }}
@@ -264,6 +264,16 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Pagination -->
+          <DynamicPagination
+            v-if="filteredCourses.length > 0"
+            v-model:currentPage="currentPage"
+            v-model:perPage="perPage"
+            :totalPages="totalPages"
+            :totalItems="filteredCourses.length"
+            itemLabel="courses"
+          />
         </div>
       </div>
     </div>
@@ -282,42 +292,66 @@
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
           <div 
-            class="relative transform rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100"
+            class="relative transform rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100"
             @click.stop
           >
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-              <h3 class="text-lg font-bold text-gray-900">
-                {{ isEditing ? 'Edit Course' : 'Add New Course' }}
-              </h3>
-              <button @click="closeModal" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">
+                  {{ isEditing ? 'Edit Course' : 'Add New Course' }}
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  Configure course syllabus details and curriculum department assignments.
+                </p>
+              </div>
+              <button @click="closeModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <form @submit.prevent="saveCourse" class="p-6 space-y-4">
+            <form @submit.prevent="saveCourse" class="p-6 sm:p-8 space-y-4 sm:space-y-5">
               <!-- Error banner if any -->
-              <div v-if="formError" class="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+              <div v-if="formError" class="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                 {{ formError }}
               </div>
 
-              <!-- Course Code -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Course Code <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  v-model.trim="form.code"
-                  type="text" 
-                  required
-                  maxlength="20"
-                  placeholder="e.g. CS101, IT204, or MATH101"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all uppercase"
-                />
+              <!-- Row 1: Code and Credit Hours -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Course Code -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Course Code <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model.trim="form.code"
+                    type="text" 
+                    required
+                    maxlength="20"
+                    placeholder="e.g. CS101, IT204, or MATH101"
+                    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all uppercase"
+                  />
+                </div>
+
+                <!-- Credit Hours -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Credit Hours <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model.number="form.credit_hours"
+                    type="number" 
+                    required
+                    min="1"
+                    max="10"
+                    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  />
+                  <p class="text-[11px] text-gray-400 mt-1">Value between 1 and 10 credit units.</p>
+                </div>
               </div>
 
-              <!-- Course Title -->
+              <!-- Row 2: Course Title -->
               <div>
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
                   Course Title <span class="text-red-500">*</span>
@@ -329,22 +363,6 @@
                   placeholder="e.g. Introduction to Computer Science"
                   class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
                 />
-              </div>
-
-              <!-- Credit Hours -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Credit Hours <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  v-model.number="form.credit_hours"
-                  type="number" 
-                  required
-                  min="1"
-                  max="10"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                />
-                <p class="text-xs text-gray-400 mt-1">Value between 1 and 10.</p>
               </div>
 
               <!-- Description -->
@@ -420,7 +438,7 @@
                         @click="selectAllYears" 
                         class="px-2 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors font-semibold text-[11px]"
                       >
-                        All (1–{{ selectedDeptTotalYears }})
+                        All (1â€“{{ selectedDeptTotalYears }})
                       </button>
                       <button 
                         v-if="selectedDeptTotalYears >= 2"
@@ -428,7 +446,7 @@
                         @click="selectPostFreshman" 
                         class="px-2 py-1 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors font-semibold text-[11px]"
                       >
-                        Years 2–{{ selectedDeptTotalYears }} (Major)
+                        Years 2â€“{{ selectedDeptTotalYears }} (Major)
                       </button>
                     </div>
                   </div>
@@ -538,7 +556,7 @@
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
           <div 
-            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100"
+            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100"
             @click.stop
           >
             <!-- Header -->
@@ -673,10 +691,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
 import SearchableSelect from '../components/SearchableSelect.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 
@@ -693,6 +712,8 @@ const filterStatus = ref('all')
 const filterCampus = ref('all')
 const filterDepartment = ref('all')
 const modalCampusId = ref('')
+const currentPage = ref(1)
+const perPage = ref(10)
 
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -815,6 +836,19 @@ const filteredCourses = computed(() => {
 
     return matchesSearch && matchesStatus && matchesCampus && matchesDepartment
   })
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredCourses.value.length / perPage.value) || 1
+})
+
+const paginatedCourses = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  return filteredCourses.value.slice(start, start + perPage.value)
+})
+
+watch([searchQuery, filterStatus, filterCampus, filterDepartment], () => {
+  currentPage.value = 1
 })
 
 const fetchCourses = async () => {

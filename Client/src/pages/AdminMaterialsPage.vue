@@ -213,7 +213,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 bg-white">
-                <tr v-for="material in filteredMaterials" :key="material.id" class="hover:bg-gray-50/80 transition-colors">
+                <tr v-for="material in paginatedMaterials" :key="material.id" class="hover:bg-gray-50/80 transition-colors">
                   <!-- Document title and original name -->
                   <td class="px-3.5 py-2.5">
                     <div class="flex items-center gap-2.5">
@@ -423,6 +423,16 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Dynamic Pagination -->
+          <DynamicPagination
+            v-if="filteredMaterials.length > 0"
+            v-model:currentPage="currentPage"
+            v-model:perPage="perPage"
+            :totalPages="totalPages"
+            :totalItems="filteredMaterials.length"
+            itemLabel="materials"
+          />
         </div>
       </div>
     </div>
@@ -441,7 +451,7 @@
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
           <div 
-            class="relative transform rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-gray-100"
+            class="relative transform rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100"
             @click.stop
           >
             <!-- Header -->
@@ -723,7 +733,7 @@
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
           <div 
-            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100"
+            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100"
             @click.stop
           >
             <!-- Modal Header -->
@@ -888,7 +898,7 @@
             <div class="p-6 space-y-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                  Number of Questions (15 – 30)
+                  Number of Questions (15 â€“ 30)
                 </label>
                 <div class="grid grid-cols-4 gap-2">
                   <button
@@ -937,10 +947,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
 import SearchableSelect from '../components/SearchableSelect.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 import { adminNavigationItems } from '../config/navigation'
@@ -953,6 +964,9 @@ const departments = ref([])
 const courses = ref([])
 const loading = ref(true)
 const error = ref(null)
+
+const currentPage = ref(1)
+const perPage = ref(10)
 
 const activeActionMenuId = ref(null)
 const showUploadModal = ref(false)
@@ -1212,6 +1226,19 @@ const filteredMaterials = computed(() => {
     return matchesSearch && matchesStatus && matchesType && matchesCampus && matchesDept && matchesYear && matchesSemester
   })
 })
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredMaterials.value.length / perPage.value) || 1
+})
+
+const paginatedMaterials = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  return filteredMaterials.value.slice(start, start + perPage.value)
+})
+
+watch(filters, () => {
+  currentPage.value = 1
+}, { deep: true })
 
 const fetchMaterials = async () => {
   try {

@@ -172,54 +172,62 @@
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
           <div 
-            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100"
+            class="relative transform rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100"
             @click.stop
           >
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-              <h3 class="text-lg font-bold text-gray-900">
-                {{ isEditing ? 'Edit Campus' : 'Add New Campus' }}
-              </h3>
-              <button @click="closeModal" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">
+                  {{ isEditing ? 'Edit Campus' : 'Add New Campus' }}
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  Configure university campus location and unique identification code.
+                </p>
+              </div>
+              <button @click="closeModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <form @submit.prevent="saveCampus" class="p-6 space-y-4">
+            <form @submit.prevent="saveCampus" class="p-6 sm:p-8 space-y-5">
               <!-- Error banner if any -->
-              <div v-if="formError" class="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+              <div v-if="formError" class="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                 {{ formError }}
               </div>
 
-              <!-- Campus Name -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Campus Name <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  v-model.trim="form.name"
-                  type="text" 
-                  required
-                  placeholder="e.g. Main Campus or Dessie Campus"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                />
-              </div>
+              <!-- 2-Column Responsive Form Fields -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                <!-- Campus Name -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Campus Name <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model.trim="form.name"
+                    type="text" 
+                    required
+                    placeholder="e.g. Dessie Main Campus"
+                    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-              <!-- Campus Code -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Campus Code <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  v-model.trim="form.code"
-                  type="text" 
-                  required
-                  maxlength="20"
-                  placeholder="e.g. MC or DC"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all uppercase"
-                />
-                <p class="text-xs text-gray-400 mt-1">Unique short identifier, max 20 characters.</p>
+                <!-- Campus Code -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Campus Code <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model.trim="form.code"
+                    type="text" 
+                    required
+                    maxlength="20"
+                    placeholder="e.g. DMC or KIoT"
+                    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all uppercase"
+                  />
+                  <p class="text-xs text-gray-400 mt-1">Unique short identifier, max 20 characters.</p>
+                </div>
               </div>
 
               <!-- Active Status -->

@@ -18,7 +18,7 @@
         <div>
           <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{{ courseTitle }}</h1>
           <p v-if="offering" class="text-sm text-gray-600 mt-1">
-            {{ offering.course?.code }} • Year {{ offering.study_year }}, Semester {{ offering.semester }} • {{ offering.academic_year }}
+            {{ offering.course?.code }} â€¢ Year {{ offering.study_year }}, Semester {{ offering.semester }} â€¢ {{ offering.academic_year }}
           </p>
         </div>
       </div>
@@ -89,9 +89,9 @@
             
             <div class="flex items-center gap-3 text-xs text-gray-400 pt-3 mt-3 border-t border-gray-100">
               <span class="font-medium text-gray-600">{{ formatFileSize(material.file_size) }}</span>
-              <span>•</span>
+              <span>â€¢</span>
               <span>Version {{ material.version }}</span>
-              <span v-if="material.created_at">•</span>
+              <span v-if="material.created_at">â€¢</span>
               <span v-if="material.created_at">{{ formatDate(material.created_at) }}</span>
             </div>
           </div>
@@ -194,30 +194,18 @@
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div v-if="pagination && pagination.last_page > 1" class="mt-8 flex justify-center">
-          <nav class="inline-flex items-center gap-2">
-            <button
-              @click="changePage(pagination.current_page - 1)"
-              :disabled="pagination.current_page === 1"
-              class="px-3.5 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-colors"
-            >
-              Previous
-            </button>
-            
-            <span class="px-3.5 py-2 text-xs font-semibold text-gray-600 bg-gray-50 border border-gray-200 rounded-xl">
-              Page {{ pagination.current_page }} of {{ pagination.last_page }}
-            </span>
-            
-            <button
-              @click="changePage(pagination.current_page + 1)"
-              :disabled="pagination.current_page === pagination.last_page"
-              class="px-3.5 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-colors"
-            >
-              Next
-            </button>
-          </nav>
-        </div>
+        <!-- Dynamic Pagination -->
+        <DynamicPagination
+          v-if="pagination && pagination.total > 0"
+          :currentPage="pagination.current_page"
+          :totalPages="pagination.last_page"
+          :totalItems="pagination.total"
+          :perPage="pagination.per_page || 10"
+          :showPerPage="false"
+          itemLabel="materials"
+          @update:currentPage="changePage"
+          class="mt-8 rounded-2xl border border-gray-200 shadow-sm"
+        />
       </div>
     </div>
   </DashboardLayout>
@@ -228,6 +216,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import { catalogService } from '../services/catalog'
 import { notesService } from '../services/notes'
 import { quizzesService } from '../services/quizzes'

@@ -90,7 +90,7 @@
         <!-- Student Cards List -->
         <div v-else class="space-y-4">
           <div
-            v-for="student in filteredStudents"
+            v-for="student in paginatedStudents"
             :key="student.id"
             class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-6"
           >
@@ -198,6 +198,17 @@
               </template>
             </div>
           </div>
+
+          <!-- Dynamic Pagination -->
+          <DynamicPagination
+            v-if="filteredStudents.length > 0"
+            v-model:currentPage="currentPage"
+            v-model:perPage="perPage"
+            :totalPages="totalPages"
+            :totalItems="filteredStudents.length"
+            itemLabel="students"
+            class="rounded-2xl border border-gray-200 shadow-sm"
+          />
         </div>
       </div>
     </div>
@@ -216,7 +227,7 @@
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
           <div 
-            class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-gray-100"
+            class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100"
             @click.stop
           >
             <!-- Modal Header Banner -->
@@ -372,9 +383,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 
@@ -387,6 +399,9 @@ const filterStatus = ref('all')
 const searchQuery = ref('')
 const processingId = ref(null)
 const selectedStudent = ref(null)
+
+const currentPage = ref(1)
+const perPage = ref(10)
 
 const openProfileModal = (student) => {
   selectedStudent.value = student
@@ -425,6 +440,19 @@ const filteredStudents = computed(() => {
 
     return matchesStatus && matchesSearch
   })
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredStudents.value.length / perPage.value) || 1
+})
+
+const paginatedStudents = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  return filteredStudents.value.slice(start, start + perPage.value)
+})
+
+watch([searchQuery, filterStatus], () => {
+  currentPage.value = 1
 })
 
 const getStatusCount = (status) => {

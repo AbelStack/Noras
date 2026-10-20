@@ -119,7 +119,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 bg-white">
-                <tr v-for="dept in filteredDepartments" :key="dept.id" class="hover:bg-gray-50/80 transition-colors">
+                <tr v-for="dept in paginatedDepartments" :key="dept.id" class="hover:bg-gray-50/80 transition-colors">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-bold text-gray-900">{{ dept.name }}</div>
                     <div v-if="dept.college" class="text-xs text-primary-600 font-medium mt-0.5">{{ dept.college }}</div>
@@ -205,6 +205,16 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Pagination -->
+          <DynamicPagination
+            v-if="filteredDepartments.length > 0"
+            v-model:currentPage="currentPage"
+            v-model:perPage="perPage"
+            :totalPages="totalPages"
+            :totalItems="filteredDepartments.length"
+            itemLabel="departments"
+          />
         </div>
       </div>
     </div>
@@ -223,84 +233,92 @@
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
           <div 
-            class="relative transform rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100"
+            class="relative transform rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100"
             @click.stop
           >
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-              <h3 class="text-lg font-bold text-gray-900">
-                {{ isEditing ? 'Edit Department' : 'Add New Department' }}
-              </h3>
-              <button @click="closeModal" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">
+                  {{ isEditing ? 'Edit Department' : 'Add New Department' }}
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  Configure department details, campus affiliation, and degree duration.
+                </p>
+              </div>
+              <button @click="closeModal" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <form @submit.prevent="saveDepartment" class="p-6 space-y-4">
+            <form @submit.prevent="saveDepartment" class="p-6 sm:p-8 space-y-5">
               <!-- Error banner if any -->
-              <div v-if="formError" class="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+              <div v-if="formError" class="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                 {{ formError }}
               </div>
 
-              <!-- Campus Selection -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Campus <span class="text-red-500">*</span>
-                </label>
-                <SearchableSelect
-                  v-model="form.university_id"
-                  :options="campuses"
-                  placeholder="Select a Campus"
-                  searchPlaceholder="Search campus..."
-                  size="md"
-                />
-                <p v-if="campuses.length === 0" class="text-xs text-amber-600 mt-1">
-                  No campuses found. Please create a campus first.
-                </p>
-              </div>
+              <!-- 2-Column Responsive Form Fields -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                <!-- Campus Selection -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Campus <span class="text-red-500">*</span>
+                  </label>
+                  <SearchableSelect
+                    v-model="form.university_id"
+                    :options="campuses"
+                    placeholder="Select a Campus"
+                    searchPlaceholder="Search campus..."
+                    size="md"
+                  />
+                  <p v-if="campuses.length === 0" class="text-xs text-amber-600 mt-1">
+                    No campuses found. Please create a campus first.
+                  </p>
+                </div>
 
-              <!-- College / School -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  College / School <span class="text-gray-400 font-normal lowercase">(optional)</span>
-                </label>
-                <input 
-                  v-model.trim="form.college"
-                  type="text" 
-                  placeholder="e.g. College of Agriculture"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                />
-              </div>
+                <!-- College / School -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                    College / School <span class="text-gray-400 font-normal lowercase">(optional)</span>
+                  </label>
+                  <input 
+                    v-model.trim="form.college"
+                    type="text" 
+                    placeholder="e.g. College of Agriculture"
+                    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-              <!-- Department Name -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Department Name <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  v-model.trim="form.name"
-                  type="text" 
-                  required
-                  placeholder="e.g. Computer Science"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                />
-              </div>
+                <!-- Department Name -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Department Name <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model.trim="form.name"
+                    type="text" 
+                    required
+                    placeholder="e.g. Computer Science"
+                    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-              <!-- Department Code -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Department Code <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  v-model.trim="form.code"
-                  type="text" 
-                  required
-                  maxlength="20"
-                  placeholder="e.g. CS"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all uppercase"
-                />
-                <p class="text-xs text-gray-400 mt-1">Unique short code within the selected campus.</p>
+                <!-- Department Code -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Department Code <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model.trim="form.code"
+                    type="text" 
+                    required
+                    maxlength="20"
+                    placeholder="e.g. CS"
+                    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all uppercase"
+                  />
+                  <p class="text-xs text-gray-400 mt-1">Unique short code within campus.</p>
+                </div>
               </div>
 
               <!-- Program Duration (Total Years) -->
@@ -308,14 +326,14 @@
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
                   Program Duration (Total Years) <span class="text-red-500">*</span>
                 </label>
-                <div class="grid grid-cols-5 gap-2">
+                <div class="grid grid-cols-5 gap-2 sm:gap-3 max-w-md">
                   <button
                     v-for="yr in [3, 4, 5, 6, 7]"
                     :key="yr"
                     type="button"
                     @click="form.total_years = yr"
                     :class="[
-                      'py-2 rounded-xl text-xs font-bold border transition-all text-center',
+                      'py-2.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer',
                       form.total_years === yr
                         ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
                         : 'bg-white text-gray-700 border-gray-300 hover:border-primary-400'
@@ -335,7 +353,7 @@
                   id="dept-active"
                   v-model="form.is_active"
                   type="checkbox"
-                  class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                  class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500 cursor-pointer"
                 />
                 <label for="dept-active" class="text-sm font-medium text-gray-700 select-none cursor-pointer">
                   Active (open for course offerings and students)
@@ -372,10 +390,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
 import SearchableSelect from '../components/SearchableSelect.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 
@@ -388,6 +407,8 @@ const error = ref(null)
 
 const searchQuery = ref('')
 const filterCampus = ref('')
+const currentPage = ref(1)
+const perPage = ref(10)
 
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -452,6 +473,19 @@ const filteredDepartments = computed(() => {
 
     return matchesSearch && matchesCampus
   })
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredDepartments.value.length / perPage.value) || 1
+})
+
+const paginatedDepartments = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  return filteredDepartments.value.slice(start, start + perPage.value)
+})
+
+watch([searchQuery, filterCampus], () => {
+  currentPage.value = 1
 })
 
 const fetchCampuses = async () => {

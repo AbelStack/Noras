@@ -316,34 +316,24 @@
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div v-if="pagination && pagination.last_page > 1" class="pt-4 flex items-center justify-between">
-          <button
-            @click="changePage(pagination.current_page - 1)"
-            :disabled="pagination.current_page === 1"
-            class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
-          >
-            Previous
-          </button>
-          
-          <span class="text-xs sm:text-sm text-gray-500">
-            Page {{ pagination.current_page }} of {{ pagination.last_page }}
-          </span>
-          
-          <button
-            @click="changePage(pagination.current_page + 1)"
-            :disabled="pagination.current_page === pagination.last_page"
-            class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
-          >
-            Next
-          </button>
-        </div>
+        <!-- Dynamic Pagination -->
+        <DynamicPagination
+          v-if="pagination && pagination.total > 0"
+          :currentPage="pagination.current_page"
+          :totalPages="pagination.last_page"
+          :totalItems="pagination.total"
+          :perPage="pagination.per_page || 10"
+          :showPerPage="false"
+          itemLabel="tasks"
+          @update:currentPage="changePage"
+          class="pt-4 rounded-2xl border border-gray-200 shadow-sm"
+        />
       </div>
     </div>
 
     <!-- Create/Edit Task Modal -->
     <div v-if="showCreateModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-100">
+      <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-100">
         <div class="p-6 sm:p-7">
           <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 tracking-tight">
             {{ editingTask ? 'Edit Task' : 'New Task' }}
@@ -423,6 +413,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import { authService } from '../services/auth'
 import { tasksService } from '../services/tasks'
 import { studentNavigationItems } from '../config/navigation'

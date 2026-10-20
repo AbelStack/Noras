@@ -182,26 +182,18 @@
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div v-if="pagination && pagination.last_page > 1" class="mt-6 flex items-center justify-between pt-4 border-t border-gray-200">
-          <button
-            @click="loadNotifications(pagination.current_page - 1)"
-            :disabled="pagination.current_page === 1"
-            class="px-4 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-colors"
-          >
-            Previous
-          </button>
-          <span class="text-xs sm:text-sm text-gray-500">
-            Page {{ pagination.current_page }} of {{ pagination.last_page }}
-          </span>
-          <button
-            @click="loadNotifications(pagination.current_page + 1)"
-            :disabled="pagination.current_page >= pagination.last_page"
-            class="px-4 py-2 border border-gray-200 rounded-xl text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-colors"
-          >
-            Next
-          </button>
-        </div>
+        <!-- Dynamic Pagination -->
+        <DynamicPagination
+          v-if="pagination && pagination.total > 0"
+          :currentPage="pagination.current_page"
+          :totalPages="pagination.last_page"
+          :totalItems="pagination.total"
+          :perPage="pagination.per_page || 10"
+          :showPerPage="false"
+          itemLabel="notifications"
+          @update:currentPage="loadNotifications"
+          class="mt-6 rounded-2xl border border-gray-200 shadow-sm"
+        />
       </div>
     </div>
   </DashboardLayout>
@@ -212,6 +204,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import { adminNavigationItems } from '../config/navigation'
 import { notificationService } from '../services/notifications'
 import { useNotification } from '../composables/useNotification'

@@ -157,11 +157,95 @@
         </div>
       </div>
     </div>
+
+    <!-- Suspended Account Modal Popup -->
+    <transition
+      enter-active-class="ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showSuspendedModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="showSuspendedModal = false"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div 
+            class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-red-100 p-6 sm:p-8"
+            @click.stop
+          >
+            <!-- Close icon -->
+            <button 
+              type="button" 
+              @click="showSuspendedModal = false"
+              class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <!-- Alert icon -->
+            <div class="w-16 h-16 rounded-3xl bg-red-50 border-4 border-red-100 text-red-600 mx-auto flex items-center justify-center mb-4">
+              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+              </svg>
+            </div>
+
+            <div class="text-center mb-5">
+              <span class="inline-block px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold uppercase tracking-wider mb-2">
+                Account Suspended
+              </span>
+              <h3 class="text-xl font-bold text-gray-900">
+                Your Account is Suspended
+              </h3>
+              <p class="text-xs sm:text-sm text-gray-600 mt-2 leading-relaxed">
+                Your account has been suspended by the university administration. Please contact the admin to reactivate your access.
+              </p>
+              <p v-if="suspendedEmail" class="text-xs font-mono text-gray-600 mt-2.5 bg-gray-50 py-1.5 px-3 rounded-xl border border-gray-100 inline-block">
+                {{ suspendedEmail }}
+              </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-2.5">
+              <!-- Direct Email Admin Button -->
+              <a
+                :href="adminMailtoLink"
+                class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>Email Administrator (support@noras.edu.et)</span>
+              </a>
+
+              <!-- Redirect to full Suspended Page -->
+              <router-link
+                :to="`/suspended?email=${encodeURIComponent(suspendedEmail)}`"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold text-xs sm:text-sm transition-all cursor-pointer"
+              >
+                <span>View Full Suspension Details</span>
+              </router-link>
+
+              <button
+                type="button"
+                @click="showSuspendedModal = false"
+                class="w-full text-center text-xs text-gray-400 hover:text-gray-600 py-1 font-medium transition-colors cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { BookOpen, Brain, TrendingUp, ArrowLeft } from 'lucide-vue-next'
 import { authService } from '../services/auth'
@@ -171,6 +255,17 @@ const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
+const showSuspendedModal = ref(false)
+const suspendedEmail = ref('')
+
+const adminMailtoLink = computed(() => {
+  const mail = suspendedEmail.value || 'my student account'
+  const subject = encodeURIComponent(`Account Suspension Inquiry - ${mail}`)
+  const body = encodeURIComponent(
+    `Hello Administrator,\n\nMy account (${mail}) has been suspended. Please assist me in resolving this issue and reactivating my account.\n\nThank you.`
+  )
+  return `mailto:support@noras.edu.et?subject=${subject}&body=${body}`
+})
 
 const handleLogin = async () => {
   if (isLoading.value) return
@@ -188,7 +283,17 @@ const handleLogin = async () => {
       router.push('/dashboard')
     }
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Login failed. Please check your email and password.'
+    const status = error.response?.status
+    const data = error.response?.data
+    const msg = data?.message || error.message || ''
+
+    if (status === 403 && (data?.account_status === 'suspended' || msg.toLowerCase().includes('suspended'))) {
+      suspendedEmail.value = email.value
+      showSuspendedModal.value = true
+      return
+    }
+
+    errorMessage.value = msg || 'Login failed. Please check your email and password.'
   } finally {
     isLoading.value = false
   }

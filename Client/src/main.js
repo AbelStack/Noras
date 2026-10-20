@@ -36,6 +36,7 @@ import QuizTakingPage from './pages/QuizTakingPage.vue'
 import StudyTasksPage from './pages/StudyTasksPage.vue'
 import BookmarksPage from './pages/BookmarksPage.vue'
 import LearningProgressPage from './pages/LearningProgressPage.vue'
+import SuspendedAccountPage from './pages/SuspendedAccountPage.vue'
 
 const routes = [
   { path: '/', component: LandingPage, meta: { public: true } },
@@ -43,6 +44,7 @@ const routes = [
   { path: '/register', component: RegisterPage, meta: { public: true } },
   { path: '/forgot-password', component: ForgotPasswordPage, meta: { public: true } },
   { path: '/reset-password', component: ResetPasswordPage, meta: { public: true } },
+  { path: '/suspended', component: SuspendedAccountPage, meta: { public: true } },
   { path: '/legal/contact', component: ContactPage, meta: { public: true } },
   { path: '/legal/privacy-policy', component: PrivacyPolicyPage, meta: { public: true } },
   { path: '/legal/terms-of-use', component: TermsOfUsePage, meta: { public: true } },
@@ -193,6 +195,13 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = authService.isAuthenticated()
   const isAdmin = authService.isAdmin()
   const isApproved = authService.isApproved()
+  const user = authService.getUser()
+  const isSuspended = user?.account_status === 'suspended'
+
+  // If account is suspended, always route to /suspended
+  if (isSuspended && to.path !== '/suspended') {
+    return next('/suspended')
+  }
 
   // Public routes
   if (to.meta.public) {

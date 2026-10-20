@@ -195,28 +195,18 @@
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div v-if="pagination && pagination.last_page > 1" class="pt-4 flex items-center justify-between">
-          <button
-            @click="changePage(pagination.current_page - 1)"
-            :disabled="pagination.current_page === 1"
-            class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
-          >
-            Previous
-          </button>
-          
-          <span class="text-xs sm:text-sm text-gray-500">
-            Page {{ pagination.current_page }} of {{ pagination.last_page }}
-          </span>
-          
-          <button
-            @click="changePage(pagination.current_page + 1)"
-            :disabled="pagination.current_page === pagination.last_page"
-            class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-colors"
-          >
-            Next
-          </button>
-        </div>
+        <!-- Dynamic Pagination -->
+        <DynamicPagination
+          v-if="pagination && pagination.total > 0"
+          :currentPage="pagination.current_page"
+          :totalPages="pagination.last_page"
+          :totalItems="pagination.total"
+          :perPage="pagination.per_page || 10"
+          :showPerPage="false"
+          itemLabel="bookmarks"
+          @update:currentPage="changePage"
+          class="pt-4 rounded-2xl border border-gray-200 shadow-sm"
+        />
       </div>
     </div>
   </DashboardLayout>
@@ -227,6 +217,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import { bookmarksService } from '../services/bookmarks'
 import { studentNavigationItems } from '../config/navigation'
 import { useNotification } from '../composables/useNotification'
@@ -326,7 +317,7 @@ const getBookmarkDescription = (bookmark) => {
     return `Generated with ${bookmark.bookmarkable.ai_provider}`
   }
   if (bookmark.bookmarkable_type.includes('GeneratedQuiz')) {
-    return `${bookmark.bookmarkable.question_count} questions • ${bookmark.bookmarkable.ai_provider}`
+    return `${bookmark.bookmarkable.question_count} questions â€¢ ${bookmark.bookmarkable.ai_provider}`
   }
   return null
 }

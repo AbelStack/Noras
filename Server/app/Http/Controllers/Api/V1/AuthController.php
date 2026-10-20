@@ -140,6 +140,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $message,
+                'account_status' => $user->account_status,
             ], 403);
         }
 

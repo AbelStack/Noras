@@ -329,28 +329,17 @@
             </table>
           </div>
 
-          <!-- Pagination -->
-          <div v-if="pagination.last_page > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-            <span class="text-xs text-gray-500">
-              Showing page {{ pagination.current_page }} of {{ pagination.last_page }} ({{ pagination.total }} notes)
-            </span>
-            <div class="flex items-center gap-1.5">
-              <button 
-                :disabled="pagination.current_page <= 1"
-                @click="changePage(pagination.current_page - 1)"
-                class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
-              >
-                Previous
-              </button>
-              <button 
-                :disabled="pagination.current_page >= pagination.last_page"
-                @click="changePage(pagination.current_page + 1)"
-                class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+          <!-- Dynamic Pagination -->
+          <DynamicPagination
+            v-if="pagination.total > 0"
+            :currentPage="pagination.current_page"
+            :totalPages="pagination.last_page"
+            :totalItems="pagination.total"
+            :perPage="pagination.per_page || 10"
+            :showPerPage="false"
+            itemLabel="notes"
+            @update:currentPage="changePage"
+          />
         </div>
       </div>
     </div>
@@ -371,7 +360,7 @@
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-emerald-50/50">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
-                  📝
+                  ðŸ“
                 </div>
                 <div>
                   <h3 class="text-base font-bold text-gray-900">Official Master Study Note</h3>
@@ -438,7 +427,7 @@
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-sm">
-                  🎯
+                  ðŸŽ¯
                 </div>
                 <div>
                   <h3 class="text-base font-bold text-gray-900 truncate max-w-xs sm:max-w-sm">
@@ -528,6 +517,7 @@
 import { ref, computed, onMounted } from 'vue'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
+import DynamicPagination from '../components/DynamicPagination.vue'
 import api from '../services/api'
 import { useNotification } from '../composables/useNotification'
 import { adminNavigationItems } from '../config/navigation'
