@@ -3,28 +3,28 @@
     pageTitle="Noras Admin" 
     :navigationItems="navigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           @click="$router.push('/admin/dashboard')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Dashboard
         </button>
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">AI Quizzes</h1>
-            <p class="text-sm text-gray-600 mt-1">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">AI Quizzes</h1>
+            <p class="text-xs sm:text-sm text-gray-600 mt-0.5">
               Inspect, test, regenerate and manage official practice quizzes organized by curriculum (15 to 30 questions)
             </p>
           </div>
           <button 
             @click="$router.push('/admin/materials')"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-semibold rounded-xl shadow-2xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-semibold rounded-xl shadow-2xs transition-colors cursor-pointer self-start sm:self-center"
           >
             <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -53,7 +53,7 @@
           <div class="text-xl font-bold text-blue-600 mt-1">
             {{ stats.total_quizzes > 0 ? Math.round(stats.total_questions / stats.total_quizzes) : 0 }}
           </div>
-          <p class="text-[11px] text-gray-400 mt-0.5">15â€“30 questions</p>
+          <p class="text-[11px] text-gray-400 mt-0.5">15 - 30 questions</p>
         </div>
         <div class="bg-white rounded-xl border border-gray-200 p-3.5 shadow-2xs">
           <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Materials Covered</div>
@@ -365,7 +365,7 @@
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-indigo-50/50">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
-                  ðŸŽ¯
+                  <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="2" /><circle cx="12" cy="12" r="5" stroke-width="2" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></svg>
                 </div>
                 <div>
                   <h3 class="text-base font-bold text-gray-900">
@@ -413,7 +413,9 @@
                     >
                       <span>{{ formatOptionLabel(opt.option_text, optIndex) }}</span>
                       <span v-if="opt.is_correct" class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded flex items-center gap-1">
-                        <span>âœ“</span> Correct Answer
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg> Correct Answer
                       </span>
                     </div>
                   </div>
@@ -458,7 +460,9 @@
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-indigo-50/50">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
-                  âš¡
+                  <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
                 <div>
                   <h3 class="text-base font-bold text-gray-900">Regenerate Master Quiz</h3>
@@ -538,7 +542,11 @@
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-sm">
-                  ðŸŽ¯
+                  <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" stroke-width="2" />
+                    <circle cx="12" cy="12" r="5" stroke-width="2" />
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                  </svg>
                 </div>
                 <div>
                   <h3 class="text-base font-bold text-gray-900 truncate max-w-xs sm:max-w-sm">

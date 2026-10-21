@@ -3,37 +3,37 @@
     pageTitle="Noras Admin" 
     :navigationItems="navigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           @click="$router.push('/admin/dashboard')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Dashboard
         </button>
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Student Approvals</h1>
-            <p class="text-sm text-gray-600 mt-1">Review student registrations and manage enrollment access</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Student Approvals</h1>
+            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Review student registrations and manage enrollment access</p>
           </div>
         </div>
       </div>
 
-      <!-- Filters & Search -->
-      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-        <div class="flex flex-wrap gap-2 w-full md:w-auto">
+      <!-- Filters & Search (Compact Single-Row Bar) -->
+      <div class="bg-white p-2.5 sm:px-3.5 rounded-xl border border-gray-200 shadow-2xs flex flex-col md:flex-row gap-2.5 items-stretch md:items-center justify-between">
+        <div class="flex flex-wrap gap-1.5 w-full md:w-auto">
           <button
             v-for="status in statuses"
             :key="status.value"
             @click="filterStatus = status.value"
             :class="[
-              'px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all',
+              'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all',
               filterStatus === status.value
-                ? 'bg-primary-600 text-white shadow-sm'
+                ? 'bg-primary-600 text-white shadow-2xs'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             ]"
           >
@@ -41,15 +41,15 @@
           </button>
         </div>
 
-        <div class="relative w-full md:w-72">
-          <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="relative w-full md:w-64">
+          <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search student or ID..."
-            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            class="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
           />
         </div>
       </div>
@@ -75,7 +75,7 @@
       <!-- Content -->
       <div v-else>
         <!-- Empty State -->
-        <div v-if="filteredStudents.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+        <div v-if="filteredStudents.length === 0" class="bg-white rounded-2xl border border-gray-200 p-8 sm:p-12 text-center shadow-sm min-h-[440px] flex flex-col items-center justify-center">
           <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4">
             <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -87,8 +87,9 @@
           </p>
         </div>
 
-        <!-- Student Cards List -->
-        <div v-else class="space-y-4">
+        <!-- Student Cards List (Large Box Flow) -->
+        <div v-else class="min-h-[500px] flex flex-col justify-between space-y-4">
+          <div class="space-y-4 flex-1">
           <div
             v-for="student in paginatedStudents"
             :key="student.id"
@@ -198,9 +199,10 @@
               </template>
             </div>
           </div>
+        </div>
 
-          <!-- Dynamic Pagination -->
-          <DynamicPagination
+        <!-- Dynamic Pagination -->
+        <DynamicPagination
             v-if="filteredStudents.length > 0"
             v-model:currentPage="currentPage"
             v-model:perPage="perPage"

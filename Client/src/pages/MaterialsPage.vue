@@ -18,7 +18,7 @@
         <div>
           <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{{ courseTitle }}</h1>
           <p v-if="offering" class="text-sm text-gray-600 mt-1">
-            {{ offering.course?.code }} â€¢ Year {{ offering.study_year }}, Semester {{ offering.semester }} â€¢ {{ offering.academic_year }}
+            {{ offering.course?.code }} &bull; Year {{ offering.study_year }}, Semester {{ offering.semester }} &bull; {{ offering.academic_year }}
           </p>
         </div>
       </div>
@@ -89,9 +89,9 @@
             
             <div class="flex items-center gap-3 text-xs text-gray-400 pt-3 mt-3 border-t border-gray-100">
               <span class="font-medium text-gray-600">{{ formatFileSize(material.file_size) }}</span>
-              <span>â€¢</span>
+              <span>&bull;</span>
               <span>Version {{ material.version }}</span>
-              <span v-if="material.created_at">â€¢</span>
+              <span v-if="material.created_at">&bull;</span>
               <span v-if="material.created_at">{{ formatDate(material.created_at) }}</span>
             </div>
           </div>

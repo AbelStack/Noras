@@ -317,7 +317,7 @@ const getBookmarkDescription = (bookmark) => {
     return `Generated with ${bookmark.bookmarkable.ai_provider}`
   }
   if (bookmark.bookmarkable_type.includes('GeneratedQuiz')) {
-    return `${bookmark.bookmarkable.question_count} questions â€¢ ${bookmark.bookmarkable.ai_provider}`
+    return `${bookmark.bookmarkable.question_count} questions &bull; ${bookmark.bookmarkable.ai_provider}`
   }
   return null
 }

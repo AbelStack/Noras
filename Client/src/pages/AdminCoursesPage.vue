@@ -3,28 +3,28 @@
     pageTitle="Noras Admin" 
     :navigationItems="navigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           @click="$router.push('/admin/dashboard')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Dashboard
         </button>
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Courses Management</h1>
-            <p class="text-sm text-gray-600 mt-1">Manage academic courses, catalog codes, and credit hours</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Courses Management</h1>
+            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Manage academic courses, catalog codes, and credit hours</p>
           </div>
           <button 
             @click="openAddModal"
-            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 active:bg-primary-800 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-primary-600 text-white text-xs sm:text-sm font-semibold rounded-xl hover:bg-primary-700 active:bg-primary-800 shadow-xs transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             Add Course
@@ -32,20 +32,20 @@
         </div>
       </div>
 
-      <!-- Filters & Search -->
-      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-        <div class="relative w-full md:w-72">
-          <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Filters & Search (Compact Single-Row Bar) -->
+      <div class="bg-white p-2.5 sm:px-3.5 rounded-xl border border-gray-200 shadow-2xs flex flex-col xl:flex-row gap-2.5 items-stretch xl:items-center justify-between">
+        <div class="relative w-full xl:w-64">
+          <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search courses or codes..."
-            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            class="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
           />
         </div>
-        <div class="w-full md:w-auto flex flex-wrap items-center gap-2.5">
+        <div class="w-full xl:w-auto flex flex-wrap items-center gap-2">
           <!-- Campus Filter -->
           <div class="flex items-center gap-1.5">
             <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Campus:</label>
@@ -57,7 +57,7 @@
               placeholder="All Campuses"
               searchPlaceholder="Search campus..."
               size="sm"
-              widthClass="w-36 sm:w-44"
+              widthClass="w-36 sm:w-40"
               dropdownWidthClass="w-56"
               @change="onFilterCampusChange"
             />
@@ -74,7 +74,7 @@
               placeholder="All Departments"
               searchPlaceholder="Search 80+ departments..."
               size="sm"
-              widthClass="w-44 sm:w-60"
+              widthClass="w-44 sm:w-56"
               dropdownWidthClass="w-64 sm:w-72"
             />
           </div>
@@ -84,7 +84,7 @@
             <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Status:</label>
             <select 
               v-model="filterStatus"
-              class="px-2.5 py-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none bg-white transition-all text-gray-700 min-h-[34px]"
+              class="px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none bg-white transition-all text-gray-700 min-h-[32px]"
             >
               <option value="all">All Courses</option>
               <option value="active">Active Only</option>
@@ -115,7 +115,7 @@
       <!-- Course List -->
       <div v-else>
         <!-- Empty State -->
-        <div v-if="filteredCourses.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+        <div v-if="filteredCourses.length === 0" class="bg-white rounded-2xl border border-gray-200 p-8 sm:p-12 text-center shadow-sm min-h-[440px] flex flex-col items-center justify-center">
           <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4">
             <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -128,7 +128,7 @@
           <button 
             v-if="!searchQuery && filterStatus === 'all' && filterDepartment === 'all'"
             @click="openAddModal"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors shadow-sm cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -137,9 +137,9 @@
           </button>
         </div>
 
-        <!-- Table -->
-        <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
+        <!-- Table (Large Box) -->
+        <div v-else class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[500px] flex flex-col justify-between">
+          <div class="overflow-x-auto flex-1">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50/75">
                 <tr>
@@ -421,34 +421,13 @@
 
                 <!-- Study Years & Semester (shown when department selected) -->
                 <div v-if="form.department_id" class="p-4 bg-gray-50/90 rounded-2xl border border-gray-200 space-y-3.5">
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div>
-                      <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Study Year(s) <span class="text-red-500">*</span>
-                      </label>
-                      <p class="text-[11px] text-gray-500 mt-0.5">
-                        {{ selectedDept?.name }} is a {{ selectedDeptTotalYears }}-year program.
-                      </p>
-                    </div>
-
-                    <!-- Dynamic Presets -->
-                    <div class="flex flex-wrap items-center gap-1.5">
-                      <button 
-                        type="button" 
-                        @click="selectAllYears" 
-                        class="px-2 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors font-semibold text-[11px]"
-                      >
-                        All (1â€“{{ selectedDeptTotalYears }})
-                      </button>
-                      <button 
-                        v-if="selectedDeptTotalYears >= 2"
-                        type="button" 
-                        @click="selectPostFreshman" 
-                        class="px-2 py-1 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors font-semibold text-[11px]"
-                      >
-                        Years 2â€“{{ selectedDeptTotalYears }} (Major)
-                      </button>
-                    </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Study Year(s) <span class="text-red-500">*</span>
+                    </label>
+                    <p class="text-[11px] text-gray-500 mt-0.5">
+                      {{ selectedDept?.name }} is a {{ selectedDeptTotalYears }}-year program. Select the study year(s) for this course.
+                    </p>
                   </div>
 
                   <!-- Year Selection Checkboxes -->
@@ -909,19 +888,6 @@ const editFromCurriculumModal = () => {
   closeCurriculumModal()
   if (targetCourse) {
     openEditModal(targetCourse)
-  }
-}
-
-const selectAllYears = () => {
-  form.value.study_years = [...availableStudyYears.value]
-}
-
-const selectPostFreshman = () => {
-  const total = selectedDeptTotalYears.value
-  if (total >= 2) {
-    form.value.study_years = Array.from({ length: total - 1 }, (_, i) => i + 2)
-  } else {
-    form.value.study_years = [1]
   }
 }
 

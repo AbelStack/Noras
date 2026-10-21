@@ -3,28 +3,28 @@
     pageTitle="Noras Admin" 
     :navigationItems="navigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           @click="$router.push('/admin/dashboard')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Dashboard
         </button>
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">AI Study Notes</h1>
-            <p class="text-sm text-gray-600 mt-1">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">AI Study Notes</h1>
+            <p class="text-xs sm:text-sm text-gray-600 mt-0.5">
               Browse, inspect, regenerate and manage official master study notes organized by curriculum
             </p>
           </div>
           <button 
             @click="$router.push('/admin/materials')"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-semibold rounded-xl shadow-2xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-semibold rounded-xl shadow-2xs transition-colors cursor-pointer self-start sm:self-center"
           >
             <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -360,7 +360,7 @@
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-emerald-50/50">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
-                  ðŸ“
+                  <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
                 <div>
                   <h3 class="text-base font-bold text-gray-900">Official Master Study Note</h3>
@@ -427,7 +427,7 @@
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-sm">
-                  ðŸŽ¯
+                  <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="2" /><circle cx="12" cy="12" r="5" stroke-width="2" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></svg>
                 </div>
                 <div>
                   <h3 class="text-base font-bold text-gray-900 truncate max-w-xs sm:max-w-sm">
