@@ -1,14 +1,14 @@
 <template>
-  <section id="home" class="pt-24 sm:pt-28 md:pt-32 pb-20 bg-gradient-to-br from-beige-50 via-white to-blue-50 min-h-screen flex items-center relative overflow-hidden">
+  <section id="home" class="pt-20 sm:pt-24 md:pt-24 pb-8 sm:pb-10 lg:pb-6 bg-gradient-to-br from-beige-50 via-white to-blue-50 min-h-screen lg:min-h-0 lg:h-screen lg:max-h-screen flex items-center relative overflow-hidden">
     <div class="absolute top-20 right-10 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl"></div>
     <div class="absolute bottom-20 left-10 w-96 h-96 bg-beige-200/30 rounded-full blur-3xl"></div>
 
     <div class="max-w-7xl mx-auto px-6 w-full relative z-10">
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="grid lg:grid-cols-2 gap-10 xl:gap-14 items-center">
         <!-- Left: Content -->
-        <div class="space-y-8">
+        <div class="space-y-5 lg:space-y-6">
           <div class="inline-block">
-            <div class="bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200/50 rounded-full px-6 py-2">
+            <div class="bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200/50 rounded-full px-5 py-2">
               <span class="text-blue-600 font-semibold text-sm flex items-center space-x-2">
                 <Sparkles :size="16" />
                 <span>Your Academic Learning Companion</span>
@@ -16,26 +16,26 @@
             </div>
           </div>
 
-          <h1 class="text-6xl lg:text-7xl font-bold text-gray-900 leading-tight tracking-tight">
+          <h1 class="text-5xl sm:text-6xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-[1.1] tracking-tight">
             Meet <span class="text-blue-600">Noras</span>, <br />
             Your Study Buddy
           </h1>
           
-          <p class="text-xl text-gray-600 leading-relaxed font-normal">
+          <p class="text-lg lg:text-xl text-gray-600 leading-relaxed font-normal max-w-xl">
             AI-powered study notes, practice quizzes, and organized course materials — all in one beautiful place designed for Wollo University students.
           </p>
 
-          <div class="flex flex-col sm:flex-row gap-4">
-            <router-link to="/register" class="bg-blue-600 text-white px-10 py-4 rounded-2xl hover:bg-yellow-400 hover:text-gray-900 transition-all font-semibold text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center space-x-2">
+          <div class="flex flex-col sm:flex-row gap-4 pt-1">
+            <router-link to="/register" class="bg-blue-600 text-white px-8 py-3.5 sm:px-9 sm:py-4 rounded-2xl hover:bg-yellow-400 hover:text-gray-900 transition-all font-semibold text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center space-x-2 text-base">
               <span>Get Started Free</span>
               <ArrowRight :size="20" />
             </router-link>
-            <router-link to="/login" class="bg-white text-gray-900 px-10 py-4 rounded-2xl hover:bg-yellow-50 transition-all font-semibold text-center border-2 border-gray-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+            <router-link to="/login" class="bg-white text-gray-900 px-8 py-3.5 sm:px-9 sm:py-4 rounded-2xl hover:bg-yellow-50 transition-all font-semibold text-center border-2 border-gray-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 text-base">
               Sign In
             </router-link>
           </div>
 
-          <div class="flex flex-wrap items-center gap-6 pt-4">
+          <div class="flex flex-wrap items-center gap-5 sm:gap-6 pt-2">
             <!-- Skeleton state -->
             <template v-if="loadingStats">
               <div class="flex items-center space-x-2">
@@ -58,19 +58,19 @@
             <!-- Real data loaded from database -->
             <template v-else>
               <div class="flex items-center space-x-2 text-gray-700">
-                <BookOpen :size="20" class="text-blue-600 flex-shrink-0" />
+                <BookOpen :size="19" class="text-blue-600 flex-shrink-0" />
                 <span class="font-semibold text-sm">{{ stats.materials || 0 }}+ Materials</span>
               </div>
               <div class="flex items-center space-x-2 text-gray-700">
-                <Users :size="20" class="text-blue-600 flex-shrink-0" />
+                <Users :size="19" class="text-blue-600 flex-shrink-0" />
                 <span class="font-semibold text-sm">{{ stats.students || 0 }}+ Students</span>
               </div>
               <div class="flex items-center space-x-2 text-gray-700">
-                <GraduationCap :size="20" class="text-blue-600 flex-shrink-0" />
+                <GraduationCap :size="19" class="text-blue-600 flex-shrink-0" />
                 <span class="font-semibold text-sm">{{ stats.courses || 0 }}+ Courses</span>
               </div>
               <div class="flex items-center space-x-2 text-gray-700">
-                <Building2 :size="20" class="text-blue-600 flex-shrink-0" />
+                <Building2 :size="19" class="text-blue-600 flex-shrink-0" />
                 <span class="font-semibold text-sm">{{ stats.campuses || 3 }} Campuses</span>
               </div>
             </template>
@@ -79,28 +79,28 @@
 
         <!-- Right: 3D Model -->
         <div class="relative">
-          <div class="relative w-full h-[600px] bg-gradient-to-br from-blue-50/50 to-beige-100/50 rounded-[40px] overflow-hidden border border-gray-200/50 shadow-2xl">
+          <div class="relative w-full h-[400px] sm:h-[450px] lg:h-[460px] xl:h-[500px] 2xl:h-[540px] bg-gradient-to-br from-blue-50/50 to-beige-100/50 rounded-3xl xl:rounded-[36px] overflow-hidden border border-gray-200/50 shadow-xl">
             <!-- 3D Mascot Skeleton Loader -->
             <transition name="fade">
               <div 
                 v-if="loadingModel" 
-                class="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-50/80 via-white/70 to-blue-100/50 backdrop-blur-xs z-10"
+                class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50/80 via-white/70 to-blue-100/50 backdrop-blur-xs z-10"
               >
                 <!-- Animated Mascot Silhouette Placeholder -->
-                <div class="relative flex flex-col items-center justify-center w-64 h-80 animate-pulse">
+                <div class="relative flex flex-col items-center justify-center w-52 h-64 animate-pulse">
                   <!-- Head -->
-                  <div class="w-24 h-24 rounded-full bg-gradient-to-b from-blue-200/90 to-blue-300/80 shadow-inner mb-3"></div>
+                  <div class="w-20 h-20 rounded-full bg-gradient-to-b from-blue-200/90 to-blue-300/80 shadow-inner mb-2.5"></div>
                   <!-- Torso / Mascot Body -->
-                  <div class="w-36 h-40 rounded-3xl bg-gradient-to-b from-blue-200/90 to-blue-300/70 shadow-inner relative flex items-center justify-center">
-                    <div class="w-12 h-12 rounded-2xl bg-white/70 shadow-xs"></div>
+                  <div class="w-32 h-32 rounded-3xl bg-gradient-to-b from-blue-200/90 to-blue-300/70 shadow-inner relative flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-xl bg-white/70 shadow-xs"></div>
                   </div>
                   <!-- Floating base shadow pulse -->
-                  <div class="w-40 h-4 rounded-full bg-blue-200/60 mt-6 blur-xs"></div>
+                  <div class="w-36 h-3 rounded-full bg-blue-200/60 mt-4 blur-xs"></div>
                 </div>
 
                 <!-- Skeleton Status Pill -->
-                <div class="mt-6 flex items-center space-x-2.5 px-4 py-2 bg-white/90 rounded-full border border-blue-100 shadow-sm animate-pulse">
-                  <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></div>
+                <div class="mt-4 flex items-center space-x-2 px-3.5 py-1.5 bg-white/90 rounded-full border border-blue-100 shadow-xs animate-pulse">
+                  <div class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></div>
                   <span class="text-xs font-semibold text-blue-800 tracking-wide">Loading 3D Mascot...</span>
                 </div>
               </div>
@@ -109,10 +109,10 @@
             <canvas ref="canvasRef" class="w-full h-full"></canvas>
             
             <!-- Floating elements around model -->
-            <div class="absolute top-10 left-10 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg animate-float">
+            <div class="absolute top-6 left-6 sm:top-8 sm:left-8 bg-white/85 backdrop-blur-sm rounded-2xl p-3.5 shadow-md animate-float">
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Brain :size="20" class="text-blue-600" />
+                <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Brain :size="18" class="text-blue-600" />
                 </div>
                 <div>
                   <p class="text-xs text-gray-500 font-medium">AI Notes</p>
@@ -211,9 +211,9 @@ onMounted(() => {
       model.position.y = -center.y
       model.position.z = -center.z
       
-      // Scale to fit the canvas (adjust 2.5 to make bigger or smaller)
+      // Scale to fit the canvas (reduced slightly from 2.5 to 2.1 so mascot fits comfortably)
       const maxDim = Math.max(size.x, size.y, size.z)
-      const scale = 2.5 / maxDim
+      const scale = 2.1 / maxDim
       model.scale.set(scale, scale, scale)
       
       scene.add(model)
