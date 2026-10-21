@@ -3,21 +3,21 @@
     pageTitle="Student" 
     :navigationItems="studentNavigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           @click="$router.push('/dashboard')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Dashboard
         </button>
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Bookmarks</h1>
-          <p class="text-sm text-gray-600 mt-1">Quick access to your saved materials, notes, and quizzes</p>
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Bookmarks</h1>
+          <p class="text-xs sm:text-sm text-gray-600 mt-0.5">Quick access to your saved materials, notes, and quizzes</p>
         </div>
       </div>
 
@@ -91,26 +91,26 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="bookmarks.length === 0 && !errorMessage" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+      <div v-else-if="bookmarks.length === 0 && !errorMessage" class="bg-white rounded-2xl border border-gray-200 p-8 sm:p-12 text-center shadow-sm min-h-[440px] flex flex-col items-center justify-center">
         <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
           </svg>
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-1">No bookmarks found</h3>
-        <p class="text-sm text-gray-500 max-w-sm mx-auto mb-6">
+        <p class="text-xs sm:text-sm text-gray-500 max-w-sm mx-auto mb-5">
           {{ currentFilter === null ? 'Save materials, notes, or quizzes to access them quickly.' : 'No bookmarks match this filter.' }}
         </p>
         <router-link
           to="/departments"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-colors"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm text-white bg-primary-600 hover:bg-primary-700 shadow-2xs transition-colors"
         >
           Browse Materials
         </router-link>
       </div>
 
       <!-- Bookmarks List -->
-      <div v-else class="space-y-4">
+      <div v-else class="space-y-3 min-h-[460px]">
         <div
           v-for="bookmark in bookmarks"
           :key="bookmark.id"

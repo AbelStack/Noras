@@ -3,23 +3,23 @@
     pageTitle="Student" 
     :navigationItems="studentNavigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           @click="$router.push('/dashboard')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Dashboard
         </button>
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
             {{ myDepartment?.name || 'Department' }} Curriculum Years
           </h1>
-          <p class="text-sm text-gray-600 mt-1">
+          <p class="text-xs sm:text-sm text-gray-600 mt-0.5">
             Browse Year 2 to Year {{ departmentDuration }} courses, lecture notes, and learning materials
           </p>
         </div>
@@ -44,7 +44,7 @@
       </div>
 
       <!-- Main Content when Loaded -->
-      <div v-else class="space-y-6">
+      <div v-else class="space-y-6 min-h-[460px]">
         <!-- Enrolled Department Quick Info Banner -->
         <div 
           v-if="myDepartment"

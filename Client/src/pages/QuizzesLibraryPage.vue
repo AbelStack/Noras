@@ -3,15 +3,15 @@
     pageTitle="Student" 
     :navigationItems="studentNavigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           v-if="selectedYear"
           @click="selectedYear = null"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group cursor-pointer"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group cursor-pointer"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Academic Years
@@ -19,9 +19,9 @@
         <button 
           v-else
           @click="$router.push('/dashboard')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group cursor-pointer"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group cursor-pointer"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Dashboard
@@ -29,7 +29,7 @@
 
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
               <template v-if="selectedYear">
                 Year {{ selectedYear }} AI Quizzes
               </template>
@@ -37,7 +37,7 @@
                 AI Quizzes Library
               </template>
             </h1>
-            <p class="text-sm text-gray-600 mt-1">
+            <p class="text-xs sm:text-sm text-gray-600 mt-0.5">
               <template v-if="selectedYear">
                 {{ userDepartment?.name || 'Department' }} &bull; Semester 1 &amp; Semester 2 practice quizzes
               </template>
@@ -85,17 +85,17 @@
       </div>
 
       <!-- Empty State (No quizzes at all) -->
-      <div v-else-if="quizzes.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+      <div v-else-if="quizzes.length === 0" class="bg-white rounded-2xl border border-gray-200 p-8 sm:p-12 text-center shadow-sm min-h-[440px] flex flex-col items-center justify-center">
         <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4 border border-primary-100">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
           </svg>
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-1">No quizzes available yet</h3>
-        <p class="text-sm text-gray-500 max-w-sm mx-auto mb-6">Explore course materials to find published quizzes for your academic program.</p>
+        <p class="text-xs sm:text-sm text-gray-500 max-w-sm mx-auto mb-5">Explore course materials to find published quizzes for your academic program.</p>
         <router-link
           to="/departments"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-colors"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm text-white bg-primary-600 hover:bg-primary-700 shadow-2xs transition-colors"
         >
           Browse Course Materials
         </router-link>
@@ -290,7 +290,7 @@
           </router-link>
         </div>
 
-        <div v-else class="space-y-4">
+        <div v-else class="space-y-4 min-h-[460px]">
           <div
             v-for="quiz in filteredQuizzes"
             :key="quiz.id"

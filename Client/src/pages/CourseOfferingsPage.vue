@@ -3,14 +3,14 @@
     pageTitle="Student" 
     :navigationItems="studentNavigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           @click="$router.push('/departments')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Academic Years
@@ -18,7 +18,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div class="flex items-center gap-2.5 flex-wrap">
-              <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                 {{ department?.name || 'Department' }} &mdash; Year {{ selectedYear }}
               </h1>
               <span 
@@ -28,7 +28,7 @@
                 Your Enrolled Department
               </span>
             </div>
-            <p class="text-sm text-gray-600 mt-1">
+            <p class="text-xs sm:text-sm text-gray-600 mt-0.5">
               <span v-if="department?.university">{{ department.university.name }} &bull; </span>
               <span>Year {{ selectedYear }} Curriculum &bull; Semester 1 &amp; Semester 2</span>
             </p>
@@ -37,7 +37,7 @@
       </div>
 
       <!-- Year Selector & Filters Card -->
-      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+      <div class="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 shadow-2xs space-y-3">
         <!-- Top row: Year Switcher & Course Search -->
         <div class="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
           <!-- Year Selector Buttons (Years 2 to Duration) -->
@@ -67,7 +67,7 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search courses or codes..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+              class="w-full pl-10 pr-4 py-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
             />
           </div>
         </div>
@@ -135,27 +135,27 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredOfferings.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+      <div v-else-if="filteredOfferings.length === 0" class="bg-white rounded-2xl border border-gray-200 p-8 sm:p-12 text-center shadow-sm min-h-[440px] flex flex-col items-center justify-center">
         <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4">
           <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-1">No course offerings found</h3>
-        <p class="text-sm text-gray-500 max-w-sm mx-auto">
+        <p class="text-xs sm:text-sm text-gray-500 max-w-sm mx-auto">
           {{ selectedSemester !== 'all' || searchQuery ? 'No courses match the selected semester or search criteria.' : `No courses are currently registered for Year ${selectedYear}.` }}
         </p>
         <button 
           v-if="selectedSemester !== 'all' || searchQuery"
           @click="resetFilters"
-          class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-xl text-xs font-semibold hover:bg-primary-700 transition-colors cursor-pointer"
+          class="mt-4 px-3.5 py-2 bg-primary-600 text-white rounded-xl text-xs font-semibold hover:bg-primary-700 shadow-2xs transition-colors cursor-pointer"
         >
           Reset Filters
         </button>
       </div>
 
       <!-- Course Offerings Grid -->
-      <div v-else class="space-y-6">
+      <div v-else class="space-y-6 min-h-[460px]">
         <!-- If "All" is selected, group courses by Semester for clean layout -->
         <div v-if="selectedSemester === 'all'" class="space-y-8">
           <div 

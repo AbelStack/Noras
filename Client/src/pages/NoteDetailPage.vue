@@ -3,14 +3,14 @@
     pageTitle="Student" 
     :navigationItems="studentNavigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-5xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-5xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button -->
       <div>
         <button
           @click="$router.push('/notes')"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group cursor-pointer"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Notes Library
@@ -47,9 +47,9 @@
       </div>
 
       <!-- Note Content -->
-      <div v-else-if="note" class="space-y-6">
+      <div v-else-if="note" class="space-y-4 sm:space-y-5">
         <!-- Note Header -->
-        <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm">
           <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-2">

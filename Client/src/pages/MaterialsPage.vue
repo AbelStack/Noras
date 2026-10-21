@@ -3,21 +3,21 @@
     pageTitle="Student" 
     :navigationItems="studentNavigationItems"
   >
-    <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div class="p-5 sm:p-6 lg:p-7 max-w-7xl mx-auto space-y-4 sm:space-y-4.5">
       <!-- Back Button & Page Header -->
       <div>
         <button 
           @click="goBack"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors mb-3 group"
+          class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors mb-1.5 group"
         >
-          <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Course Offerings
         </button>
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{{ courseTitle }}</h1>
-          <p v-if="offering" class="text-sm text-gray-600 mt-1">
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">{{ courseTitle }}</h1>
+          <p v-if="offering" class="text-xs sm:text-sm text-gray-600 mt-0.5">
             {{ offering.course?.code }} &bull; Year {{ offering.study_year }}, Semester {{ offering.semester }} &bull; {{ offering.academic_year }}
           </p>
         </div>
@@ -42,7 +42,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="materials.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+      <div v-else-if="materials.length === 0" class="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm min-h-[440px] flex flex-col items-center justify-center">
         <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 mx-auto flex items-center justify-center mb-4">
           <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -53,7 +53,7 @@
       </div>
 
       <!-- Materials List -->
-      <div v-else class="space-y-4">
+      <div v-else class="space-y-4 min-h-[460px]">
         <div
           v-for="material in materials"
           :key="material.id"

@@ -3,7 +3,7 @@
     pageTitle="Student" 
     :navigationItems="navigationItems"
   >
-    <div class="p-8">
+    <div class="p-5 sm:p-6 lg:p-7">
       <!-- Loading Skeleton -->
       <div v-if="isLoading" class="py-4">
         <SkeletonLoader type="dashboard" />
@@ -12,7 +12,7 @@
       <!-- Dashboard Content -->
       <div v-else>
         <!-- Page Header -->
-        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="mb-5 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ user?.name }}!</h1>
             <p class="text-gray-600 mt-1">
@@ -36,7 +36,7 @@
         </div>
 
         <!-- Stats Cards (Real Data from DB) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5 mb-5 sm:mb-6">
           <!-- Saved Materials -->
           <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col justify-between">
             <div>
