@@ -14,7 +14,7 @@
         <!-- Page Header -->
         <div class="mb-5 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ user?.name }}!</h1>
+            <h1 class="text-3xl font-bold text-gray-900">Welcome, {{ firstName }}!</h1>
             <p class="text-gray-600 mt-1">
               <span v-if="user?.department">
                 {{ user.department.name }} &bull; {{ user.university?.name || 'Campus' }}
@@ -250,6 +250,10 @@ import { studentNavigationItems } from '../config/navigation'
 
 const router = useRouter()
 const user = computed(() => authService.getUser())
+const firstName = computed(() => {
+  if (!user.value?.name) return 'Student'
+  return user.value.name.trim().split(/\s+/)[0]
+})
 const isLoading = ref(true)
 
 const stats = ref({

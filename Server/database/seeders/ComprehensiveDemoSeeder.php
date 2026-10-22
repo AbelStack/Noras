@@ -1005,30 +1005,83 @@ MARKDOWN
         $this->command->info('Study Tasks seeded: ' . StudyTask::count());
 
         // 11. Seed App Notifications
+        $cs201MatOfferingId = $cs201Mat?->course_offering_id;
+        $materialsActionUrl = $cs201MatOfferingId ? "/offerings/{$cs201MatOfferingId}/materials" : '/departments';
+        $cs201Note = $createdNotes['CS201_Lecture01_Arrays_BigO.pdf'] ?? null;
+        $cs201Quiz = $createdQuizzes['CS201_Lecture01_Arrays_BigO.pdf'] ?? null;
+
         $notifications = [
             [
                 'user_id' => $studentAbel->id,
-                'type' => 'system_welcome',
-                'title' => 'Welcome to Noras Learning Platform!',
-                'message' => 'Your student account is verified for Wollo University (KIoT - Software Engineering). Explore your courses and AI-powered study tools.',
-                'action_url' => '/student/courses',
-                'read_at' => now()->subDays(3),
+                'type' => 'task_reminder',
+                'title' => 'Study Task Due Soon: Big-O Notation Practice',
+                'message' => 'Your study task "Master Big-O Notation & Dynamic Array Resizing" is due in 2 days.',
+                'action_url' => '/tasks',
+                'read_at' => null,
+                'created_at' => now()->subHours(2),
+            ],
+            [
+                'user_id' => $studentAbel->id,
+                'type' => 'quiz_generated',
+                'title' => 'New AI Practice Quiz: Data Structures & Algorithms',
+                'message' => 'Adaptive 10-question AI quiz has been generated for CS201. Test your knowledge and boost your score!',
+                'action_url' => $cs201Quiz ? "/quizzes/{$cs201Quiz->id}" : '/quizzes',
+                'read_at' => null,
+                'created_at' => now()->subHours(4),
+            ],
+            [
+                'user_id' => $studentAbel->id,
+                'type' => 'note_generated',
+                'title' => 'AI Study Note Ready: CS201 Lecture 01 Summary',
+                'message' => 'Your AI summary for "Asymptotic Analysis & Arrays" has been generated with key takeaways and formulas.',
+                'action_url' => $cs201Note ? "/notes/{$cs201Note->id}" : '/notes',
+                'read_at' => null,
+                'created_at' => now()->subHours(6),
             ],
             [
                 'user_id' => $studentAbel->id,
                 'type' => 'material_uploaded',
                 'title' => 'New Material Uploaded: CS201 Data Structures',
                 'message' => 'Instructor uploaded "Lecture 01 - Asymptotic Analysis & Arrays". AI summary and quiz are now available.',
-                'action_url' => '/student/materials',
+                'action_url' => $materialsActionUrl,
                 'read_at' => now()->subDays(1),
+                'created_at' => now()->subDays(1),
             ],
             [
                 'user_id' => $studentAbel->id,
-                'type' => 'task_reminder',
-                'title' => 'Study Task Due Soon: Big-O Notation Practice',
-                'message' => 'Your study task "Master Big-O Notation & Dynamic Array Resizing" is due in 2 days.',
-                'action_url' => '/student/study-tasks',
-                'read_at' => null,
+                'type' => 'streak_milestone',
+                'title' => '🔥 3-Day Study Streak Achieved!',
+                'message' => 'Great consistency, Abel! You completed 4 study tasks this week. Keep going to reach Level 2 Mastery!',
+                'action_url' => '/progress',
+                'read_at' => now()->subDays(1),
+                'created_at' => now()->subDays(1),
+            ],
+            [
+                'user_id' => $studentAbel->id,
+                'type' => 'material_uploaded',
+                'title' => 'New Material Uploaded: CS301 Database Systems',
+                'message' => 'Instructor uploaded "Lecture 01 - Relational Data Model & Normalization (1NF-BCNF)" with downloadable slides.',
+                'action_url' => '/departments',
+                'read_at' => now()->subDays(2),
+                'created_at' => now()->subDays(2),
+            ],
+            [
+                'user_id' => $studentAbel->id,
+                'type' => 'system_welcome',
+                'title' => 'Welcome to Noras Learning Platform!',
+                'message' => 'Your student account is verified for Wollo University (KIoT - Software Engineering). Explore your courses and AI-powered study tools.',
+                'action_url' => '/departments',
+                'read_at' => now()->subDays(3),
+                'created_at' => now()->subDays(3),
+            ],
+            [
+                'user_id' => $studentAbel->id,
+                'type' => 'announcement',
+                'title' => 'KIoT Semester 1 Exam Schedule Announcement',
+                'message' => 'Midterm examination schedule for Software Engineering Year 2 has been updated. Review your course calendar.',
+                'action_url' => '/departments',
+                'read_at' => now()->subDays(4),
+                'created_at' => now()->subDays(4),
             ],
             [
                 'user_id' => $admin->id,
@@ -1037,6 +1090,7 @@ MARKDOWN
                 'message' => 'Student Yared Alemu (Electrical & Computer Engineering) has registered and is awaiting account approval.',
                 'action_url' => '/admin/students',
                 'read_at' => null,
+                'created_at' => now()->subHours(1),
             ],
         ];
 

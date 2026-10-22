@@ -115,6 +115,26 @@ const routes = [
     component: LearningProgressPage,
     meta: { requiresAuth: true, requiresApproval: true }
   },
+
+  // Student aliases and friendly redirects (prevent blank pages on alternative paths)
+  { path: '/student', redirect: '/dashboard' },
+  { path: '/student/dashboard', redirect: '/dashboard' },
+  { path: '/student/courses', redirect: '/departments' },
+  { path: '/courses', redirect: '/departments' },
+  { path: '/student/departments', redirect: '/departments' },
+  { path: '/student/departments/:departmentId/courses', redirect: to => `/departments/${to.params.departmentId}/courses` },
+  { path: '/student/materials', redirect: '/departments' },
+  { path: '/materials', redirect: '/departments' },
+  { path: '/student/offerings/:offeringId/materials', redirect: to => `/offerings/${to.params.offeringId}/materials` },
+  { path: '/student/notes', redirect: '/notes' },
+  { path: '/student/notes/:id', redirect: to => `/notes/${to.params.id}` },
+  { path: '/student/quizzes', redirect: '/quizzes' },
+  { path: '/student/quizzes/:id', redirect: to => `/quizzes/${to.params.id}` },
+  { path: '/student/tasks', redirect: '/tasks' },
+  { path: '/student/study-tasks', redirect: '/tasks' },
+  { path: '/study-tasks', redirect: '/tasks' },
+  { path: '/student/bookmarks', redirect: '/bookmarks' },
+  { path: '/student/progress', redirect: '/progress' },
   
   // Protected admin routes
   { 
@@ -177,6 +197,22 @@ const routes = [
     component: AdminSettingsPage,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
+  { path: '/admin/student-approvals', redirect: '/admin/students' },
+
+  // Catch-all route to gracefully prevent blank white screens on unknown URLs
+  { 
+    path: '/:pathMatch(.*)*', 
+    redirect: () => {
+      const user = authService.getUser()
+      if (user?.role === 'admin') {
+        return '/admin/dashboard'
+      }
+      if (authService.isAuthenticated()) {
+        return '/dashboard'
+      }
+      return '/login'
+    } 
+  }
 ]
 
 const router = createRouter({
