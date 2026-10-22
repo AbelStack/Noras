@@ -243,31 +243,67 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Current Password</label>
-                <input 
-                  v-model="security.currentPassword"
-                  type="password" 
-                  placeholder="••••••••"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                />
+                <div class="relative">
+                  <input 
+                    v-model="security.currentPassword"
+                    :type="showCurrentPassword ? 'text' : 'password'" 
+                    placeholder="••••••••"
+                    class="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    tabindex="-1"
+                    @click="showCurrentPassword = !showCurrentPassword"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                    aria-label="Toggle current password visibility"
+                  >
+                    <Eye v-if="!showCurrentPassword" :size="18" />
+                    <EyeOff v-else :size="18" />
+                  </button>
+                </div>
               </div>
               <div class="sm:col-span-2">
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">New Password</label>
-                <input 
-                  v-model="security.newPassword"
-                  type="password" 
-                  placeholder="Minimum 8 characters (letters, numbers, symbols)"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                />
+                <div class="relative">
+                  <input 
+                    v-model="security.newPassword"
+                    :type="showNewPassword ? 'text' : 'password'" 
+                    placeholder="Minimum 8 characters (letters, numbers, symbols)"
+                    class="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    tabindex="-1"
+                    @click="showNewPassword = !showNewPassword"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                    aria-label="Toggle new password visibility"
+                  >
+                    <Eye v-if="!showNewPassword" :size="18" />
+                    <EyeOff v-else :size="18" />
+                  </button>
+                </div>
                 <PasswordRequirements :password="security.newPassword" />
               </div>
               <div>
                 <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Confirm New Password</label>
-                <input 
-                  v-model="security.confirmPassword"
-                  type="password" 
-                  placeholder="Repeat new password"
-                  class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                />
+                <div class="relative">
+                  <input 
+                    v-model="security.confirmPassword"
+                    :type="showConfirmPassword ? 'text' : 'password'" 
+                    placeholder="Repeat new password"
+                    class="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    tabindex="-1"
+                    @click="showConfirmPassword = !showConfirmPassword"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                    aria-label="Toggle confirm password visibility"
+                  >
+                    <Eye v-if="!showConfirmPassword" :size="18" />
+                    <EyeOff v-else :size="18" />
+                  </button>
+                </div>
               </div>
             </div>
             <div class="flex justify-end pt-2">
@@ -317,6 +353,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { Eye, EyeOff } from 'lucide-vue-next'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import { authService } from '../services/auth'
 import { userService } from '../services/userService'
@@ -335,6 +372,9 @@ const photoError = ref('')
 const isSavingSettings = ref(false)
 const isUpdatingPassword = ref(false)
 const isLoadingProfile = ref(false)
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 const navigationItems = adminNavigationItems
 
@@ -599,6 +639,9 @@ const changePassword = async () => {
       newPassword: '',
       confirmPassword: '',
     }
+    showCurrentPassword.value = false
+    showNewPassword.value = false
+    showConfirmPassword.value = false
   } catch (err) {
     const msg = err.response?.data?.message || err.response?.data?.errors?.current_password?.[0] || 'Failed to update password.'
     notify.error(msg)

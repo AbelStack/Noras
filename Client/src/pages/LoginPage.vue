@@ -107,14 +107,26 @@
 
             <div>
               <label for="password" class="block text-sm font-semibold text-gray-900 mb-1.5">Password</label>
-              <input 
-                type="password" 
-                id="password" 
-                v-model="password"
-                class="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
-                placeholder="Enter your password"
-                required
-              />
+              <div class="relative">
+                <input 
+                  :type="showPassword ? 'text' : 'password'" 
+                  id="password" 
+                  v-model="password"
+                  class="w-full pl-4 pr-11 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
+                  placeholder="Enter your password"
+                  required
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-700 transition-colors focus:outline-none cursor-pointer"
+                  :title="showPassword ? 'Hide password' : 'Show password'"
+                  tabindex="-1"
+                >
+                  <EyeOff v-if="showPassword" class="w-5 h-5" />
+                  <Eye v-else class="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             <div class="flex items-center justify-between pt-1">
@@ -337,13 +349,16 @@ import {
   X,
   AlertCircle,
   Info,
-  Building2
+  Building2,
+  Eye,
+  EyeOff
 } from 'lucide-vue-next'
 import { authService } from '../services/auth'
 
 const router = useRouter()
 const email = ref('')
 const password = ref('')
+const showPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const showSuspendedModal = ref(false)

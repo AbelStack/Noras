@@ -5,15 +5,69 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
   body {
     @apply font-sans antialiased text-gray-900;
     font-family: 'Outfit', sans-serif;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply text-gray-900;
     font-family: 'Outfit', sans-serif;
   }
+}
+
+/* Mobile haptic-like press animation */
+.touch-press {
+  transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.12s ease;
+  user-select: none;
+}
+.touch-press:active {
+  transform: scale(0.92);
+  opacity: 0.85;
+}
+
+/* Safe area insets for iOS home bar & notch */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.75rem);
+}
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 0.5rem);
+}
+
+/* Native Mobile Bottom Sheet Animations */
+@keyframes sheetSlideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-sheet-up {
+  animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInOverlay {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInOverlay 0.2s ease-out forwards;
 }
 
 * {

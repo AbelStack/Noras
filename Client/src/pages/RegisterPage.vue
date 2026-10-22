@@ -170,27 +170,51 @@
 
             <div>
               <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">Password</label>
-              <input 
-                type="password" 
-                id="password" 
-                v-model="password"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
-                placeholder="Create a strong password"
-                required
-              />
+              <div class="relative">
+                <input 
+                  :type="showPassword ? 'text' : 'password'" 
+                  id="password" 
+                  v-model="password"
+                  class="w-full px-4 py-3 pr-11 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
+                  placeholder="Create a strong password"
+                  required
+                />
+                <button
+                  type="button"
+                  tabindex="-1"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                  aria-label="Toggle password visibility"
+                >
+                  <Eye v-if="!showPassword" :size="20" />
+                  <EyeOff v-else :size="20" />
+                </button>
+              </div>
               <PasswordRequirements :password="password" />
             </div>
 
             <div>
               <label for="confirmPassword" class="block text-sm font-semibold text-gray-900 mb-2">Confirm Password</label>
-              <input 
-                type="password" 
-                id="confirmPassword" 
-                v-model="confirmPassword"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
-                placeholder="Confirm your password"
-                required
-              />
+              <div class="relative">
+                <input 
+                  :type="showConfirmPassword ? 'text' : 'password'" 
+                  id="confirmPassword" 
+                  v-model="confirmPassword"
+                  class="w-full px-4 py-3 pr-11 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition bg-white"
+                  placeholder="Confirm your password"
+                  required
+                />
+                <button
+                  type="button"
+                  tabindex="-1"
+                  @click="showConfirmPassword = !showConfirmPassword"
+                  class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                  aria-label="Toggle confirm password visibility"
+                >
+                  <Eye v-if="!showConfirmPassword" :size="20" />
+                  <EyeOff v-else :size="20" />
+                </button>
+              </div>
               <p v-if="confirmPassword && password !== confirmPassword" class="mt-1.5 text-xs text-rose-600 font-medium flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -250,7 +274,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Zap, Award, BarChart3, ArrowLeft } from 'lucide-vue-next'
+import { Zap, Award, BarChart3, ArrowLeft, Eye, EyeOff } from 'lucide-vue-next'
 import { authService } from '../services/auth'
 import SearchablePickerModal from '../components/SearchablePickerModal.vue'
 import PasswordRequirements from '../components/PasswordRequirements.vue'
@@ -259,6 +283,8 @@ const router = useRouter()
 const fullName = ref('')
 const email = ref('')
 const studentId = ref('')
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 const selectedCampusId = ref(null)
 const selectedDepartmentId = ref(null)
 const campuses = ref([])

@@ -41,15 +41,27 @@
           <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">
             New Password
           </label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            class="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition text-sm"
-            placeholder="Create a strong new password"
-            :disabled="loading"
-          />
+          <div class="relative">
+            <input
+              id="password"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              required
+              class="appearance-none block w-full px-4 py-3 pr-11 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition text-sm"
+              placeholder="Create a strong new password"
+              :disabled="loading"
+            />
+            <button
+              type="button"
+              tabindex="-1"
+              @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+              aria-label="Toggle new password visibility"
+            >
+              <Eye v-if="!showPassword" :size="18" />
+              <EyeOff v-else :size="18" />
+            </button>
+          </div>
           <PasswordRequirements :password="password" />
         </div>
 
@@ -57,12 +69,27 @@
           <label for="password_confirmation" class="block text-sm font-semibold text-gray-900 mb-2">
             Confirm New Password
           </label>
-          <input
-            id="password_confirmation"
-            v-model="passwordConfirmation"
-            type="password"
-            required
-            class="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition text-sm"
+          <div class="relative">
+            <input
+              id="password_confirmation"
+              v-model="passwordConfirmation"
+              :type="showPasswordConfirmation ? 'text' : 'password'"
+              required
+              class="appearance-none block w-full px-4 py-3 pr-11 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition text-sm"
+              placeholder="Confirm new password"
+              :disabled="loading"
+            />
+            <button
+              type="button"
+              tabindex="-1"
+              @click="showPasswordConfirmation = !showPasswordConfirmation"
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+              aria-label="Toggle confirm password visibility"
+            >
+              <Eye v-if="!showPasswordConfirmation" :size="18" />
+              <EyeOff v-else :size="18" />
+            </button>
+          </div>
             placeholder="Confirm new password"
             :disabled="loading"
           />
@@ -108,6 +135,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Eye, EyeOff } from 'lucide-vue-next'
 import NorasLogo from '../components/NorasLogo.vue'
 import PasswordRequirements from '../components/PasswordRequirements.vue'
 import api from '../services/api'
@@ -117,6 +145,8 @@ const router = useRouter()
 
 const password = ref('')
 const passwordConfirmation = ref('')
+const showPassword = ref(false)
+const showPasswordConfirmation = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')

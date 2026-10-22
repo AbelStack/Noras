@@ -35,16 +35,16 @@
           </router-link>
         </div>
 
-        <!-- Stats Cards (Real Data from DB) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5 mb-5 sm:mb-6">
+        <!-- Stats Cards (Compact 2x2 Grid on Mobile, 4 Cols on Desktop) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5 mb-5 sm:mb-6">
           <!-- Saved Materials -->
-          <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col justify-between">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs flex flex-col justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600 mb-1">Saved Materials</p>
-              <p class="text-4xl font-extrabold text-gray-900 tracking-tight">{{ stats.materials }}</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 line-clamp-1">Saved Materials</p>
+              <p class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">{{ stats.materials }}</p>
             </div>
-            <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-gray-100">
-              <span class="text-gray-400">Bookmarked resources</span>
+            <div class="flex items-center justify-between text-[11px] sm:text-xs mt-2 pt-2 sm:mt-3 sm:pt-3 border-t border-gray-100">
+              <span class="text-gray-400 hidden sm:inline">Bookmarked resources</span>
               <router-link to="/bookmarks" class="text-primary-600 hover:text-primary-700 font-semibold hover:underline">
                 View saved &rarr;
               </router-link>
@@ -52,13 +52,13 @@
           </div>
 
           <!-- AI Study Notes Available -->
-          <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col justify-between">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs flex flex-col justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600 mb-1">AI Study Notes</p>
-              <p class="text-4xl font-extrabold text-primary-600 tracking-tight">{{ stats.notes }}</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 line-clamp-1">AI Study Notes</p>
+              <p class="text-2xl sm:text-4xl font-extrabold text-primary-600 tracking-tight">{{ stats.notes }}</p>
             </div>
-            <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-gray-100">
-              <span class="text-gray-400">Study summaries</span>
+            <div class="flex items-center justify-between text-[11px] sm:text-xs mt-2 pt-2 sm:mt-3 sm:pt-3 border-t border-gray-100">
+              <span class="text-gray-400 hidden sm:inline">Study summaries</span>
               <router-link to="/notes" class="text-primary-600 hover:text-primary-700 font-semibold hover:underline">
                 Explore notes &rarr;
               </router-link>
@@ -66,12 +66,12 @@
           </div>
 
           <!-- Quizzes Completed -->
-          <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col justify-between">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs flex flex-col justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600 mb-1">Quizzes Completed</p>
-              <p class="text-4xl font-extrabold text-accent-500 tracking-tight">{{ stats.quizzes }}</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 line-clamp-1">Quizzes Completed</p>
+              <p class="text-2xl sm:text-4xl font-extrabold text-accent-500 tracking-tight">{{ stats.quizzes }}</p>
             </div>
-            <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-gray-100">
+            <div class="flex items-center justify-between text-[11px] sm:text-xs mt-2 pt-2 sm:mt-3 sm:pt-3 border-t border-gray-100">
               <span v-if="stats.avgScore" class="text-gray-500 font-medium">Avg. {{ stats.avgScore }}%</span>
               <span v-else class="text-gray-400">Track scores</span>
               <router-link to="/quizzes" class="text-primary-600 hover:text-primary-700 font-semibold hover:underline">
@@ -81,18 +81,18 @@
           </div>
 
           <!-- Study Streak (Active Consecutive Days) -->
-          <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col justify-between">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-xs flex flex-col justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600 mb-1">Study Streak</p>
-              <p class="text-3xl font-extrabold text-gray-900 tracking-tight">
+              <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1 line-clamp-1">Study Streak</p>
+              <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
                 <span class="text-accent-500 font-black">{{ stats.streak }}</span> {{ stats.streak === 1 ? 'day' : 'days' }}
               </p>
             </div>
-            <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-gray-100">
-              <span class="text-xs text-gray-500 font-medium">
-                {{ stats.streak > 0 ? '🔥 Active streak!' : 'Study today to start!' }}
+            <div class="flex items-center justify-between text-[11px] sm:text-xs mt-2 pt-2 sm:mt-3 sm:pt-3 border-t border-gray-100">
+              <span class="text-[11px] sm:text-xs text-gray-500 font-medium">
+                {{ stats.streak > 0 ? '🔥 Active!' : 'Study today!' }}
               </span>
-              <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+              <span class="text-[10px] sm:text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-full border border-emerald-100">
                 Daily Goal
               </span>
             </div>

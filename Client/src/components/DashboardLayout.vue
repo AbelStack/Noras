@@ -8,18 +8,19 @@
       aria-hidden="true"
     ></div>
 
-    <!-- Sidebar -->
+    <!-- Sidebar / Mobile App Drawer -->
     <aside 
       :class="[
         'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col z-50',
         'fixed inset-y-0 left-0 lg:static lg:translate-x-0',
         mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0',
         sidebarCollapsed ? 'lg:w-20' : 'lg:w-64',
-        'w-64'
+        'w-72 sm:w-80 lg:w-64',
+        isMobileView ? 'rounded-r-3xl' : ''
       ]"
     >
       <!-- Logo & Toggle Button -->
-      <div class="h-16 flex items-center border-b border-gray-200 px-3 justify-between">
+      <div class="h-16 flex items-center border-b border-gray-200 px-4 justify-between">
         <!-- Expanded state on desktop OR on mobile: Logo on left, collapse/close button on right -->
         <template v-if="!sidebarCollapsed || isMobileView">
           <router-link to="/" class="flex items-center min-w-0" title="Noras Home" @click="mobileMenuOpen = false">
@@ -28,7 +29,7 @@
           <button 
             type="button"
             @click="handleSidebarCloseOrCollapse"
-            class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 ml-1"
+            class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors flex-shrink-0 ml-1 touch-press"
             :title="isMobileView ? 'Close navigation' : 'Collapse sidebar'"
           >
             <!-- Close icon on mobile, left arrows on desktop -->
@@ -61,9 +62,31 @@
         </template>
       </div>
 
+      <!-- Mobile Profile Card Snippet inside Drawer -->
+      <div v-if="isMobileView" class="px-3.5 py-3 mx-3 mt-3 bg-gradient-to-br from-blue-50/80 to-gray-50/60 rounded-2xl border border-blue-100/60 flex items-center gap-3">
+        <img 
+          v-if="user?.avatar_url" 
+          :src="user.avatar_url" 
+          :alt="userName" 
+          class="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-xs" 
+        />
+        <div 
+          v-else 
+          class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white font-bold text-xs shadow-xs"
+        >
+          {{ userInitials }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-bold text-gray-900 truncate">{{ userName }}</p>
+          <p class="text-[11px] text-gray-500 truncate">{{ user?.department?.name || user?.email }}</p>
+        </div>
+      </div>
+
       <!-- MENU Label -->
-      <div class="px-4 py-3">
-        <p class="text-xs text-gray-500 font-medium" v-if="!sidebarCollapsed || isMobileView">MENU</p>
+      <div class="px-4 py-2">
+        <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider" v-if="!sidebarCollapsed || isMobileView">
+          {{ isMobileView ? 'Quick Navigation' : 'MENU' }}
+        </p>
       </div>
 
       <!-- Navigation Items -->
@@ -136,30 +159,51 @@
 
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Top Navigation Bar -->
-      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6">
-        <div class="flex items-center space-x-3">
+      <!-- Top Navigation Bar (Mobile Native App Bar + Desktop Header) -->
+      <header class="h-14 sm:h-16 bg-white/95 backdrop-blur-md border-b border-gray-200/80 sticky top-0 z-30 flex items-center justify-between px-3.5 sm:px-6">
+        <div class="flex items-center space-x-2.5 sm:space-x-3">
           <button 
             type="button"
             @click="handleMenuToggle"
-            class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+            class="p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20 touch-press"
             :title="isMobileView ? 'Open navigation' : (sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 class="text-lg sm:text-xl font-bold text-gray-900">
+          
+          <!-- Mobile Brand Indicator -->
+          <div class="flex items-center gap-2 lg:hidden">
+            <router-link to="/" class="flex items-center gap-1.5 touch-press">
+              <img src="/Noras logo-sm.png" alt="Noras" class="h-7 w-auto object-contain" />
+              <span class="font-bold text-gray-900 text-base tracking-tight">Noras</span>
+            </router-link>
+            <span 
+              :class="[
+                'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                user?.role === 'admin' 
+                  ? 'bg-purple-100 text-purple-700 border border-purple-200' 
+                  : 'bg-blue-100 text-primary-700 border border-blue-200'
+              ]"
+            >
+              {{ user?.role === 'admin' ? 'Admin' : 'Student' }}
+            </span>
+          </div>
+
+          <!-- Desktop Page Title -->
+          <h1 class="hidden lg:block text-lg sm:text-xl font-bold text-gray-900">
             {{ pageTitle === 'Admin' ? 'Noras Admin' : (pageTitle === 'Student' ? 'Noras Student' : pageTitle) }}
           </h1>
         </div>
 
-        <div class="flex items-center space-x-3 sm:space-x-4">
-          <!-- Notification Bell -->
+        <div class="flex items-center space-x-2 sm:space-x-4">
+          <!-- Notification Bell (Desktop & Top Bar) -->
           <div class="relative">
             <button 
+              type="button"
               @click.stop="toggleNotifications"
-              class="p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors relative focus:outline-none"
+              class="p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors relative focus:outline-none touch-press"
               title="Notifications"
             >
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -174,12 +218,12 @@
               </span>
             </button>
             
-            <!-- Notification Dropdown -->
+            <!-- Desktop Notification Dropdown (shown strictly on desktop) -->
             <div 
-              v-if="showNotifications"
+              v-if="showNotifications && !isMobileView"
               @click.stop
               v-click-outside="() => showNotifications = false"
-              class="fixed left-3 right-3 top-16 sm:left-auto sm:right-0 sm:top-auto sm:absolute sm:mt-2 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+              class="absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden divide-y divide-gray-100"
             >
               <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <div class="flex items-center gap-2">
@@ -193,6 +237,7 @@
                 </div>
                 <button
                   v-if="unreadCount > 0"
+                  type="button"
                   @click="markAllNotificationsAsRead"
                   class="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors"
                 >
@@ -201,16 +246,17 @@
               </div>
 
               <div class="max-h-80 overflow-y-auto divide-y divide-gray-100">
-                <div v-if="notifications.length === 0" class="p-6 text-center text-gray-500 text-sm">
-                  <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-400 mx-auto flex items-center justify-center mb-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div v-if="notifications.length === 0" class="p-8 text-center text-gray-500 text-sm">
+                  <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 mx-auto flex items-center justify-center mb-3">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                   </div>
-                  No notifications yet
+                  <p class="font-bold text-gray-800">No notifications yet</p>
+                  <p class="text-xs text-gray-400 mt-1">We'll alert you when there are new updates</p>
                 </div>
                 <div 
-                  v-for="notif in notifications.slice(0, 5)" 
+                  v-for="notif in notifications.slice(0, 8)" 
                   :key="notif.id" 
                   @click="handleNotificationItemClick(notif)"
                   :class="[
@@ -221,7 +267,7 @@
                   <div 
                     :class="[
                       'w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5',
-                      !notif.read_at ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
+                      !notif.read_at ? 'bg-blue-600 text-white shadow-2xs' : 'bg-gray-100 text-gray-500'
                     ]"
                   >
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -246,7 +292,7 @@
                   @click="showNotifications = false"
                   class="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors inline-flex items-center gap-1"
                 >
-                  <span>{{ user?.role === 'admin' ? 'View all notifications' : 'Dashboard' }}</span>
+                  <span>{{ user?.role === 'admin' ? 'View all notifications' : 'Back to Dashboard' }}</span>
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
@@ -463,10 +509,278 @@
         </div>
       </header>
 
-      <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto bg-gray-50">
+      <!-- Page Content (padded on mobile so content never clips behind bottom bar) -->
+      <main class="flex-1 overflow-y-auto bg-gray-50 pb-20 lg:pb-0">
         <slot></slot>
       </main>
+
+      <!-- ============================================== -->
+      <!-- MOBILE APP BOTTOM NAVIGATION BAR (iOS / Android) -->
+      <!-- ============================================== -->
+      <nav 
+        class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/92 backdrop-blur-xl border-t border-gray-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-1.5 px-1 select-none"
+        aria-label="Mobile Navigation Bar"
+      >
+        <!-- STUDENT MOBILE TABS (5 Buttons) -->
+        <div v-if="user?.role !== 'admin'" class="grid grid-cols-5 items-center">
+          <!-- 1. Dashboard -->
+          <button
+            type="button"
+            @click="handleMobileNav('/dashboard')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press',
+              isTabActive('dashboard') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all',
+                isTabActive('dashboard') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('dashboard') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('dashboard') ? '2.2' : '1.8'" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('dashboard') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Home
+            </span>
+          </button>
+
+          <!-- 2. Courses -->
+          <button
+            type="button"
+            @click="handleMobileNav('/departments')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press',
+              isTabActive('courses') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all',
+                isTabActive('courses') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('courses') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('courses') ? '2.2' : '1.8'" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('courses') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Courses
+            </span>
+          </button>
+
+          <!-- 3. AI Notes -->
+          <button
+            type="button"
+            @click="handleMobileNav('/notes')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press',
+              isTabActive('notes') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all',
+                isTabActive('notes') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('notes') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('notes') ? '2.2' : '1.8'" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('notes') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              AI Notes
+            </span>
+          </button>
+
+          <!-- 4. AI Quizzes -->
+          <button
+            type="button"
+            @click="handleMobileNav('/quizzes')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press',
+              isTabActive('quizzes') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all',
+                isTabActive('quizzes') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('quizzes') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('quizzes') ? '2.2' : '1.8'" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('quizzes') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Quizzes
+            </span>
+          </button>
+
+          <!-- 5. Notifications -->
+          <button
+            type="button"
+            @click.stop="handleMobileNav(null, 'notifications')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press relative',
+              showNotifications ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all relative',
+                showNotifications ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="showNotifications ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="showNotifications ? '2.2' : '1.8'" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <!-- Real-time Unread Badge -->
+              <span 
+                v-if="unreadCount > 0"
+                class="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-red-600 text-white text-[9px] font-extrabold rounded-full flex items-center justify-center ring-2 ring-white shadow-xs leading-none"
+              >
+                {{ unreadCount >= 10 ? '9+' : unreadCount }}
+              </span>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', showNotifications ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Alerts
+            </span>
+          </button>
+        </div>
+
+        <!-- ADMIN MOBILE TABS (5 Buttons) -->
+        <div v-else class="grid grid-cols-5 items-center">
+          <!-- 1. Admin Dashboard -->
+          <button
+            type="button"
+            @click="handleMobileNav('/admin/dashboard')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press',
+              isTabActive('dashboard') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all',
+                isTabActive('dashboard') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('dashboard') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('dashboard') ? '2.2' : '1.8'" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('dashboard') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Admin
+            </span>
+          </button>
+
+          <!-- 2. Courses -->
+          <button
+            type="button"
+            @click="handleMobileNav('/admin/courses')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press',
+              isTabActive('courses') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all',
+                isTabActive('courses') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('courses') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('courses') ? '2.2' : '1.8'" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('courses') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Courses
+            </span>
+          </button>
+
+          <!-- 3. Course Materials -->
+          <button
+            type="button"
+            @click="handleMobileNav('/admin/materials')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press',
+              isTabActive('materials') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all',
+                isTabActive('materials') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('materials') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('materials') ? '2.2' : '1.8'" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('materials') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Materials
+            </span>
+          </button>
+
+          <!-- 4. Student Approvals -->
+          <button
+            type="button"
+            @click="handleMobileNav('/admin/students')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press',
+              isTabActive('approvals') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all',
+                isTabActive('approvals') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('approvals') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('approvals') ? '2.2' : '1.8'" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('approvals') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Approvals
+            </span>
+          </button>
+
+          <!-- 5. Notifications -->
+          <button
+            type="button"
+            @click.stop="handleMobileNav('/admin/notifications')"
+            :class="[
+              'flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 touch-press relative',
+              isTabActive('notifications') ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+            ]"
+          >
+            <div 
+              :class="[
+                'w-9 h-7 rounded-full flex items-center justify-center transition-all relative',
+                isTabActive('notifications') ? 'bg-primary-50 text-primary-600 font-bold scale-105 shadow-2xs ring-1 ring-primary-100' : ''
+              ]"
+            >
+              <svg class="w-5 h-5" :fill="isTabActive('notifications') ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="isTabActive('notifications') ? '2.2' : '1.8'" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <!-- Real-time Unread Badge -->
+              <span 
+                v-if="unreadCount > 0"
+                class="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-red-600 text-white text-[9px] font-extrabold rounded-full flex items-center justify-center ring-2 ring-white shadow-xs leading-none"
+              >
+                {{ unreadCount >= 10 ? '9+' : unreadCount }}
+              </span>
+            </div>
+            <span :class="['text-[10px] mt-0.5 tracking-tight leading-none', isTabActive('notifications') ? 'font-bold text-primary-600' : 'font-medium text-gray-500']">
+              Alerts
+            </span>
+          </button>
+        </div>
+      </nav>
     </div>
 
     <!-- Profile Picture Modal -->
@@ -641,36 +955,72 @@
 
           <div>
             <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Current Password</label>
-            <input 
-              v-model="pwdForm.currentPassword"
-              type="password"
-              required
-              placeholder="••••••••"
-              class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-            />
+            <div class="relative">
+              <input 
+                v-model="pwdForm.currentPassword"
+                :type="showCurrentPwd ? 'text' : 'password'"
+                required
+                placeholder="••••••••"
+                class="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+              />
+              <button
+                type="button"
+                tabindex="-1"
+                @click="showCurrentPwd = !showCurrentPwd"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                aria-label="Toggle current password visibility"
+              >
+                <Eye v-if="!showCurrentPwd" :size="18" />
+                <EyeOff v-else :size="18" />
+              </button>
+            </div>
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">New Password</label>
-            <input 
-              v-model="pwdForm.newPassword"
-              type="password"
-              required
-              placeholder="Minimum 8 characters"
-              class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-            />
+            <div class="relative">
+              <input 
+                v-model="pwdForm.newPassword"
+                :type="showNewPwd ? 'text' : 'password'"
+                required
+                placeholder="Minimum 8 characters"
+                class="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+              />
+              <button
+                type="button"
+                tabindex="-1"
+                @click="showNewPwd = !showNewPwd"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                aria-label="Toggle new password visibility"
+              >
+                <Eye v-if="!showNewPwd" :size="18" />
+                <EyeOff v-else :size="18" />
+              </button>
+            </div>
             <PasswordRequirements :password="pwdForm.newPassword" />
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">Confirm New Password</label>
-            <input 
-              v-model="pwdForm.confirmPassword"
-              type="password"
-              required
-              placeholder="Repeat new password"
-              class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-            />
+            <div class="relative">
+              <input 
+                v-model="pwdForm.confirmPassword"
+                :type="showConfirmPwd ? 'text' : 'password'"
+                required
+                placeholder="Repeat new password"
+                class="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+              />
+              <button
+                type="button"
+                tabindex="-1"
+                @click="showConfirmPwd = !showConfirmPwd"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                aria-label="Toggle confirm password visibility"
+              >
+                <Eye v-if="!showConfirmPwd" :size="18" />
+                <EyeOff v-else :size="18" />
+              </button>
+            </div>
             <p v-if="pwdForm.confirmPassword && pwdForm.newPassword !== pwdForm.confirmPassword" class="mt-1 text-xs text-rose-600 font-medium">
               Passwords do not match
             </p>
@@ -705,6 +1055,140 @@
       </div>
     </div>
 
+    <!-- ============================================== -->
+    <!-- MOBILE NOTIFICATIONS BOTTOM SHEET (TELEPORTED) -->
+    <!-- ============================================== -->
+    <Teleport to="body">
+      <div 
+        v-if="isMobileView && showNotifications" 
+        class="fixed inset-0 z-[100] flex flex-col justify-end"
+        @keydown.esc="showNotifications = false"
+      >
+        <!-- Dark Blur Backdrop -->
+        <div 
+          class="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-fade-in"
+          @click="showNotifications = false"
+          aria-hidden="true"
+        ></div>
+
+        <!-- Sliding Bottom Sheet Panel -->
+        <div 
+          class="relative z-10 bg-white rounded-t-3xl shadow-2xl border-t border-gray-200/90 max-h-[85vh] flex flex-col pb-[max(env(safe-area-inset-bottom),1rem)] animate-sheet-up select-none overflow-hidden"
+          @click.stop
+        >
+          <!-- Drag Handle -->
+          <div class="pt-3 pb-1 flex justify-center cursor-pointer" @click="showNotifications = false">
+            <div class="w-12 h-1.5 bg-gray-300 hover:bg-gray-400 rounded-full transition-colors"></div>
+          </div>
+
+          <!-- Bottom Sheet Header -->
+          <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-white">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center shadow-2xs">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-gray-900 text-base leading-tight">Notifications</h3>
+                <p class="text-[11px] text-gray-500 font-medium">
+                  {{ unreadCount > 0 ? `${unreadCount} unread update${unreadCount > 1 ? 's' : ''}` : 'You are all caught up' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                v-if="unreadCount > 0"
+                type="button"
+                @click="markAllNotificationsAsRead"
+                class="text-xs font-semibold text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-2.5 py-1.5 rounded-xl transition-colors cursor-pointer"
+              >
+                Mark all read
+              </button>
+              <button 
+                type="button"
+                @click="showNotifications = false"
+                class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                aria-label="Close notifications"
+              >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Notification Items List (Scrollable) -->
+          <div class="flex-1 overflow-y-auto divide-y divide-gray-100 max-h-[60vh] overscroll-contain px-1">
+            <div v-if="notifications.length === 0" class="p-10 text-center text-gray-500 text-sm">
+              <div class="w-14 h-14 rounded-2xl bg-gray-100 text-gray-400 mx-auto flex items-center justify-center mb-3">
+                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </div>
+              <p class="font-bold text-gray-800 text-base">No notifications yet</p>
+              <p class="text-xs text-gray-400 mt-1">We'll alert you here when new materials or tasks arrive</p>
+            </div>
+            <div 
+              v-for="notif in notifications" 
+              :key="notif.id" 
+              @click="handleNotificationItemClick(notif)"
+              :class="[
+                'p-4 hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-colors flex items-start gap-3.5',
+                !notif.read_at ? 'bg-blue-50/50' : ''
+              ]"
+            >
+              <div 
+                :class="[
+                  'w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5',
+                  !notif.read_at ? 'bg-blue-600 text-white shadow-xs' : 'bg-gray-100 text-gray-500'
+                ]"
+              >
+                <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <p :class="['text-xs truncate', !notif.read_at ? 'font-bold text-gray-900' : 'font-semibold text-gray-700']">
+                    {{ notif.title }}
+                  </p>
+                  <span class="text-[10px] text-gray-400 whitespace-nowrap">{{ formatRelativeTime(notif.created_at) }}</span>
+                </div>
+                <p class="text-xs text-gray-600 line-clamp-2 leading-relaxed">{{ notif.message }}</p>
+              </div>
+              <span v-if="!notif.read_at" class="w-2.5 h-2.5 rounded-full bg-blue-600 ring-2 ring-blue-100 flex-shrink-0 mt-2"></span>
+            </div>
+          </div>
+
+          <!-- Bottom Sheet Footer -->
+          <div class="p-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs">
+            <span class="text-gray-400 text-[11px] font-medium">Notifications sync in real time</span>
+            <router-link
+              v-if="user?.role === 'admin'"
+              to="/admin/notifications"
+              @click="showNotifications = false"
+              class="font-semibold text-primary-600 hover:text-primary-700 transition-colors inline-flex items-center gap-1"
+            >
+              <span>Full admin panel</span>
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </router-link>
+            <button
+              v-else
+              type="button"
+              @click="showNotifications = false"
+              class="font-semibold text-gray-600 hover:text-gray-900 transition-colors px-3 py-1"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Centralized Toast & Confirmation Modals -->
     <NotificationContainer />
   </div>
@@ -713,6 +1197,7 @@
 <script setup>
 import { ref, computed, h, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Eye, EyeOff } from 'lucide-vue-next'
 import { authService } from '../services/auth'
 import { notificationService } from '../services/notifications'
 import { userService } from '../services/userService'
@@ -721,6 +1206,36 @@ import { adminNavigationItems, studentNavigationItems } from '../config/navigati
 import NorasLogo from './NorasLogo.vue'
 import NotificationContainer from './NotificationContainer.vue'
 import PasswordRequirements from './PasswordRequirements.vue'
+
+const props = defineProps({
+  pageTitle: {
+    type: String,
+    default: 'Dashboard'
+  },
+  navigationItems: {
+    type: Array,
+    default: () => []
+  }
+})
+
+// Current user state
+const toast = useNotification()
+const currentUser = ref(authService.getUser())
+const user = computed(() => currentUser.value)
+const userName = computed(() => user.value?.name || 'User')
+const userInitials = computed(() => {
+  const name = userName.value
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+})
+
+// Notifications state
+const showNotifications = ref(false)
+const showUserMenu = ref(false)
+const notifications = ref([])
+const unreadCount = ref(0)
+const unreadBadge = ref('0')
+const notificationCount = computed(() => unreadCount.value)
+let notifTimer = null
 
 // Responsive viewport detection
 const isMobileView = ref(typeof window !== 'undefined' ? window.innerWidth < 1024 : false)
@@ -767,13 +1282,65 @@ const navigateAndCloseMenu = (path) => {
   router.push(path)
 }
 
-// Automatically close mobile menu whenever route changes
+// Automatically close mobile menu & notifications sheet whenever route changes
 const route = useRoute()
 const router = useRouter()
 
 watch(() => route.path, () => {
   mobileMenuOpen.value = false
+  showNotifications.value = false
 })
+
+// Body scroll lock when mobile bottom sheet is active
+watch(showNotifications, (isOpen) => {
+  if (typeof document !== 'undefined') {
+    if (isOpen && isMobileView.value) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  }
+})
+
+// Mobile bottom navigation active state detection
+const isTabActive = (tabKey) => {
+  const path = route.path
+  if (tabKey === 'dashboard') {
+    return path === '/dashboard' || path === '/admin/dashboard' || path === '/admin'
+  }
+  if (tabKey === 'courses') {
+    return path.startsWith('/departments') || path.startsWith('/offerings') || path === '/admin/courses'
+  }
+  if (tabKey === 'materials') {
+    return path === '/admin/materials'
+  }
+  if (tabKey === 'notes') {
+    return path.startsWith('/notes') || path === '/admin/notes'
+  }
+  if (tabKey === 'quizzes') {
+    return path.startsWith('/quizzes') || path === '/admin/quizzes'
+  }
+  if (tabKey === 'approvals') {
+    return path === '/admin/students'
+  }
+  if (tabKey === 'notifications') {
+    return path === '/admin/notifications' || showNotifications.value
+  }
+  return false
+}
+
+// Mobile bottom navigation tap handler
+const handleMobileNav = (targetPath, isAction = null) => {
+  if (isAction === 'notifications') {
+    toggleNotifications()
+    return
+  }
+  showNotifications.value = false
+  mobileMenuOpen.value = false
+  if (targetPath && route.path !== targetPath) {
+    router.push(targetPath)
+  }
+}
 
 // Create icon components using h() render function
 const DashboardIcon = () => h('svg', { class: 'w-5 h-5', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
@@ -820,34 +1387,6 @@ const QuizIcon = () => h('svg', { class: 'w-5 h-5', fill: 'none', viewBox: '0 0 
 const UsersIcon = () => h('svg', { class: 'w-5 h-5', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' })
 ])
-
-const props = defineProps({
-  pageTitle: {
-    type: String,
-    default: 'Dashboard'
-  },
-  navigationItems: {
-    type: Array,
-    default: () => []
-  }
-})
-
-const showNotifications = ref(false)
-const showUserMenu = ref(false)
-const notifications = ref([])
-const unreadCount = ref(0)
-const unreadBadge = ref('0')
-const notificationCount = computed(() => unreadCount.value)
-let notifTimer = null
-
-const toast = useNotification()
-const currentUser = ref(authService.getUser())
-const user = computed(() => currentUser.value)
-const userName = computed(() => user.value?.name || 'User')
-const userInitials = computed(() => {
-  const name = userName.value
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-})
 
 // Compute navigation items: ensure admin has Notifications with real-time badge
 const effectiveNavItems = computed(() => {
@@ -1050,6 +1589,9 @@ const handleRemoveAvatar = async () => {
 const showPasswordModal = ref(false)
 const isSavingPassword = ref(false)
 const pwdError = ref('')
+const showCurrentPwd = ref(false)
+const showNewPwd = ref(false)
+const showConfirmPwd = ref(false)
 const pwdForm = ref({
   currentPassword: '',
   newPassword: '',
@@ -1059,6 +1601,9 @@ const pwdForm = ref({
 const openPasswordModal = () => {
   showUserMenu.value = false
   pwdError.value = ''
+  showCurrentPwd.value = false
+  showNewPwd.value = false
+  showConfirmPwd.value = false
   pwdForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' }
   showPasswordModal.value = true
 }
@@ -1066,6 +1611,9 @@ const openPasswordModal = () => {
 const closePasswordModal = () => {
   showPasswordModal.value = false
   pwdError.value = ''
+  showCurrentPwd.value = false
+  showNewPwd.value = false
+  showConfirmPwd.value = false
   pwdForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' }
 }
 
@@ -1142,6 +1690,9 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
   window.removeEventListener('resize', checkMobile)
   window.removeEventListener('user-profile-updated', handleProfileUpdated)
   if (notifTimer) {
